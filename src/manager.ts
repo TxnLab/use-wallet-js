@@ -1,5 +1,6 @@
-import { clients, BaseClient } from './wallets'
-import { LOCAL_STORAGE_KEY } from './constants'
+import { clients, BaseClient } from './clients'
+import { LOCAL_STORAGE_KEY, WALLET_ID } from './constants'
+import { processNewAccounts } from './utils/manager'
 import type {
   InitializeConfig,
   WalletAccount,
@@ -11,7 +12,7 @@ import type {
 } from './types/wallet'
 
 export class WalletManager {
-  private wallets: Record<string, BaseClient | null> = {}
+  private clients: Record<string, BaseClient | null> = {}
   private accounts: WalletAccount[] = []
   private activeAccount: WalletAccount | null = null
 
@@ -42,24 +43,14 @@ export class WalletManager {
       // Initialize wallet client
       const walletClient: BaseClient | null = ClientClass.initialize(walletConfig)
 
-      if (walletClient) {
-        // Set persisted accounts for wallet client
-        const accounts: Account[] = this.accounts
-          .filter((account) => account.walletId === walletId)
-          .map((account) => ({
-            name: account.name,
-            address: account.address
-          }))
-
-        if (accounts.length > 0) {
-          walletClient.accounts = accounts
-        }
-      } else {
+      if (!walletClient) {
         console.error(`Failed to initialize client for wallet ID: ${walletId}`)
         continue // Skip to next client
       }
 
-      this.wallets[walletId] = walletClient
+      this.clients[walletId] = walletClient
+
+      // Initialize wallet
     }
   }
 
@@ -80,9 +71,82 @@ export class WalletManager {
     localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(state))
   }
 
-  // public async connect(id: WALLET_ID): Promise<Account[]> {
-  //   // @todo: call active wallet client's `connect` method
-  // }
+  private getActiveWalletClient(): BaseClient | null {
+    if (!this.activeAccount) {
+      console.error('No active account set.')
+      return null
+    }
+    const walletId = this.activeAccount.walletId
+    const activeWallet = this.clients[walletId]
+    if (!activeWallet) {
+      console.error(`No wallet found for wallet ID: ${walletId}`)
+      return null
+    }
+    return activeWallet
+  }
+
+  private handleDisconnect(id: WALLET_ID): void {
+    if (this.activeAccount && this.activeAccount.walletId === id) {
+      this.activeAccount = null
+    }
+
+    this.accounts = this.accounts.filter((account) => account.walletId !== id)
+    this.saveToLocalStorage()
+  }
+
+  public get activeWalletClient(): BaseClient | null {
+    return this.getActiveWalletClient()
+  }
+
+  public async connect(id: WALLET_ID): Promise<Account[]> {
+    const client = this.clients[id]
+    if (!client) {
+      throw new Error(`No client found for wallet ID: ${id}`)
+    }
+    const newAccounts = await client.connect(() => this.handleDisconnect(id))
+
+    if (!newAccounts || newAccounts.length === 0) {
+      throw new Error('No accounts found!')
+    }
+    const { accounts, activeAccount } = processNewAccounts(id, newAccounts, this.accounts)
+
+    this.accounts = accounts
+    this.activeAccount = activeAccount
+    this.saveToLocalStorage()
+
+    return newAccounts.map<Account>((account) => ({
+      name: account.name,
+      address: account.address
+    }))
+  }
+
+  public async reconnect(id: WALLET_ID): Promise<void> {
+    const client = this.clients[id]
+    if (!client) {
+      throw new Error(`No client found for wallet ID: ${id}`)
+    }
+    const newAccounts = await client.reconnect(() => this.handleDisconnect(id))
+
+    // Only update state if wallet client's `reconnect` method returns an array
+    if (Array.isArray(newAccounts)) {
+      if (newAccounts.length === 0) {
+        throw new Error('No accounts found!')
+      }
+      const { accounts } = processNewAccounts(id, newAccounts, this.accounts)
+
+      this.accounts = accounts
+      this.saveToLocalStorage()
+    }
+  }
+
+  public async disconnect(id: WALLET_ID): Promise<void> {
+    const client = this.clients[id]
+    if (!client) {
+      console.error(`No client found for wallet ID: ${id}`)
+      return
+    }
+    await client.disconnect()
+  }
 
   // public async transactionSigner(
   //   txnGroup: Transaction[],

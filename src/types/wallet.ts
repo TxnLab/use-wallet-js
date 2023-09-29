@@ -31,14 +31,13 @@ export interface WalletManagerConfig {
   wallets: WalletsArray
 }
 
-export type Account = {
+export type WalletAccount = {
   name: string
   address: string
-}
-
-export type WalletAccount = Account & {
   walletId: WALLET_ID
 }
+
+export type Account = Omit<WalletAccount, 'walletId'>
 
 export interface PersistedState {
   accounts: WalletAccount[]
