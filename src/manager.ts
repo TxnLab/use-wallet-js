@@ -1,169 +1,174 @@
-import { clients, BaseClient } from './clients'
-import { LOCAL_STORAGE_KEY, WALLET_ID } from './constants'
-import { processNewAccounts } from './utils/manager'
+import { clients, WalletClient } from './clients'
+import { WALLET_ID } from './constants'
+import { loadManagerState, saveManagerState } from './utils/state'
+import { Wallet } from './wallet'
+import type { Transaction } from 'algosdk'
 import type {
-  InitializeConfig,
+  ClientConfig,
   WalletAccount,
-  PersistedState,
-  Account,
   WalletConfig,
-  WalletConfigMap,
-  WalletManagerConfig
+  ClientConfigMap,
+  WalletManagerConstructor
 } from './types/wallet'
 
 export class WalletManager {
-  private clients: Record<string, BaseClient | null> = {}
-  private accounts: WalletAccount[] = []
-  private activeAccount: WalletAccount | null = null
+  private _wallets: Wallet[] = []
+  private clients: Record<string, WalletClient | null> = {}
+  private activeWalletId: WALLET_ID | null = null
 
-  constructor({ wallets }: WalletManagerConfig) {
+  constructor({ wallets }: WalletManagerConstructor) {
     this.loadFromLocalStorage()
-    this.initialize(wallets)
+    this.initializeWallets(wallets)
   }
 
-  private initialize<T extends keyof WalletConfigMap>(wallets: Array<T | WalletConfig<T>>) {
+  // ---------- Wallets ----------------------------------------------- //
+
+  private initializeWallets<T extends keyof ClientConfigMap>(wallets: Array<T | WalletConfig<T>>) {
+    console.info('[Manager] Initializing wallets...')
     for (const wallet of wallets) {
       let walletId: T
-      let walletConfig: InitializeConfig<T> | undefined
+      let clientConfig: ClientConfig<T> | undefined
 
+      // Parse client config
       if (typeof wallet === 'string') {
         walletId = wallet
       } else {
         const { id, ...config } = wallet
         walletId = id
-        walletConfig = config as InitializeConfig<T>
+        clientConfig = config as ClientConfig<T>
       }
 
+      // Get client class
       const ClientClass = clients[walletId]
       if (!ClientClass) {
         console.error(`No client found for wallet ID: ${walletId}`)
-        continue // Skip to next client
+        continue
       }
 
-      // Initialize wallet client
-      const walletClient: BaseClient | null = ClientClass.initialize(walletConfig)
+      // Initialize client
+      const walletClient: WalletClient | null = ClientClass.initialize(clientConfig)
 
       if (!walletClient) {
         console.error(`Failed to initialize client for wallet ID: ${walletId}`)
-        continue // Skip to next client
+        continue
       }
 
       this.clients[walletId] = walletClient
+      console.info(`[Manager] Initialized client for wallet ID: ${walletId}`, walletClient)
 
       // Initialize wallet
+      const walletInstance = new Wallet({
+        id: walletId,
+        client: walletClient,
+        manager: this
+      })
+
+      this.wallets.push(walletInstance)
+      console.info(`[Manager] Initialized wallet for wallet ID: ${walletId}`, walletInstance)
     }
+    console.info('[Manager] Initialized wallets', this.wallets)
   }
 
+  public get wallets(): Wallet[] {
+    return this._wallets
+  }
+
+  private set wallets(wallets: Wallet[]) {
+    this._wallets = wallets
+  }
+
+  // ---------- Active Wallet ----------------------------------------- //
+
+  public get activeWallet(): Wallet | null {
+    const activeWallet = this.wallets.find((wallet) => wallet.id === this.activeWalletId)
+    if (!activeWallet) {
+      return null
+    }
+
+    return activeWallet
+  }
+
+  public get activeWalletAccounts(): WalletAccount[] | null {
+    if (!this.activeWallet) {
+      return null
+    }
+    return this.activeWallet.accounts
+  }
+
+  public get activeWalletAddresses(): string[] | null {
+    if (!this.activeWallet) {
+      return null
+    }
+    return this.activeWallet.accounts.map((account) => account.address)
+  }
+
+  public get activeAccount(): WalletAccount | null {
+    if (!this.activeWallet) {
+      return null
+    }
+    return this.activeWallet.activeAccount
+  }
+
+  public get activeAddress(): string | null {
+    if (!this.activeAccount) {
+      return null
+    }
+    return this.activeAccount.address
+  }
+
+  public setActiveWallet(id: WALLET_ID | null): void {
+    console.info(`[Manager] Setting active wallet to: ${id}`)
+    this.activeWalletId = id
+    this.saveToLocalStorage()
+  }
+
+  // ---------- Transaction Signer ------------------------------------ //
+
+  public async transactionSigner(
+    txnGroup: Transaction[],
+    indexesToSign: number[]
+  ): Promise<Uint8Array[]>
+
+  public async transactionSigner(
+    txnGroup: Uint8Array[] | Uint8Array[][],
+    indexesToSign?: number[],
+    returnGroup?: boolean
+  ): Promise<Uint8Array[]>
+
+  public async transactionSigner(
+    txnGroup: Transaction[] | Uint8Array[] | Uint8Array[][],
+    indexesToSign?: number[],
+    returnGroup = true
+  ): Promise<Uint8Array[]> {
+    if (!this.activeWallet) {
+      throw new Error('No active wallet found!')
+    }
+
+    const connectedAccounts = this.activeWallet.accounts.map((account) => account.address)
+    const client = this.clients[this.activeWallet.id]
+
+    if (!client) {
+      throw new Error('No client found!')
+    }
+
+    return client.transactionSigner(connectedAccounts, txnGroup, indexesToSign, returnGroup)
+  }
+
+  // ---------- Local Storage ----------------------------------------- //
+
   private loadFromLocalStorage(): void {
-    const savedState = localStorage.getItem(LOCAL_STORAGE_KEY)
-    if (savedState) {
-      const parsedState: PersistedState = JSON.parse(savedState)
-      this.accounts = parsedState.accounts
-      this.activeAccount = parsedState.activeAccount
+    console.info(`[Manager] Loading active wallet state...`)
+    const state = loadManagerState()
+    if (state) {
+      console.info(`[Manager] Loaded active wallet state`, state)
+      this.activeWalletId = state.activeWalletId
     }
   }
 
   private saveToLocalStorage(): void {
-    const state: PersistedState = {
-      accounts: this.accounts,
-      activeAccount: this.activeAccount
-    }
-    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(state))
+    console.info(`[Manager] Saving active wallet state: ${this.activeWalletId}`)
+    saveManagerState({
+      activeWalletId: this.activeWalletId
+    })
   }
-
-  private getActiveWalletClient(): BaseClient | null {
-    if (!this.activeAccount) {
-      console.error('No active account set.')
-      return null
-    }
-    const walletId = this.activeAccount.walletId
-    const activeWallet = this.clients[walletId]
-    if (!activeWallet) {
-      console.error(`No wallet found for wallet ID: ${walletId}`)
-      return null
-    }
-    return activeWallet
-  }
-
-  private handleDisconnect(id: WALLET_ID): void {
-    if (this.activeAccount && this.activeAccount.walletId === id) {
-      this.activeAccount = null
-    }
-
-    this.accounts = this.accounts.filter((account) => account.walletId !== id)
-    this.saveToLocalStorage()
-  }
-
-  public get activeWalletClient(): BaseClient | null {
-    return this.getActiveWalletClient()
-  }
-
-  public async connect(id: WALLET_ID): Promise<Account[]> {
-    const client = this.clients[id]
-    if (!client) {
-      throw new Error(`No client found for wallet ID: ${id}`)
-    }
-    const newAccounts = await client.connect(() => this.handleDisconnect(id))
-
-    if (!newAccounts || newAccounts.length === 0) {
-      throw new Error('No accounts found!')
-    }
-    const { accounts, activeAccount } = processNewAccounts(id, newAccounts, this.accounts)
-
-    this.accounts = accounts
-    this.activeAccount = activeAccount
-    this.saveToLocalStorage()
-
-    return newAccounts.map<Account>((account) => ({
-      name: account.name,
-      address: account.address
-    }))
-  }
-
-  public async reconnect(id: WALLET_ID): Promise<void> {
-    const client = this.clients[id]
-    if (!client) {
-      throw new Error(`No client found for wallet ID: ${id}`)
-    }
-    const newAccounts = await client.reconnect(() => this.handleDisconnect(id))
-
-    // Only update state if wallet client's `reconnect` method returns an array
-    if (Array.isArray(newAccounts)) {
-      if (newAccounts.length === 0) {
-        throw new Error('No accounts found!')
-      }
-      const { accounts } = processNewAccounts(id, newAccounts, this.accounts)
-
-      this.accounts = accounts
-      this.saveToLocalStorage()
-    }
-  }
-
-  public async disconnect(id: WALLET_ID): Promise<void> {
-    const client = this.clients[id]
-    if (!client) {
-      console.error(`No client found for wallet ID: ${id}`)
-      return
-    }
-    await client.disconnect()
-  }
-
-  // public async transactionSigner(
-  //   txnGroup: Transaction[],
-  //   indexesToSign: number[]
-  // ): Promise<Uint8Array[]>
-
-  // public async transactionSigner(
-  //   txnGroup: Uint8Array[] | Uint8Array[][],
-  //   indexesToSign?: number[],
-  //   returnGroup?: boolean
-  // ): Promise<Uint8Array[]>
-
-  // public async transactionSigner(
-  //   txnGroup: Transaction[] | Uint8Array[] | Uint8Array[][],
-  //   indexesToSign?: number[],
-  //   returnGroup = true
-  // ): Promise<Uint8Array[]> {
-  //   // @todo: call active wallet client's `transactionSigner` method
-  // }
 }

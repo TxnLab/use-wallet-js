@@ -2,8 +2,8 @@ import { WALLET_ID } from 'src/constants'
 import type { Transaction } from 'algosdk'
 import type { WalletAccount } from 'src/types/wallet'
 
-export abstract class BaseClient {
-  id: WALLET_ID
+export abstract class WalletClient {
+  public readonly id: WALLET_ID
 
   protected constructor(id: WALLET_ID) {
     this.id = id

@@ -1,26 +1,24 @@
 import algosdk from 'algosdk'
-import { BaseClient } from './base'
+import { WalletClient } from './base'
 import { WALLET_ID } from 'src/constants'
-import { isDecodedTransaction, isSignedTxnObject } from 'src/utils/transaction'
+import { isTransaction, isSignedTxnObject } from 'src/utils/transaction'
 import type { EncodedSignedTransaction, EncodedTransaction, Transaction } from 'algosdk'
 import type { Exodus, ExodusOptions, WindowExtended } from 'src/types/exodus'
-import type { InitializeConfig, WalletAccount, WalletConfigMap } from 'src/types/wallet'
+import type { ClientConfig, WalletAccount, ClientConfigMap } from 'src/types/wallet'
 
-export class ExodusClient extends BaseClient {
-  #client: Exodus
-  options: ExodusOptions
+export class ExodusClient extends WalletClient {
+  private client: Exodus
+  private options: ExodusOptions
 
   constructor(client: Exodus, options: ExodusOptions) {
     super(WALLET_ID.EXODUS)
-    this.#client = client
+    this.client = client
     this.options = options
   }
 
-  static id = WALLET_ID.EXODUS
-
-  static initialize<T extends keyof WalletConfigMap>({
+  public static initialize<T extends keyof ClientConfigMap>({
     options
-  }: InitializeConfig<T> = {}): ExodusClient | null {
+  }: ClientConfig<T> = {}): ExodusClient | null {
     try {
       if (typeof window == 'undefined' || (window as WindowExtended).exodus === undefined) {
         throw new Error('Exodus is not available.')
@@ -35,9 +33,9 @@ export class ExodusClient extends BaseClient {
     }
   }
 
-  async connect(): Promise<WalletAccount[]> {
+  public async connect(): Promise<WalletAccount[]> {
     try {
-      const { address } = await this.#client.connect({
+      const { address } = await this.client.connect({
         onlyIfTrusted: this.options.onlyIfTrusted
       })
 
@@ -48,8 +46,7 @@ export class ExodusClient extends BaseClient {
       const walletAccounts = [
         {
           name: `Exodus 1`,
-          address,
-          walletId: this.id
+          address
         }
       ]
 
@@ -60,11 +57,11 @@ export class ExodusClient extends BaseClient {
     }
   }
 
-  async disconnect(): Promise<void> {
+  public async disconnect(): Promise<void> {
     return
   }
 
-  async reconnect(onDisconnect: () => void): Promise<void> {
+  public async reconnect(onDisconnect: () => void): Promise<void> {
     if (
       window === undefined ||
       (window as WindowExtended).exodus === undefined ||
@@ -74,7 +71,7 @@ export class ExodusClient extends BaseClient {
     }
   }
 
-  async transactionSigner(
+  public async transactionSigner(
     connectedAccounts: string[],
     txnGroup: Transaction[] | Uint8Array[] | Uint8Array[][],
     indexesToSign?: number[],
@@ -86,11 +83,13 @@ export class ExodusClient extends BaseClient {
     const txnsToSign: Uint8Array[] = []
     const signedIndexes: number[] = []
 
-    const isTransactionType = isDecodedTransaction(txnGroup[0])
+    const isTransactionType = isTransaction(txnGroup[0])
 
+    // Handle `Transaction[]` group transaction
     if (isTransactionType) {
       const transactionGroup = txnGroup as Transaction[]
 
+      // Marshal transactions to sign into `Uint8Array[]`
       transactionGroup.forEach((txn, idx) => {
         const isIndexMatch = !indexesToSign || indexesToSign.includes(idx)
         const canSign = connectedAccounts.includes(algosdk.encodeAddress(txn.from.publicKey))
@@ -103,15 +102,21 @@ export class ExodusClient extends BaseClient {
         }
       })
 
-      const signerResult = await this.#client.signTransaction(txnsToSign)
+      // Sign transactions
+      const signerResult = await this.client.signTransaction(txnsToSign)
       return signerResult
-    } else {
+    }
+
+    // Handle `Uint8Array[]` group transaction(s)
+    else {
       const uintTxnGroup = txnGroup.flat() as Uint8Array[]
 
+      // Decode transactions to access properties
       const encodedTxnObjects = uintTxnGroup.map((txn) => {
         return algosdk.decodeObj(txn)
       }) as Array<EncodedTransaction | EncodedSignedTransaction>
 
+      // Marshal transactions to sign into `Uint8Array[]`
       encodedTxnObjects.forEach((txn, idx) => {
         const isIndexMatch = !indexesToSign || indexesToSign.includes(idx)
         const isSigned = isSignedTxnObject(txn)
@@ -126,8 +131,10 @@ export class ExodusClient extends BaseClient {
         }
       })
 
-      const result = await this.#client.signTransaction(txnsToSign)
+      // Sign transactions
+      const result = await this.client.signTransaction(txnsToSign)
 
+      // Merge signed transactions back into original `Uint8Array[]` group
       const signerResult = uintTxnGroup.reduce<Uint8Array[]>((acc, txn, i) => {
         if (signedIndexes.includes(i)) {
           const signedByUser = result.shift()

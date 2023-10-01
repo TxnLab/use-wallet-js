@@ -1,4 +1,4 @@
-import { BaseClient } from './base'
+import { WalletClient } from './base'
 import { ExodusClient } from './exodus'
 import { PeraClient } from './pera'
 import { WALLET_ID } from 'src/constants'
@@ -17,4 +17,4 @@ function createClientMap(): ClientMap {
 
 const clients = createClientMap()
 
-export { clients, BaseClient, ExodusClient, PeraClient }
+export { clients, WalletClient, ExodusClient, PeraClient }

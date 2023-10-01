@@ -2,8 +2,10 @@ import { WALLET_ID } from 'src/constants'
 import type { ExodusOptions } from './exodus'
 import type { PeraWalletConnectOptions } from './pera'
 import type { NonEmptyArray } from './utilities'
+import type { WalletClient } from 'src/clients'
+import type { WalletManager } from 'src/manager'
 
-export type WalletConfigMap = {
+export type ClientConfigMap = {
   [WALLET_ID.PERA]: {
     options?: PeraWalletConnectOptions
   }
@@ -12,13 +14,13 @@ export type WalletConfigMap = {
   }
 }
 
-export type WalletConfig<T extends keyof WalletConfigMap> = {
+export type ClientConfig<T extends keyof ClientConfigMap> = ClientConfigMap[T]
+
+export type WalletConfig<T extends keyof ClientConfigMap> = {
   [K in T]: {
     id: K
-  } & WalletConfigMap[K]
+  } & ClientConfigMap[K]
 }[T]
-
-export type InitializeConfig<T extends keyof WalletConfigMap> = WalletConfigMap[T]
 
 export type WalletDef =
   | WalletConfig<WALLET_ID.PERA>
@@ -27,19 +29,26 @@ export type WalletDef =
 
 export type WalletsArray = NonEmptyArray<WalletDef>
 
-export interface WalletManagerConfig {
+export interface WalletManagerConstructor {
   wallets: WalletsArray
+}
+
+export interface WalletConstructor {
+  id: WALLET_ID
+  client: WalletClient
+  manager: WalletManager
 }
 
 export type WalletAccount = {
   name: string
   address: string
-  walletId: WALLET_ID
 }
 
-export type Account = Omit<WalletAccount, 'walletId'>
-
-export interface PersistedState {
+export type WalletState = {
   accounts: WalletAccount[]
   activeAccount: WalletAccount | null
+}
+
+export type ManagerState = {
+  activeWalletId: WALLET_ID | null
 }

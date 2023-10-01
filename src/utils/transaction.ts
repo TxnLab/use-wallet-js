@@ -1,8 +1,6 @@
 import type { EncodedSignedTransaction, EncodedTransaction, Transaction } from 'algosdk'
 
-export function isDecodedTransaction(
-  item: Transaction | Uint8Array | Uint8Array[]
-): item is Transaction {
+export function isTransaction(item: Transaction | Uint8Array | Uint8Array[]): item is Transaction {
   return (item as Transaction).genesisID !== undefined
 }
 
