@@ -1,21 +1,21 @@
 import { WalletClient } from './clients'
 import { WALLET_ID } from './constants'
 import { WalletManager } from './manager'
-import { deleteWalletState, loadWalletState, saveWalletState } from './utils/state'
+import { StoreActions, type State } from './types/state'
 import type { WalletAccount, WalletConstructor } from './types/wallet'
+import type { Store } from './store'
 
 export class Wallet {
   private _id: WALLET_ID
   private client: WalletClient
   private manager: WalletManager
-  private _accounts: WalletAccount[] = []
-  private _activeAccount: WalletAccount | null = null
+  private store: Store<State>
 
-  constructor({ id, client, manager }: WalletConstructor) {
+  constructor({ id, client, manager, store }: WalletConstructor) {
     this._id = id
     this.client = client
     this.manager = manager
-    this.loadFromLocalStorage()
+    this.store = store
   }
 
   // ---------- Wallet ------------------------------------------------ //
@@ -25,11 +25,14 @@ export class Wallet {
   }
 
   public get isConnected(): boolean {
-    return this.accounts.length > 0
+    const state = this.store.getState()
+    const walletState = state.wallets.get(this.id)
+    return walletState ? walletState.accounts.length > 0 : false
   }
 
   public get isActive(): boolean {
-    return this.manager.activeWallet?.id === this.id
+    const state = this.store.getState()
+    return state.activeWallet === this.id
   }
 
   public setActive = (): void => {
@@ -40,18 +43,23 @@ export class Wallet {
   // ---------- Accounts ---------------------------------------------- //
 
   public get accounts() {
-    return this._accounts
+    const state = this.store.getState()
+    const walletState = state.wallets.get(this.id)
+    return walletState ? walletState.accounts : []
   }
 
   public get activeAccount() {
-    return this._activeAccount
+    const state = this.store.getState()
+    const walletState = state.wallets.get(this.id)
+    return walletState ? walletState.activeAccount : null
   }
 
   public setActiveAccount = (account: string): void => {
     console.info(`[Wallet] Setting active account: ${account}`)
-    const activeAccount = this.accounts.find((a) => a.address === account)
-    this.activeAccount = activeAccount || null
-    this.saveToLocalStorage()
+    this.store.dispatch(StoreActions.SET_ACTIVE_ACCOUNT, {
+      walletId: this.id,
+      address: account
+    })
   }
 
   // ---------- Connection Methods ------------------------------------ //
@@ -63,19 +71,23 @@ export class Wallet {
     if (!accounts || accounts.length === 0) {
       throw new Error('No accounts found!')
     }
-    this.accounts = accounts
     const activeAccount: WalletAccount | null = accounts.length > 0 ? accounts?.[0] || null : null
 
     if (activeAccount) {
-      this.activeAccount = activeAccount
+      this.store.dispatch(StoreActions.ADD_WALLET, {
+        walletId: this.id,
+        wallet: {
+          accounts,
+          activeAccount
+        }
+      })
     }
 
-    this.manager.setActiveWallet(this.id)
-
-    this.saveToLocalStorage()
     return accounts
   }
 
+  // @todo: add action that compares provided accounts with existing ones
+  // @todo: add action that compares provided active account with existing one
   public reconnect = async (): Promise<void> => {
     console.info(`[Wallet] Reconnecting wallet: ${this.id}`)
     const accounts = await this.client.reconnect(() => this.handleDisconnect())
@@ -84,14 +96,12 @@ export class Wallet {
       if (!accounts || accounts.length === 0) {
         throw new Error('No accounts found!')
       }
-      this.accounts = accounts
+      // this.accounts = accounts
       const activeAccount: WalletAccount | null = accounts.length > 0 ? accounts?.[0] || null : null
 
       if (activeAccount) {
-        this.activeAccount = activeAccount
+        // this.activeAccount = activeAccount
       }
-
-      this.saveToLocalStorage()
     }
   }
 
@@ -103,42 +113,8 @@ export class Wallet {
 
   // ---------- Private ----------------------------------------------- //
 
-  private set accounts(accounts: WalletAccount[]) {
-    this._accounts = accounts
-  }
-
-  private set activeAccount(account: WalletAccount | null) {
-    this._activeAccount = account
-  }
-
   private handleDisconnect = (): void => {
     console.info(`[Wallet] Handle disconnecting wallet: ${this.id}`)
-    this.accounts = []
-    this.activeAccount = null
-    this.saveToLocalStorage()
-  }
-
-  // ---------- Local Storage ----------------------------------------- //
-
-  private loadFromLocalStorage(): void {
-    console.info(`[Wallet] Loading wallet state: ${this.id}`)
-    const state = loadWalletState(this.id)
-    if (state) {
-      console.info(`[Wallet] Loaded wallet state`, state)
-      this.accounts = state.accounts
-      this.activeAccount = state.activeAccount
-    }
-  }
-
-  private saveToLocalStorage(): void {
-    console.info(`[Wallet] Saving wallet state: ${this.id}`)
-    if (this.accounts.length === 0) {
-      return deleteWalletState(this.id)
-    } else {
-      saveWalletState(this.id, {
-        accounts: this.accounts,
-        activeAccount: this.activeAccount || this.accounts[0] || null
-      })
-    }
+    this.store.dispatch(StoreActions.REMOVE_WALLET, this.id)
   }
 }

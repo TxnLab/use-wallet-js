@@ -1,7 +1,8 @@
 import { clients, WalletClient } from './clients'
-import { WALLET_ID } from './constants'
-import { loadManagerState, saveManagerState } from './utils/state'
+import { LOCAL_STORAGE_KEY, WALLET_ID } from './constants'
+import { createStore, defaultState, Store } from './store'
 import { Wallet } from './wallet'
+import { StoreActions, type State } from './types/state'
 import type { Transaction } from 'algosdk'
 import type {
   ClientConfig,
@@ -14,10 +15,10 @@ import type {
 export class WalletManager {
   private _wallets: Wallet[] = []
   private clients: Record<string, WalletClient | null> = {}
-  private activeWalletId: WALLET_ID | null = null
+  private store: Store<State>
 
   constructor({ wallets }: WalletManagerConstructor) {
-    this.loadFromLocalStorage()
+    this.store = createStore(defaultState)
     this.initializeWallets(wallets)
   }
 
@@ -60,7 +61,8 @@ export class WalletManager {
       const walletInstance = new Wallet({
         id: walletId,
         client: walletClient,
-        manager: this
+        manager: this,
+        store: this.store
       })
 
       this.wallets.push(walletInstance)
@@ -80,7 +82,8 @@ export class WalletManager {
   // ---------- Active Wallet ----------------------------------------- //
 
   public get activeWallet(): Wallet | null {
-    const activeWallet = this.wallets.find((wallet) => wallet.id === this.activeWalletId)
+    const state = this.store.getState()
+    const activeWallet = this.wallets.find((wallet) => wallet.id === state.activeWallet)
     if (!activeWallet) {
       return null
     }
@@ -116,10 +119,9 @@ export class WalletManager {
     return this.activeAccount.address
   }
 
-  public setActiveWallet(id: WALLET_ID | null): void {
+  public setActiveWallet(id: WALLET_ID): void {
     console.info(`[Manager] Setting active wallet to: ${id}`)
-    this.activeWalletId = id
-    this.saveToLocalStorage()
+    this.store.dispatch(StoreActions.SET_ACTIVE_WALLET, id)
   }
 
   // ---------- Transaction Signer ------------------------------------ //
@@ -152,23 +154,5 @@ export class WalletManager {
     }
 
     return client.transactionSigner(connectedAccounts, txnGroup, indexesToSign, returnGroup)
-  }
-
-  // ---------- Local Storage ----------------------------------------- //
-
-  private loadFromLocalStorage(): void {
-    console.info(`[Manager] Loading active wallet state...`)
-    const state = loadManagerState()
-    if (state) {
-      console.info(`[Manager] Loaded active wallet state`, state)
-      this.activeWalletId = state.activeWalletId
-    }
-  }
-
-  private saveToLocalStorage(): void {
-    console.info(`[Manager] Saving active wallet state: ${this.activeWalletId}`)
-    saveManagerState({
-      activeWalletId: this.activeWalletId
-    })
   }
 }

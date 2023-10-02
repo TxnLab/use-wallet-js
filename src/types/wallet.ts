@@ -4,6 +4,8 @@ import type { PeraWalletConnectOptions } from './pera'
 import type { NonEmptyArray } from './utilities'
 import type { WalletClient } from 'src/clients'
 import type { WalletManager } from 'src/manager'
+import type { Store } from 'src/store'
+import type { State } from './state'
 
 export type ClientConfigMap = {
   [WALLET_ID.PERA]: {
@@ -37,18 +39,10 @@ export interface WalletConstructor {
   id: WALLET_ID
   client: WalletClient
   manager: WalletManager
+  store: Store<State>
 }
 
 export type WalletAccount = {
   name: string
   address: string
-}
-
-export type WalletState = {
-  accounts: WalletAccount[]
-  activeAccount: WalletAccount | null
-}
-
-export type ManagerState = {
-  activeWalletId: WALLET_ID | null
 }
