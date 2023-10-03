@@ -1,9 +1,8 @@
 import { clients, WalletClient } from './clients'
-import { LOCAL_STORAGE_KEY, WALLET_ID } from './constants'
 import { createStore, defaultState, Store } from './store'
 import { Wallet } from './wallet'
-import { StoreActions, type State } from './types/state'
 import type { Transaction } from 'algosdk'
+import type { State } from './types/state'
 import type {
   ClientConfig,
   WalletAccount,
@@ -13,18 +12,35 @@ import type {
 } from './types/wallet'
 
 export class WalletManager {
-  private _wallets: Wallet[] = []
   private clients: Record<string, WalletClient | null> = {}
   private store: Store<State>
+  private _wallets: Wallet[] = []
+  private subscribers: Array<(state: State) => void> = []
 
   constructor({ wallets }: WalletManagerConstructor) {
     this.store = createStore(defaultState)
     this.initializeWallets(wallets)
   }
 
+  // ---------- Subscription ------------------------------------------ //
+
+  public subscribe = (callback: (state: State) => void): (() => void) => {
+    this.subscribers.push(callback)
+    return () => {
+      this.subscribers = this.subscribers.filter((sub) => sub !== callback)
+    }
+  }
+
+  private notifySubscribers = (): void => {
+    const state = this.store.getState()
+    this.subscribers.forEach((sub) => sub(state))
+  }
+
   // ---------- Wallets ----------------------------------------------- //
 
-  private initializeWallets<T extends keyof ClientConfigMap>(wallets: Array<T | WalletConfig<T>>) {
+  private initializeWallets = <T extends keyof ClientConfigMap>(
+    wallets: Array<T | WalletConfig<T>>
+  ) => {
     console.info('[Manager] Initializing wallets...')
     for (const wallet of wallets) {
       let walletId: T
@@ -61,8 +77,9 @@ export class WalletManager {
       const walletInstance = new Wallet({
         id: walletId,
         client: walletClient,
-        manager: this,
-        store: this.store
+        store: this.store,
+        subscribe: this.subscribe,
+        onStateChange: this.notifySubscribers
       })
 
       this.wallets.push(walletInstance)
@@ -117,11 +134,6 @@ export class WalletManager {
       return null
     }
     return this.activeAccount.address
-  }
-
-  public setActiveWallet(id: WALLET_ID): void {
-    console.info(`[Manager] Setting active wallet to: ${id}`)
-    this.store.dispatch(StoreActions.SET_ACTIVE_WALLET, id)
   }
 
   // ---------- Transaction Signer ------------------------------------ //

@@ -38,8 +38,9 @@ export interface WalletManagerConstructor {
 export interface WalletConstructor {
   id: WALLET_ID
   client: WalletClient
-  manager: WalletManager
   store: Store<State>
+  subscribe: (callback: (state: State) => void) => () => void
+  onStateChange: () => void
 }
 
 export type WalletAccount = {

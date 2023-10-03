@@ -1,6 +1,5 @@
 import { WalletClient } from './clients'
 import { WALLET_ID } from './constants'
-import { WalletManager } from './manager'
 import { StoreActions, type State } from './types/state'
 import type { WalletAccount, WalletConstructor } from './types/wallet'
 import type { Store } from './store'
@@ -8,14 +7,16 @@ import type { Store } from './store'
 export class Wallet {
   private _id: WALLET_ID
   private client: WalletClient
-  private manager: WalletManager
   private store: Store<State>
+  private notifySubscribers: () => void
+  public subscribe: (callback: (state: State) => void) => () => void
 
-  constructor({ id, client, manager, store }: WalletConstructor) {
+  constructor({ id, client, store, subscribe, onStateChange }: WalletConstructor) {
     this._id = id
     this.client = client
-    this.manager = manager
     this.store = store
+    this.subscribe = subscribe
+    this.notifySubscribers = onStateChange
   }
 
   // ---------- Wallet ------------------------------------------------ //
@@ -37,7 +38,9 @@ export class Wallet {
 
   public setActive = (): void => {
     console.info(`[Wallet] Setting active wallet: ${this.id}`)
-    this.manager.setActiveWallet(this.id)
+    this.store.dispatch(StoreActions.SET_ACTIVE_WALLET, this.id)
+
+    this.notifySubscribers()
   }
 
   // ---------- Accounts ---------------------------------------------- //
@@ -60,6 +63,8 @@ export class Wallet {
       walletId: this.id,
       address: account
     })
+
+    this.notifySubscribers()
   }
 
   // ---------- Connection Methods ------------------------------------ //
@@ -81,6 +86,8 @@ export class Wallet {
           activeAccount
         }
       })
+
+      this.notifySubscribers()
     }
 
     return accounts
@@ -116,5 +123,7 @@ export class Wallet {
   private handleDisconnect = (): void => {
     console.info(`[Wallet] Handle disconnecting wallet: ${this.id}`)
     this.store.dispatch(StoreActions.REMOVE_WALLET, this.id)
+
+    this.notifySubscribers()
   }
 }
