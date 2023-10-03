@@ -1,6 +1,7 @@
 import { LOCAL_STORAGE_KEY } from 'src/constants'
 import { PubSub } from 'src/lib/pubsub'
 import { Actions, Mutations, Status, StoreActions, StoreMutations } from 'src/types/state'
+import { isValidState, replacer, reviver } from 'src/utils/state'
 
 export class Store<StateType extends object> {
   private actions: Actions<StateType>
@@ -26,6 +27,7 @@ export class Store<StateType extends object> {
   private createProxy<T extends object>(state: T): T {
     return new Proxy(state, {
       set: (target, key, value) => {
+        console.log('Proxy set callback', { target, key, value })
         if (key in target) {
           target[key as keyof T] = value
           console.log(`stateChange: ${String(key)}: ${String(value)}`)
@@ -52,7 +54,7 @@ export class Store<StateType extends object> {
     console.groupCollapsed(`ACTION: ${actionKey}`)
 
     this.status = Status.ACTION
-    this.actions[actionKey]!(this, payload)
+    this.actions[actionKey](this, payload)
 
     console.groupEnd()
 
@@ -64,12 +66,14 @@ export class Store<StateType extends object> {
       console.log(`Mutation "${mutationKey}" doesn't exist`)
       return false
     }
+    console.log(`MUTATION: ${mutationKey}`, payload)
 
     this.status = Status.MUTATION
 
-    let newState = this.mutations[mutationKey]!(this.state, payload)
+    const newState = this.mutations[mutationKey](this.state, payload)
 
-    this.state = Object.assign(this.state, newState)
+    this.state = this.createProxy(newState)
+    this.savePersistedState()
 
     return true
   }
@@ -80,20 +84,26 @@ export class Store<StateType extends object> {
 
   public loadPersistedState(): StateType | null {
     try {
-      const persistedState = localStorage.getItem(LOCAL_STORAGE_KEY)
-      if (persistedState === null) {
+      const serializedState = localStorage.getItem(LOCAL_STORAGE_KEY)
+      if (serializedState === null) {
         return null
       }
-      return JSON.parse(persistedState) as StateType
+      const parsedState = JSON.parse(serializedState, reviver)
+      if (!isValidState(parsedState)) {
+        console.error('Parsed state:', parsedState)
+        throw new Error('Persisted state is invalid')
+      }
+      return parsedState as StateType
     } catch (error) {
       console.error('Could not load state from local storage:', error)
       return null
     }
   }
 
-  public savePersistedState() {
+  public savePersistedState(): void {
     try {
-      const serializedState = JSON.stringify(this.getState())
+      const state = this.getState()
+      const serializedState = JSON.stringify(state, replacer)
       localStorage.setItem(LOCAL_STORAGE_KEY, serializedState)
     } catch (error) {
       console.error('Could not save state to local storage:', error)

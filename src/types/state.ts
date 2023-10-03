@@ -47,10 +47,10 @@ export interface ActionPayloads {
 }
 
 export interface Mutations<S extends object> {
-  addWallet: (state: S, payload: { walletId: WALLET_ID; wallet: WalletState }) => void
-  removeWallet: (state: S, walletId: WALLET_ID) => void
-  setActiveWallet: (state: S, walletId: WALLET_ID) => void
-  setActiveAccount: (state: S, payload: { walletId: WALLET_ID; address: string }) => void
+  addWallet: (state: S, payload: { walletId: WALLET_ID; wallet: WalletState }) => S
+  removeWallet: (state: S, walletId: WALLET_ID) => S
+  setActiveWallet: (state: S, walletId: WALLET_ID) => S
+  setActiveAccount: (state: S, payload: { walletId: WALLET_ID; address: string }) => S
 }
 
 export interface Actions<S extends object> {
@@ -58,8 +58,4 @@ export interface Actions<S extends object> {
   removeWallet: (context: Store<S>, walletId: WALLET_ID) => void
   setActiveWallet: (context: Store<S>, walletId: WALLET_ID) => void
   setActiveAccount: (context: Store<S>, payload: { walletId: WALLET_ID; address: string }) => void
-}
-
-export type ManagerState = {
-  activeWalletId: WALLET_ID | null
 }
