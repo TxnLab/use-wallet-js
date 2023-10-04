@@ -3,7 +3,6 @@ import type { ExodusOptions } from './exodus'
 import type { PeraWalletConnectOptions } from './pera'
 import type { NonEmptyArray } from './utilities'
 import type { WalletClient } from 'src/clients'
-import type { WalletManager } from 'src/manager'
 import type { Store } from 'src/store'
 import type { State } from './state'
 
