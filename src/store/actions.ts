@@ -1,6 +1,7 @@
 import type { Store } from './store'
 import type { WALLET_ID } from 'src/constants'
 import { StoreMutations, type State, type WalletState } from 'src/types/state'
+import type { WalletAccount } from 'src/types/wallet'
 
 export const actions = {
   addWallet(
@@ -20,5 +21,11 @@ export const actions = {
     { walletId, address }: { walletId: WALLET_ID; address: string }
   ) {
     context.commit(StoreMutations.SET_ACTIVE_ACCOUNT, { walletId, address })
+  },
+  setAccounts(
+    context: Store<State>,
+    { walletId, accounts }: { walletId: WALLET_ID; accounts: WalletAccount[] }
+  ) {
+    context.commit(StoreMutations.SET_ACCOUNTS, { walletId, accounts })
   }
 }

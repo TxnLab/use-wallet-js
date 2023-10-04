@@ -1,5 +1,6 @@
 import type { WALLET_ID } from 'src/constants'
 import type { State, WalletState } from 'src/types/state'
+import type { WalletAccount } from 'src/types/wallet'
 
 export const mutations = {
   addWallet(state: State, { walletId, wallet }: { walletId: WALLET_ID; wallet: WalletState }) {
@@ -38,12 +39,42 @@ export const mutations = {
       return state
     }
 
-    // Clone wallets map and set the updated wallet
     const newWallets = new Map(state.wallets.entries())
     newWallets.set(walletId, {
       ...wallet,
       activeAccount: activeAccount
     })
+
+    return {
+      ...state,
+      wallets: newWallets
+    }
+  },
+  setAccounts(
+    state: State,
+    { walletId, accounts }: { walletId: WALLET_ID; accounts: WalletAccount[] }
+  ) {
+    const wallet = state.wallets.get(walletId)
+    if (!wallet) {
+      return state
+    }
+
+    // Check if `accounts` includes `wallet.activeAccount`
+    const isActiveAccountConnected = accounts.some(
+      (account) => account.address === wallet.activeAccount?.address
+    )
+
+    const activeAccount = isActiveAccountConnected ? wallet.activeAccount! : accounts[0] || null
+
+    const newWallet = {
+      ...wallet,
+      accounts,
+      activeAccount
+    }
+
+    // Create a new Map with the updated wallet
+    const newWallets = new Map(state.wallets.entries())
+    newWallets.set(walletId, newWallet)
 
     return {
       ...state,

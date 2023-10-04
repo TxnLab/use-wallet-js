@@ -61,7 +61,7 @@ export class ExodusClient extends WalletClient {
     return
   }
 
-  public async reconnect(onDisconnect: () => void): Promise<void> {
+  public async resumeSession(onDisconnect: () => void): Promise<void> {
     if (
       window === undefined ||
       (window as WindowExtended).exodus === undefined ||

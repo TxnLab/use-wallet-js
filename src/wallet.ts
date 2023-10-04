@@ -1,6 +1,7 @@
-import { WalletClient } from './clients'
 import { WALLET_ID } from './constants'
+import { compareAccounts } from './utils/wallet'
 import { StoreActions, type State } from './types/state'
+import type { WalletClient } from './clients'
 import type { WalletAccount, WalletConstructor } from './types/wallet'
 import type { Store } from './store'
 
@@ -93,21 +94,37 @@ export class Wallet {
     return accounts
   }
 
-  // @todo: add action that compares provided accounts with existing ones
-  // @todo: add action that compares provided active account with existing one
-  public reconnect = async (): Promise<void> => {
-    console.info(`[Wallet] Reconnecting wallet: ${this.id}`)
-    const accounts = await this.client.reconnect(() => this.handleDisconnect())
+  public resumeSession = async (): Promise<void> => {
+    const state = this.store.getState()
+    const walletState = state.wallets.get(this.id)
 
-    if (Array.isArray(accounts)) {
-      if (!accounts || accounts.length === 0) {
-        throw new Error('No accounts found!')
-      }
-      // this.accounts = accounts
-      const activeAccount: WalletAccount | null = accounts.length > 0 ? accounts?.[0] || null : null
+    if (!walletState) {
+      // Disconnected wallet, do nothing
+      return
+    }
+    console.info(`[Wallet] Resuming connected wallet session: ${this.id}`)
+    const accounts = await this.client.resumeSession(() => this.handleDisconnect())
 
-      if (activeAccount) {
-        // this.activeAccount = activeAccount
+    if (typeof accounts === 'undefined') {
+      // Client returned void, do nothing
+      return
+    } else if (accounts.length === 0) {
+      // Error or no accounts found
+      this.handleDisconnect()
+      return
+    } else {
+      // Accounts found, compare to state
+      const doAccountsMatch = compareAccounts(accounts, walletState.accounts)
+
+      if (!doAccountsMatch) {
+        // Accounts mismatch, set to latest accounts
+        console.warn(`[Wallet] Accounts mismatch in ${this.id}, updating accounts`)
+        this.store.dispatch(StoreActions.SET_ACCOUNTS, {
+          walletId: this.id,
+          accounts
+        })
+
+        this.notifySubscribers()
       }
     }
   }

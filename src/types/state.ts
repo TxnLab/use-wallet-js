@@ -22,7 +22,8 @@ export enum StoreMutations {
   ADD_WALLET = 'addWallet',
   REMOVE_WALLET = 'removeWallet',
   SET_ACTIVE_WALLET = 'setActiveWallet',
-  SET_ACTIVE_ACCOUNT = 'setActiveAccount'
+  SET_ACTIVE_ACCOUNT = 'setActiveAccount',
+  SET_ACCOUNTS = 'setAccounts'
 }
 
 export interface MutationPayloads {
@@ -30,13 +31,15 @@ export interface MutationPayloads {
   [StoreMutations.REMOVE_WALLET]: WALLET_ID
   [StoreMutations.SET_ACTIVE_WALLET]: WALLET_ID
   [StoreMutations.SET_ACTIVE_ACCOUNT]: { walletId: WALLET_ID; address: string }
+  [StoreMutations.SET_ACCOUNTS]: { walletId: WALLET_ID; accounts: WalletAccount[] }
 }
 
 export enum StoreActions {
   ADD_WALLET = 'addWallet',
   REMOVE_WALLET = 'removeWallet',
   SET_ACTIVE_WALLET = 'setActiveWallet',
-  SET_ACTIVE_ACCOUNT = 'setActiveAccount'
+  SET_ACTIVE_ACCOUNT = 'setActiveAccount',
+  SET_ACCOUNTS = 'setAccounts'
 }
 
 export interface ActionPayloads {
@@ -44,6 +47,7 @@ export interface ActionPayloads {
   [StoreActions.REMOVE_WALLET]: WALLET_ID
   [StoreActions.SET_ACTIVE_WALLET]: WALLET_ID
   [StoreActions.SET_ACTIVE_ACCOUNT]: { walletId: WALLET_ID; address: string }
+  [StoreActions.SET_ACCOUNTS]: { walletId: WALLET_ID; accounts: WalletAccount[] }
 }
 
 export interface Mutations<S extends object> {
@@ -51,6 +55,7 @@ export interface Mutations<S extends object> {
   removeWallet: (state: S, walletId: WALLET_ID) => S
   setActiveWallet: (state: S, walletId: WALLET_ID) => S
   setActiveAccount: (state: S, payload: { walletId: WALLET_ID; address: string }) => S
+  setAccounts: (state: S, payload: { walletId: WALLET_ID; accounts: WalletAccount[] }) => S
 }
 
 export interface Actions<S extends object> {
@@ -58,4 +63,8 @@ export interface Actions<S extends object> {
   removeWallet: (context: Store<S>, walletId: WALLET_ID) => void
   setActiveWallet: (context: Store<S>, walletId: WALLET_ID) => void
   setActiveAccount: (context: Store<S>, payload: { walletId: WALLET_ID; address: string }) => void
+  setAccounts: (
+    context: Store<S>,
+    payload: { walletId: WALLET_ID; accounts: WalletAccount[] }
+  ) => void
 }

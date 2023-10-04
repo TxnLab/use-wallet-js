@@ -10,7 +10,7 @@ export abstract class WalletClient {
   }
 
   abstract connect(onDisconnect: () => void): Promise<WalletAccount[]>
-  abstract reconnect(onDisconnect: () => void): Promise<WalletAccount[] | void>
+  abstract resumeSession(onDisconnect: () => void): Promise<WalletAccount[] | void>
   abstract disconnect(): Promise<void>
 
   abstract transactionSigner(

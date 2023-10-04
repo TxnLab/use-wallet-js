@@ -50,7 +50,7 @@ export class PeraClient extends WalletClient {
     await this.client.disconnect()
   }
 
-  public async reconnect(onDisconnect: () => void): Promise<WalletAccount[]> {
+  public async resumeSession(onDisconnect: () => void): Promise<WalletAccount[]> {
     try {
       const accounts = await this.client.reconnectSession()
       this.client.connector?.on('disconnect', onDisconnect)
