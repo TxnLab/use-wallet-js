@@ -1,7 +1,7 @@
 import algosdk from 'algosdk'
 import { WalletClient } from './base'
 import { WALLET_ID } from 'src/constants'
-import { isTransaction, isSignedTxnObject } from 'src/utils/transaction'
+import { isTransaction, isSignedTxnObject } from 'src/utils'
 import type { EncodedSignedTransaction, EncodedTransaction, Transaction } from 'algosdk'
 import type { Exodus, ExodusOptions, WindowExtended } from 'src/types/clients/exodus'
 import type { ClientConfig, WalletAccount, ClientConfigMap } from 'src/types/wallet'

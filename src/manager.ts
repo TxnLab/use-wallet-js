@@ -1,15 +1,15 @@
-import { clients, WalletClient } from './clients'
-import { createStore, defaultState, Store } from './store'
-import { Wallet } from './wallet'
+import { clients, WalletClient } from 'src/clients'
+import { createStore, defaultState, Store } from 'src/store'
+import { Wallet } from 'src/wallet'
 import type { Transaction } from 'algosdk'
-import type { State } from './types/state'
+import type { State } from 'src/types/state'
 import type {
   ClientConfig,
   WalletAccount,
   WalletConfig,
   ClientConfigMap,
   WalletManagerConstructor
-} from './types/wallet'
+} from 'src/types/wallet'
 
 export class WalletManager {
   private clients: Record<string, WalletClient | null> = {}

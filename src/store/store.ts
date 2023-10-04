@@ -1,7 +1,7 @@
 import { LOCAL_STORAGE_KEY } from 'src/constants'
 import { PubSub } from 'src/lib/pubsub'
 import { Actions, Mutations, Status, StoreActions, StoreMutations } from 'src/types/state'
-import { isValidState, replacer, reviver } from 'src/utils/state'
+import { isValidState, replacer, reviver } from 'src/utils'
 
 export class Store<StateType extends object> {
   private actions: Actions<StateType>

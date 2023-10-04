@@ -1,9 +1,9 @@
-import { WALLET_ID } from './constants'
-import { compareAccounts } from './utils/wallet'
-import { StoreActions, type State } from './types/state'
-import type { WalletClient } from './clients'
-import type { WalletAccount, WalletConstructor } from './types/wallet'
-import type { Store } from './store'
+import { WALLET_ID } from 'src/constants'
+import { compareAccounts } from 'src/utils'
+import { StoreActions, type State } from 'src/types/state'
+import type { WalletClient } from 'src/clients'
+import type { WalletAccount, WalletConstructor } from 'src/types/wallet'
+import type { Store } from 'src/store'
 
 export class Wallet {
   private _id: WALLET_ID
