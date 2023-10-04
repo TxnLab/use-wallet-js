@@ -4,7 +4,7 @@ import { WalletClient } from './base'
 import { WALLET_ID } from 'src/constants'
 import { isTransaction, isSignedTxnObject } from 'src/utils/transaction'
 import type { EncodedSignedTransaction, EncodedTransaction, Transaction } from 'algosdk'
-import type { PeraWalletConnectOptions } from 'src/types/pera'
+import type { PeraWalletConnectOptions } from 'src/types/clients/pera'
 import type { SignerTransaction } from 'src/types/transaction'
 import type { ClientConfig, ClientConfigMap, WalletAccount } from 'src/types/wallet'
 

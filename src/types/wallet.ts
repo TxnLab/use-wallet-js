@@ -1,6 +1,6 @@
 import { WALLET_ID } from 'src/constants'
-import type { ExodusOptions } from './exodus'
-import type { PeraWalletConnectOptions } from './pera'
+import type { ExodusOptions } from './clients/exodus'
+import type { PeraWalletConnectOptions } from './clients/pera'
 import type { NonEmptyArray } from './utilities'
 import type { WalletClient } from 'src/clients'
 import type { Store } from 'src/store'
