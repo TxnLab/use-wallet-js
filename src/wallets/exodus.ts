@@ -1,43 +1,50 @@
 import algosdk from 'algosdk'
-import { WalletClient } from './base'
+import { BaseWallet } from './base'
 import { WALLET_ID } from 'src/constants'
+import { Store } from 'src/store'
 import { isTransaction, isSignedTxnObject } from 'src/utils'
+import { StoreActions, type State } from 'src/types/state'
 import type { EncodedSignedTransaction, EncodedTransaction, Transaction } from 'algosdk'
-import type { Exodus, ExodusOptions, WindowExtended } from 'src/types/clients/exodus'
-import type { ClientConfig, WalletAccount, ClientConfigMap } from 'src/types/wallet'
+import type { Exodus, ExodusOptions, WindowExtended } from 'src/types/wallets/exodus'
+import type { WalletAccount, WalletConstructor } from 'src/types/wallet'
 
-export class ExodusClient extends WalletClient {
-  private client: Exodus
+export class ExodusWallet extends BaseWallet {
+  private client: Exodus | null = null
   private options: ExodusOptions
 
-  constructor(client: Exodus, options: ExodusOptions) {
-    super(WALLET_ID.EXODUS)
-    this.client = client
-    this.options = options
-  }
+  protected store: Store<State>
+  protected notifySubscribers: () => void
 
-  public static initialize<T extends keyof ClientConfigMap>({
+  public subscribe: (callback: (state: State) => void) => () => void
+
+  constructor({
+    id,
+    store,
+    subscribe,
+    onStateChange,
     options
-  }: ClientConfig<T> = {}): ExodusClient | null {
-    try {
-      if (typeof window == 'undefined' || (window as WindowExtended).exodus === undefined) {
-        throw new Error('Exodus is not available.')
-      }
-      const client = (window as WindowExtended).exodus.algorand
-      const clientOptions = options || { onlyIfTrusted: false }
-
-      return new ExodusClient(client, clientOptions as ExodusOptions)
-    } catch (error: any) {
-      console.error(error)
-      return null
-    }
+  }: WalletConstructor<WALLET_ID.EXODUS>) {
+    super({ id, store, subscribe, onStateChange })
+    this.options = options || { onlyIfTrusted: false }
+    this.store = store
+    this.subscribe = subscribe
+    this.notifySubscribers = onStateChange
   }
 
-  public async connect(): Promise<WalletAccount[]> {
+  private initializeClient = async (): Promise<Exodus> => {
+    console.info('[ExodusWallet] Initializing client...')
+    if (typeof window == 'undefined' || (window as WindowExtended).exodus === undefined) {
+      throw new Error('Exodus is not available.')
+    }
+    const client = (window as WindowExtended).exodus.algorand
+    this.client = client
+    return client
+  }
+
+  public connect = async (): Promise<WalletAccount[]> => {
     try {
-      const { address } = await this.client.connect({
-        onlyIfTrusted: this.options.onlyIfTrusted
-      })
+      const client = this.client || (await this.initializeClient())
+      const { address } = await client.connect(this.options)
 
       if (!address) {
         throw new Error('No accounts found!')
@@ -50,6 +57,18 @@ export class ExodusClient extends WalletClient {
         }
       ]
 
+      const activeAccount = walletAccounts[0]!
+
+      this.store.dispatch(StoreActions.ADD_WALLET, {
+        walletId: this.id,
+        wallet: {
+          accounts: walletAccounts,
+          activeAccount
+        }
+      })
+
+      this.notifySubscribers()
+
       return walletAccounts
     } catch (error: any) {
       console.error(error)
@@ -57,26 +76,38 @@ export class ExodusClient extends WalletClient {
     }
   }
 
-  public async disconnect(): Promise<void> {
-    return
+  public disconnect = async (): Promise<void> => {
+    this.handleDisconnect()
   }
 
-  public async resumeSession(onDisconnect: () => void): Promise<void> {
+  public resumeSession = async (): Promise<void> => {
+    const state = this.store.getState()
+    const walletState = state.wallets.get(this.id)
+
+    if (!walletState) {
+      // No persisted state, abort
+      return
+    }
+    console.info('[ExodusWallet] Resuming session...')
+
     if (
       window === undefined ||
       (window as WindowExtended).exodus === undefined ||
       (window as WindowExtended).exodus.algorand.isConnected !== true
     ) {
-      onDisconnect()
+      this.handleDisconnect()
     }
   }
 
-  public async transactionSigner(
+  public transactionSigner = async (
     connectedAccounts: string[],
     txnGroup: Transaction[] | Uint8Array[] | Uint8Array[][],
     indexesToSign?: number[],
     returnGroup = true
-  ): Promise<Uint8Array[]> {
+  ): Promise<Uint8Array[]> => {
+    if (!this.client) {
+      throw new Error('Client not initialized!')
+    }
     if (!txnGroup[0]) {
       throw new Error('Empty transaction group!')
     }

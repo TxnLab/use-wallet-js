@@ -1,32 +1,52 @@
 import { PeraWalletConnect } from '@perawallet/connect'
 import algosdk from 'algosdk'
-import { WalletClient } from './base'
+import { BaseWallet } from './base'
 import { WALLET_ID } from 'src/constants'
-import { isTransaction, isSignedTxnObject } from 'src/utils'
+import { Store } from 'src/store'
+import { isTransaction, isSignedTxnObject, compareAccountsMatch } from 'src/utils'
+import { StoreActions, type State } from 'src/types/state'
 import type { EncodedSignedTransaction, EncodedTransaction, Transaction } from 'algosdk'
-import type { PeraWalletConnectOptions } from 'src/types/clients/pera'
+import type { PeraWalletConnectOptions } from 'src/types/wallets/pera'
 import type { SignerTransaction } from 'src/types/transaction'
-import type { ClientConfig, ClientConfigMap, WalletAccount } from 'src/types/wallet'
+import type { WalletAccount, WalletConstructor } from 'src/types/wallet'
 
-export class PeraClient extends WalletClient {
-  private client: PeraWalletConnect
+export class PeraWallet extends BaseWallet {
+  private client: PeraWalletConnect | null = null
+  private options: PeraWalletConnectOptions
 
-  constructor(client: PeraWalletConnect) {
-    super(WALLET_ID.PERA)
+  protected store: Store<State>
+  protected notifySubscribers: () => void
+
+  public subscribe: (callback: (state: State) => void) => () => void
+
+  constructor({
+    id,
+    store,
+    subscribe,
+    onStateChange,
+    options = {}
+  }: WalletConstructor<WALLET_ID.PERA>) {
+    super({ id, store, subscribe, onStateChange })
+    this.options = options
+    this.store = store
+    this.subscribe = subscribe
+    this.notifySubscribers = onStateChange
+  }
+
+  private initializeClient = async (): Promise<PeraWalletConnect> => {
+    console.info('[PeraWallet] Initializing client...')
+    const client = new PeraWalletConnect(this.options)
     this.client = client
+    return client
   }
 
-  public static initialize<T extends keyof ClientConfigMap>({
-    options
-  }: ClientConfig<T> = {}): PeraClient {
-    const client = new PeraWalletConnect(options as PeraWalletConnectOptions)
-    return new PeraClient(client)
-  }
-
-  public async connect(onDisconnect: () => void): Promise<WalletAccount[]> {
+  public connect = async (): Promise<WalletAccount[]> => {
+    console.info('[PeraWallet] Connecting...')
     try {
-      const accounts = await this.client.connect()
-      this.client.connector?.on('disconnect', onDisconnect)
+      const client = this.client || (await this.initializeClient())
+
+      const accounts = await client.connect()
+      client.connector?.on('disconnect', this.handleDisconnect)
 
       if (accounts.length === 0) {
         throw new Error('No accounts found!')
@@ -36,6 +56,18 @@ export class PeraClient extends WalletClient {
         name: `Pera Wallet ${idx + 1}`,
         address
       }))
+
+      const activeAccount = walletAccounts[0]!
+
+      this.store.dispatch(StoreActions.ADD_WALLET, {
+        walletId: this.id,
+        wallet: {
+          accounts: walletAccounts,
+          activeAccount
+        }
+      })
+
+      this.notifySubscribers()
 
       return walletAccounts
     } catch (error: any) {
@@ -46,14 +78,31 @@ export class PeraClient extends WalletClient {
     }
   }
 
-  public async disconnect(): Promise<void> {
-    await this.client.disconnect()
+  public disconnect = async (): Promise<void> => {
+    console.info('[PeraWallet] Disconnecting...')
+    try {
+      await this.client?.disconnect()
+      this.handleDisconnect()
+    } catch (error: any) {
+      console.error(error)
+    }
   }
 
-  public async resumeSession(onDisconnect: () => void): Promise<WalletAccount[]> {
+  public resumeSession = async (): Promise<void> => {
     try {
-      const accounts = await this.client.reconnectSession()
-      this.client.connector?.on('disconnect', onDisconnect)
+      const state = this.store.getState()
+      const walletState = state.wallets.get(this.id)
+
+      if (!walletState) {
+        // No persisted state, abort
+        return
+      }
+      console.info('[PeraWallet] Resuming session...')
+
+      const client = this.client || (await this.initializeClient())
+
+      const accounts = await client.reconnectSession()
+      client.connector?.on('disconnect', this.handleDisconnect)
 
       if (accounts.length === 0) {
         throw new Error('No accounts found!')
@@ -64,20 +113,32 @@ export class PeraClient extends WalletClient {
         address
       }))
 
-      return walletAccounts
+      const match = compareAccountsMatch(walletAccounts, walletState.accounts)
+
+      if (!match) {
+        console.warn(`[PeraWallet] Session accounts mismatch, updating accounts`)
+        this.store.dispatch(StoreActions.SET_ACCOUNTS, {
+          walletId: this.id,
+          accounts: walletAccounts
+        })
+
+        this.notifySubscribers()
+      }
     } catch (error: any) {
       console.error(error)
-      onDisconnect()
-      return []
+      this.handleDisconnect()
     }
   }
 
-  public async transactionSigner(
+  public transactionSigner = async (
     connectedAccounts: string[],
     txnGroup: Transaction[] | Uint8Array[] | Uint8Array[][],
     indexesToSign?: number[],
     returnGroup = true
-  ): Promise<Uint8Array[]> {
+  ): Promise<Uint8Array[]> => {
+    if (!this.client) {
+      throw new Error('Client not initialized!')
+    }
     if (!txnGroup[0]) {
       throw new Error('Empty transaction group!')
     }
