@@ -29,7 +29,7 @@ export enum StoreMutations {
 export interface MutationPayloads {
   [StoreMutations.ADD_WALLET]: { walletId: WALLET_ID; wallet: WalletState }
   [StoreMutations.REMOVE_WALLET]: WALLET_ID
-  [StoreMutations.SET_ACTIVE_WALLET]: WALLET_ID
+  [StoreMutations.SET_ACTIVE_WALLET]: WALLET_ID | null
   [StoreMutations.SET_ACTIVE_ACCOUNT]: { walletId: WALLET_ID; address: string }
   [StoreMutations.SET_ACCOUNTS]: { walletId: WALLET_ID; accounts: WalletAccount[] }
 }
@@ -45,7 +45,7 @@ export enum StoreActions {
 export interface ActionPayloads {
   [StoreActions.ADD_WALLET]: { walletId: WALLET_ID; wallet: WalletState }
   [StoreActions.REMOVE_WALLET]: WALLET_ID
-  [StoreActions.SET_ACTIVE_WALLET]: WALLET_ID
+  [StoreActions.SET_ACTIVE_WALLET]: WALLET_ID | null
   [StoreActions.SET_ACTIVE_ACCOUNT]: { walletId: WALLET_ID; address: string }
   [StoreActions.SET_ACCOUNTS]: { walletId: WALLET_ID; accounts: WalletAccount[] }
 }

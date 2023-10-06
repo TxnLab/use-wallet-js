@@ -1,8 +1,8 @@
 import { WALLET_ID } from 'src/constants'
 import { allWallets, BaseWallet } from 'src/wallets'
 import { createStore, defaultState, Store } from 'src/store'
+import { StoreActions, type State } from 'src/types/state'
 import type { Transaction } from 'algosdk'
-import type { State } from 'src/types/state'
 import type {
   WalletAccount,
   WalletConfig,
@@ -75,6 +75,27 @@ export class WalletManager {
       console.info(`[Manager] Initialized wallet for wallet ID: ${walletId}`, walletInstance)
     }
     console.info('[Manager] Initialized wallets', this._wallets)
+
+    const state = this.store.getState()
+
+    // Check if connected wallets are still valid
+    const connectedWallets = state.wallets.keys()
+    for (const walletId of connectedWallets) {
+      if (!this._wallets.has(walletId)) {
+        console.warn(`[Manager] Connected wallet not found: ${walletId}`)
+        this.store.dispatch(StoreActions.REMOVE_WALLET, walletId)
+
+        this.notifySubscribers()
+      }
+    }
+
+    // Check if active wallet is still valid
+    if (state.activeWallet && !this._wallets.has(state.activeWallet)) {
+      console.warn(`[Manager] Active wallet not found: ${state.activeWallet}`)
+      this.store.dispatch(StoreActions.SET_ACTIVE_WALLET, null)
+
+      this.notifySubscribers()
+    }
   }
 
   public get wallets(): BaseWallet[] {

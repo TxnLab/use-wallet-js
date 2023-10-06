@@ -23,7 +23,7 @@ export const mutations = {
       activeWallet: state.activeWallet === walletId ? null : state.activeWallet
     }
   },
-  setActiveWallet(state: State, walletId: WALLET_ID) {
+  setActiveWallet(state: State, walletId: WALLET_ID | null) {
     return {
       ...state,
       activeWallet: walletId

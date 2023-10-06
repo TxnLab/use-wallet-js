@@ -13,7 +13,7 @@ export const actions = {
   removeWallet(context: Store<State>, walletId: WALLET_ID) {
     context.commit(StoreMutations.REMOVE_WALLET, walletId)
   },
-  setActiveWallet(context: Store<State>, walletId: WALLET_ID) {
+  setActiveWallet(context: Store<State>, walletId: WALLET_ID | null) {
     context.commit(StoreMutations.SET_ACTIVE_WALLET, walletId)
   },
   setActiveAccount(
