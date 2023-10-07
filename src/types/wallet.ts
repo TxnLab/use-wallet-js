@@ -1,13 +1,17 @@
 import { WALLET_ID } from 'src/constants'
+import type { DeflyWalletConnectOptions } from './wallets/defly'
 import type { ExodusOptions } from './wallets/exodus'
+import type { MyAlgoConnectOptions } from './wallets/myalgo'
 import type { PeraWalletConnectOptions } from './wallets/pera'
 import type { NonEmptyArray } from './utilities'
 import type { Store } from 'src/store'
 import type { State } from './state'
 
 export type ClientOptionsMap = {
-  [WALLET_ID.PERA]: PeraWalletConnectOptions
+  [WALLET_ID.DEFLY]: DeflyWalletConnectOptions
   [WALLET_ID.EXODUS]: ExodusOptions
+  [WALLET_ID.MYALGO]: MyAlgoConnectOptions
+  [WALLET_ID.PERA]: PeraWalletConnectOptions
 }
 
 export type ClientConfigMap = {
@@ -27,10 +31,14 @@ export type WalletConfig<T extends keyof ClientConfigMap> = {
 }[T]
 
 export type WalletDef =
-  | WalletConfig<WALLET_ID.PERA>
+  | WalletConfig<WALLET_ID.DEFLY>
   | WalletConfig<WALLET_ID.EXODUS>
-  | WALLET_ID.PERA
+  | WalletConfig<WALLET_ID.MYALGO>
+  | WalletConfig<WALLET_ID.PERA>
+  | WALLET_ID.DEFLY
   | WALLET_ID.EXODUS
+  | WALLET_ID.MYALGO
+  | WALLET_ID.PERA
 
 export type WalletsArray = NonEmptyArray<WalletDef>
 
