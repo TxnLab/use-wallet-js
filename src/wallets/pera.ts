@@ -3,12 +3,18 @@ import algosdk from 'algosdk'
 import { BaseWallet } from './base'
 import { WALLET_ID } from 'src/constants'
 import { Store } from 'src/store'
-import { isTransaction, isSignedTxnObject, compareAccountsMatch } from 'src/utils'
+import {
+  compareAccounts,
+  isSignedTxnObject,
+  mergeSignedTxnsWithGroup,
+  normalizeTxnGroup,
+  shouldSignTxnObject
+} from 'src/utils'
 import { StoreActions, type State } from 'src/types/state'
-import type { EncodedSignedTransaction, EncodedTransaction, Transaction } from 'algosdk'
-import type { PeraWalletConnectOptions } from 'src/types/wallets/pera'
+import type { EncodedSignedTransaction, EncodedTransaction } from 'algosdk'
 import type { SignerTransaction } from 'src/types/transaction'
 import type { WalletAccount, WalletConstructor } from 'src/types/wallet'
+import type { PeraWalletConnectOptions } from 'src/types/wallets/pera'
 
 export class PeraWallet extends BaseWallet {
   private client: PeraWalletConnect | null = null
@@ -16,8 +22,6 @@ export class PeraWallet extends BaseWallet {
 
   protected store: Store<State>
   protected notifySubscribers: () => void
-
-  public subscribe: (callback: (state: State) => void) => () => void
 
   constructor({
     id,
@@ -29,7 +33,6 @@ export class PeraWallet extends BaseWallet {
     super({ id, store, subscribe, onStateChange })
     this.options = options
     this.store = store
-    this.subscribe = subscribe
     this.notifySubscribers = onStateChange
   }
 
@@ -72,7 +75,7 @@ export class PeraWallet extends BaseWallet {
       return walletAccounts
     } catch (error: any) {
       if (error?.data?.type !== 'CONNECT_MODAL_CLOSED') {
-        console.error(error)
+        console.error('[PeraWallet] Error connecting:', error)
       }
       return []
     }
@@ -93,10 +96,11 @@ export class PeraWallet extends BaseWallet {
       const state = this.store.getState()
       const walletState = state.wallets.get(this.id)
 
+      // No session to resume
       if (!walletState) {
-        // No persisted state, abort
         return
       }
+
       console.info('[PeraWallet] Resuming session...')
 
       const client = this.client || (await this.initializeClient())
@@ -105,7 +109,7 @@ export class PeraWallet extends BaseWallet {
       client.connector?.on('disconnect', this.handleDisconnect)
 
       if (accounts.length === 0) {
-        throw new Error('No accounts found!')
+        throw new Error('[PeraWallet] No accounts found!')
       }
 
       const walletAccounts = accounts.map((address: string, idx: number) => ({
@@ -113,7 +117,7 @@ export class PeraWallet extends BaseWallet {
         address
       }))
 
-      const match = compareAccountsMatch(walletAccounts, walletState.accounts)
+      const match = compareAccounts(walletAccounts, walletState.accounts)
 
       if (!match) {
         console.warn(`[PeraWallet] Session accounts mismatch, updating accounts`)
@@ -130,90 +134,74 @@ export class PeraWallet extends BaseWallet {
     }
   }
 
-  public transactionSigner = async (
-    connectedAccounts: string[],
-    txnGroup: Transaction[] | Uint8Array[] | Uint8Array[][],
+  public signTransactions = async (
+    txnGroup: algosdk.Transaction[] | algosdk.Transaction[][] | Uint8Array[] | Uint8Array[][],
     indexesToSign?: number[],
     returnGroup = true
   ): Promise<Uint8Array[]> => {
     if (!this.client) {
-      throw new Error('Client not initialized!')
-    }
-    if (!txnGroup[0]) {
-      throw new Error('Empty transaction group!')
+      throw new Error('[PeraWallet] Client not initialized!')
     }
     const txnsToSign: SignerTransaction[] = []
     const signedIndexes: number[] = []
 
-    const isTransactionType = isTransaction(txnGroup[0])
+    const msgpackTxnGroup: Uint8Array[] = normalizeTxnGroup(txnGroup)
 
-    // Handle `Transaction[]` group transaction
-    if (isTransactionType) {
-      const transactionGroup = txnGroup as Transaction[]
+    // Decode transactions to access properties
+    const decodedObjects = msgpackTxnGroup.map((txn) => {
+      return algosdk.decodeObj(txn)
+    }) as Array<EncodedTransaction | EncodedSignedTransaction>
 
-      // Marshal transactions to sign into `SignerTransaction[]`
-      transactionGroup.forEach((txn, idx) => {
-        const isIndexMatch = !indexesToSign || indexesToSign.includes(idx)
-        const canSign = connectedAccounts.includes(algosdk.encodeAddress(txn.from.publicKey))
-        const shouldSign = isIndexMatch && canSign
+    // Marshal transactions into `SignerTransaction[]`
+    decodedObjects.forEach((txnObject, idx) => {
+      const isSigned = isSignedTxnObject(txnObject)
+      const shouldSign = shouldSignTxnObject(txnObject, this.addresses, indexesToSign, idx)
 
-        if (shouldSign) {
-          txnsToSign.push({ txn: txn })
-          signedIndexes.push(idx)
-        } else {
-          txnsToSign.push({ txn: txn, signers: [] })
-        }
-      })
+      const txnBuffer: Uint8Array = msgpackTxnGroup[idx]!
+      const txn: algosdk.Transaction = isSigned
+        ? algosdk.decodeSignedTransaction(txnBuffer).txn
+        : algosdk.decodeUnsignedTransaction(txnBuffer)
 
-      // Sign transactions
-      const signerResult = await this.client.signTransaction([txnsToSign])
-      return signerResult
+      if (shouldSign) {
+        txnsToSign.push({ txn })
+        signedIndexes.push(idx)
+      } else {
+        txnsToSign.push({ txn, signers: [] })
+      }
+    })
+
+    // Sign transactions
+    const signedTxns = await this.client.signTransaction([txnsToSign])
+
+    // Merge signed transactions back into original group
+    const txnGroupSigned = mergeSignedTxnsWithGroup(
+      signedTxns,
+      msgpackTxnGroup,
+      signedIndexes,
+      returnGroup
+    )
+
+    return txnGroupSigned
+  }
+
+  public transactionSigner = async (
+    txnGroup: algosdk.Transaction[],
+    indexesToSign: number[]
+  ): Promise<Uint8Array[]> => {
+    if (!this.client) {
+      throw new Error('[PeraWallet] Client not initialized!')
     }
 
-    // Handle `Uint8Array[]` group transaction(s)
-    else {
-      const uintTxnGroup = txnGroup.flat() as Uint8Array[]
+    const txnsToSign = txnGroup.reduce<SignerTransaction[]>((acc, txn, idx) => {
+      if (indexesToSign.includes(idx)) {
+        acc.push({ txn })
+      } else {
+        acc.push({ txn, signers: [] })
+      }
+      return acc
+    }, [])
 
-      // Decode transactions to access properties
-      const encodedTxnObjects = uintTxnGroup.map((txn) => {
-        return algosdk.decodeObj(txn)
-      }) as Array<EncodedTransaction | EncodedSignedTransaction>
-
-      // Marshal transactions to sign into `SignerTransaction[]`
-      encodedTxnObjects.forEach((txn, idx) => {
-        const isIndexMatch = !indexesToSign || indexesToSign.includes(idx)
-        const isSigned = isSignedTxnObject(txn)
-        const canSign = !isSigned && connectedAccounts.includes(algosdk.encodeAddress(txn.snd))
-        const shouldSign = isIndexMatch && canSign
-
-        const encodedTxn = uintTxnGroup[idx] as Uint8Array
-        const transaction = isSigned
-          ? algosdk.decodeSignedTransaction(encodedTxn).txn
-          : algosdk.decodeUnsignedTransaction(encodedTxn)
-
-        if (shouldSign) {
-          txnsToSign.push({ txn: transaction as Transaction })
-          signedIndexes.push(idx)
-        } else {
-          txnsToSign.push({ txn: transaction as Transaction, signers: [] })
-        }
-      })
-
-      // Sign transactions
-      const result = await this.client.signTransaction([txnsToSign])
-
-      // Merge signed transactions back into original `Uint8Array[]` group
-      const signerResult = uintTxnGroup.reduce<Uint8Array[]>((acc, txn, i) => {
-        if (signedIndexes.includes(i)) {
-          const signedByUser = result.shift()
-          signedByUser && acc.push(signedByUser)
-        } else if (returnGroup) {
-          acc.push(uintTxnGroup[i] as Uint8Array)
-        }
-        return acc
-      }, [])
-
-      return signerResult
-    }
+    const signTxnsResult = await this.client.signTransaction([txnsToSign])
+    return signTxnsResult
   }
 }

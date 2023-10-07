@@ -2,7 +2,8 @@ import { WALLET_ID } from 'src/constants'
 import { allWallets, BaseWallet } from 'src/wallets'
 import { createStore, defaultState, Store } from 'src/store'
 import { StoreActions, type State } from 'src/types/state'
-import type { Transaction } from 'algosdk'
+import type { TransactionSigner } from 'algosdk'
+import type { TransactionSignerAccount } from './types/transaction'
 import type {
   WalletAccount,
   WalletConfig,
@@ -58,7 +59,7 @@ export class WalletManager {
       // Get wallet class
       const WalletClass = allWallets[walletId]
       if (!WalletClass) {
-        console.error(`Wallet not found: ${walletId}`)
+        console.error(`[Manager] Wallet not found: ${walletId}`)
         continue
       }
 
@@ -147,36 +148,49 @@ export class WalletManager {
     return this.activeAccount.address
   }
 
-  // ---------- Transaction Signer ------------------------------------ //
+  // ---------- Sign Transactions ------------------------------------- //
 
-  public async transactionSigner(
-    txnGroup: Transaction[],
-    indexesToSign: number[]
-  ): Promise<Uint8Array[]>
-
-  public async transactionSigner(
-    txnGroup: Uint8Array[] | Uint8Array[][],
-    indexesToSign?: number[],
-    returnGroup?: boolean
-  ): Promise<Uint8Array[]>
-
-  public async transactionSigner(
-    txnGroup: Transaction[] | Uint8Array[] | Uint8Array[][],
-    indexesToSign?: number[],
-    returnGroup = true
-  ): Promise<Uint8Array[]> {
+  public get signTransactions() {
     if (!this.activeWallet) {
-      throw new Error('No active wallet found!')
+      throw new Error('[Manager] No active wallet found!')
     }
+    return this.activeWallet.signTransactions
+  }
 
-    const wallet = this._wallets.get(this.activeWallet.id)
-
-    if (!wallet) {
-      throw new Error('Wallet not found!')
+  /**
+   * A function which can sign transactions from an atomic transaction group. The logic will be
+   * specific to each wallet, but the function will always return a promise that resolves to an
+   * array of encoded signed transactions matching the length of the indexesToSign array.
+   *
+   * @see https://github.com/algorand/js-algorand-sdk/blob/v2.6.0/src/signer.ts#L7-L18
+   *
+   * @param txnGroup - The atomic group containing transactions to be signed
+   * @param indexesToSign - An array of indexes in the atomic transaction group that should be signed
+   * @returns A promise which resolves an array of encoded signed transactions. The length of the
+   *   array will be the same as the length of indexesToSign, and each index i in the array
+   *   corresponds to the signed transaction from txnGroup[indexesToSign[i]]
+   */
+  public get transactionSigner(): TransactionSigner {
+    if (!this.activeWallet) {
+      throw new Error('[Manager] No active wallet found!')
     }
+    return this.activeWallet.transactionSigner
+  }
 
-    const connectedAccounts = wallet.accounts.map((account) => account.address)
-
-    return wallet.transactionSigner(connectedAccounts, txnGroup, indexesToSign, returnGroup)
+  /**
+   * A wrapper around `TransactionSigner` that also has the sender address (the current active
+   * account). Can be used to produce a `TransactionWithSigner` object ready to be passed to an
+   * AtomicTransactionComposer's `addTransaction` method.
+   *
+   * @see https://github.com/algorandfoundation/algokit-utils-ts/blob/v4.0.0/docs/code/modules/index.md#gettransactionwithsigner
+   */
+  public get transactionSignerAccount(): TransactionSignerAccount {
+    if (!this.activeAddress) {
+      throw new Error('[Manager] No active account found!')
+    }
+    return {
+      addr: this.activeAddress,
+      signer: this.transactionSigner
+    }
   }
 }

@@ -1,9 +1,6 @@
 import type { WalletAccount } from 'src/types/wallet'
 
-export function compareAccountsMatch(
-  accounts: WalletAccount[],
-  compareTo: WalletAccount[]
-): boolean {
+export function compareAccounts(accounts: WalletAccount[], compareTo: WalletAccount[]): boolean {
   const addresses = new Set(accounts.map((account) => account.address))
   const compareAddresses = new Set(compareTo.map((account) => account.address))
 

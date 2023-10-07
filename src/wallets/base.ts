@@ -1,7 +1,7 @@
+import algosdk from 'algosdk'
 import { WALLET_ID } from 'src/constants'
 import { Store } from 'src/store'
 import { StoreActions, type State } from 'src/types/state'
-import type { Transaction } from 'algosdk'
 import type { BaseConstructor, WalletAccount } from 'src/types/wallet'
 
 export abstract class BaseWallet {
@@ -19,7 +19,7 @@ export abstract class BaseWallet {
     this.notifySubscribers = onStateChange
   }
 
-  // ---------- Actions ----------------------------------------------- //
+  // ---------- Public Methods ---------------------------------------- //
 
   public abstract connect(): Promise<WalletAccount[]>
   public abstract disconnect(): Promise<void>
@@ -42,25 +42,37 @@ export abstract class BaseWallet {
     this.notifySubscribers()
   }
 
-  public abstract transactionSigner(
-    connectedAccounts: string[],
-    txnGroup: Transaction[] | Uint8Array[] | Uint8Array[][],
+  public abstract signTransactions(
+    txnGroup: algosdk.Transaction[] | algosdk.Transaction[][] | Uint8Array[] | Uint8Array[][],
     indexesToSign?: number[],
     returnGroup?: boolean
   ): Promise<Uint8Array[]>
 
+  public abstract transactionSigner(
+    txnGroup: algosdk.Transaction[],
+    indexesToSign: number[]
+  ): Promise<Uint8Array[]>
+
   // ---------- Derived Properties ------------------------------------ //
 
-  public get accounts() {
+  public get accounts(): WalletAccount[] {
     const state = this.store.getState()
     const walletState = state.wallets.get(this.id)
     return walletState ? walletState.accounts : []
   }
 
-  public get activeAccount() {
+  public get addresses(): string[] {
+    return this.accounts.map((account) => account.address)
+  }
+
+  public get activeAccount(): WalletAccount | null {
     const state = this.store.getState()
     const walletState = state.wallets.get(this.id)
     return walletState ? walletState.activeAccount : null
+  }
+
+  public get activeAddress(): string | null {
+    return this.activeAccount?.address ?? null
   }
 
   public get isConnected(): boolean {
