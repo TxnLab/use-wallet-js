@@ -1,4 +1,3 @@
-import MyAlgoConnect from '@randlabs/myalgo-connect'
 import algosdk from 'algosdk'
 import { BaseWallet } from './base'
 import { WALLET_ID } from 'src/constants'
@@ -10,6 +9,7 @@ import {
   shouldSignTxnObject
 } from 'src/utils'
 import { StoreActions, type State } from 'src/types/state'
+import type MyAlgoConnect from '@randlabs/myalgo-connect'
 import type { EncodedSignedTransaction, EncodedTransaction } from 'algosdk'
 import type { WalletTransaction } from 'src/types/transaction'
 import type { WalletAccount, WalletConstructor } from 'src/types/wallet'
@@ -37,6 +37,7 @@ export class MyAlgoWallet extends BaseWallet {
 
   private initializeClient = async (): Promise<MyAlgoConnect> => {
     console.info('[MyAlgoWallet] Initializing client...')
+    const MyAlgoConnect = (await import('@randlabs/myalgo-connect')).default
     const client = new MyAlgoConnect(this.options)
     this.client = client
     return client

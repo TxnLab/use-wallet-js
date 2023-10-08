@@ -1,4 +1,3 @@
-import { DeflyWalletConnect } from '@blockshake/defly-connect'
 import algosdk from 'algosdk'
 import { BaseWallet } from './base'
 import { WALLET_ID } from 'src/constants'
@@ -11,10 +10,11 @@ import {
   shouldSignTxnObject
 } from 'src/utils'
 import { StoreActions, type State } from 'src/types/state'
-import type { EncodedSignedTransaction, EncodedTransaction, Transaction } from 'algosdk'
-import { WalletAccount, WalletConstructor } from 'src/types/wallet'
-import { DeflyWalletConnectOptions } from 'src/types/wallets/defly'
-import { SignerTransaction } from 'src/types/transaction'
+import type { DeflyWalletConnect } from '@blockshake/defly-connect'
+import type { EncodedSignedTransaction, EncodedTransaction } from 'algosdk'
+import type { SignerTransaction } from 'src/types/transaction'
+import type { WalletAccount, WalletConstructor } from 'src/types/wallet'
+import type { DeflyWalletConnectOptions } from 'src/types/wallets/defly'
 
 export class DeflyWallet extends BaseWallet {
   private client: DeflyWalletConnect | null = null
@@ -38,6 +38,7 @@ export class DeflyWallet extends BaseWallet {
 
   private initializeClient = async (): Promise<DeflyWalletConnect> => {
     console.info('[DeflyWallet] Initializing client...')
+    const DeflyWalletConnect = (await import('@blockshake/defly-connect')).DeflyWalletConnect
     const client = new DeflyWalletConnect(this.options)
     client.connector?.on('disconnect', this.onDisconnect)
     this.client = client

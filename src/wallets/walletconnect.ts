@@ -1,5 +1,3 @@
-import { WalletConnectModal } from '@walletconnect/modal'
-import SignClient from '@walletconnect/sign-client'
 import { getAppMetadata, getSdkError } from '@walletconnect/utils'
 import algosdk from 'algosdk'
 import { BaseWallet } from './base'
@@ -14,6 +12,8 @@ import {
   shouldSignTxnObject
 } from 'src/utils'
 import { StoreActions, type State } from 'src/types/state'
+import type { WalletConnectModal } from '@walletconnect/modal'
+import type SignClient from '@walletconnect/sign-client'
 import type { SessionTypes } from '@walletconnect/types'
 import type { EncodedSignedTransaction, EncodedTransaction } from 'algosdk'
 import type { WalletTransaction } from 'src/types/transaction'
@@ -63,6 +63,7 @@ export class WalletConnect extends BaseWallet {
 
   private initializeClient = async (): Promise<SignClient> => {
     console.info('[WalletConnect] Initializing client...')
+    const SignClient = (await import('@walletconnect/sign-client')).SignClient
     const client = await SignClient.init(this.options)
 
     client.on('session_event', (args) => {
@@ -88,6 +89,7 @@ export class WalletConnect extends BaseWallet {
 
   private initializeModal = async (): Promise<WalletConnectModal> => {
     console.info('[WalletConnect] Initializing modal...')
+    const WalletConnectModal = (await import('@walletconnect/modal')).WalletConnectModal
     const modal = new WalletConnectModal({
       projectId: this.options.projectId,
       chains: this.chains,

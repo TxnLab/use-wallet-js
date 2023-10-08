@@ -1,4 +1,3 @@
-import { PeraWalletConnect } from '@perawallet/connect'
 import algosdk from 'algosdk'
 import { BaseWallet } from './base'
 import { WALLET_ID } from 'src/constants'
@@ -11,6 +10,7 @@ import {
   shouldSignTxnObject
 } from 'src/utils'
 import { StoreActions, type State } from 'src/types/state'
+import type { PeraWalletConnect } from '@perawallet/connect'
 import type { EncodedSignedTransaction, EncodedTransaction } from 'algosdk'
 import type { SignerTransaction } from 'src/types/transaction'
 import type { WalletAccount, WalletConstructor } from 'src/types/wallet'
@@ -38,6 +38,7 @@ export class PeraWallet extends BaseWallet {
 
   private initializeClient = async (): Promise<PeraWalletConnect> => {
     console.info('[PeraWallet] Initializing client...')
+    const PeraWalletConnect = (await import('@perawallet/connect')).PeraWalletConnect
     const client = new PeraWalletConnect(this.options)
     client.connector?.on('disconnect', this.onDisconnect)
     this.client = client
