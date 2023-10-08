@@ -75,6 +75,8 @@ export class DeflyWallet extends BaseWallet {
     } catch (error: any) {
       if (error?.data?.type !== 'CONNECT_MODAL_CLOSED') {
         console.error('[DeflyWallet] Error connecting:', error)
+      } else {
+        console.info('[DeflyWallet] Connection cancelled.')
       }
       return []
     }

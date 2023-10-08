@@ -65,8 +65,12 @@ export class MyAlgoWallet extends BaseWallet {
       this.notifySubscribers()
 
       return accounts
-    } catch (error) {
-      console.error('[MyAlgoWallet] Error connecting:', error)
+    } catch (error: any) {
+      if (!error.message.includes('Operation cancelled')) {
+        console.error('[MyAlgoWallet] Error connecting:', error)
+      } else {
+        console.info('[MyAlgoWallet] Connection cancelled.')
+      }
       return []
     }
   }

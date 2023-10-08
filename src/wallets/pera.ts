@@ -75,6 +75,8 @@ export class PeraWallet extends BaseWallet {
     } catch (error: any) {
       if (error?.data?.type !== 'CONNECT_MODAL_CLOSED') {
         console.error('[PeraWallet] Error connecting:', error)
+      } else {
+        console.info('[PeraWallet] Connection cancelled.')
       }
       return []
     }

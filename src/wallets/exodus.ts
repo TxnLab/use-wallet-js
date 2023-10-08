@@ -45,6 +45,7 @@ export class ExodusWallet extends BaseWallet {
   }
 
   public connect = async (): Promise<WalletAccount[]> => {
+    console.info('[ExodusWallet] Connecting...')
     try {
       const client = this.client || (await this.initializeClient())
       const { accounts } = await client.enable(this.options)
@@ -72,7 +73,11 @@ export class ExodusWallet extends BaseWallet {
 
       return walletAccounts
     } catch (error: any) {
-      console.error(error)
+      if (error.name === 'UserRejectedRequestError') {
+        console.info('[ExodusWallet] Connection cancelled.')
+      } else {
+        console.error('[ExodusWallet] Error connecting:', error)
+      }
       return []
     }
   }
