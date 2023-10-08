@@ -1,4 +1,4 @@
-import MyAlgoConnect, { type WalletTransaction } from '@randlabs/myalgo-connect'
+import MyAlgoConnect from '@randlabs/myalgo-connect'
 import algosdk from 'algosdk'
 import { BaseWallet } from './base'
 import { WALLET_ID } from 'src/constants'
@@ -11,6 +11,7 @@ import {
 } from 'src/utils'
 import { StoreActions, type State } from 'src/types/state'
 import type { EncodedSignedTransaction, EncodedTransaction } from 'algosdk'
+import type { WalletTransaction } from 'src/types/transaction'
 import type { WalletAccount, WalletConstructor } from 'src/types/wallet'
 import type { MyAlgoConnectOptions } from 'src/types/wallets/myalgo'
 
@@ -72,7 +73,7 @@ export class MyAlgoWallet extends BaseWallet {
 
   public disconnect = async (): Promise<void> => {
     console.info('[MyAlgoWallet] Disconnecting...')
-    this.handleDisconnect()
+    this.onDisconnect()
   }
 
   public resumeSession = (): Promise<void> => {

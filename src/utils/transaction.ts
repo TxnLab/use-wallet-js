@@ -1,5 +1,6 @@
 import algosdk from 'algosdk'
 import type { EncodedSignedTransaction, EncodedTransaction } from 'algosdk'
+import type { JsonRpcRequest } from 'src/types/transaction'
 
 export function isTransaction(
   item: algosdk.Transaction | algosdk.Transaction[] | Uint8Array | Uint8Array[]
@@ -87,4 +88,19 @@ export function mergeSignedTxnsWithGroup(
     }
     return acc
   }, [])
+}
+
+function getPayloadId(): number {
+  const date = Date.now() * Math.pow(10, 3)
+  const extra = Math.floor(Math.random() * Math.pow(10, 3))
+  return date + extra
+}
+
+export function formatJsonRpcRequest<T = any>(method: string, params: T): JsonRpcRequest<T> {
+  return {
+    id: getPayloadId(),
+    jsonrpc: '2.0',
+    method,
+    params
+  }
 }

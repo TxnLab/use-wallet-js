@@ -1,5 +1,7 @@
 /** @see https://docs.exodus.com/api-reference/algorand-provider-arc-api/ */
 
+import { WalletTransaction } from '../transaction'
+
 interface EnableNetworkOpts {
   genesisID?: string
   genesisHash?: string
@@ -21,22 +23,6 @@ interface EnableAccountsResult {
 }
 
 export type EnableResult = EnableNetworkResult & EnableAccountsResult
-
-export interface WalletTransaction {
-  // Base64 encoding of the canonical msgpack encoding of a Transaction.
-  txn: string
-
-  // Optional authorized address used to sign the transaction when the account
-  // is rekeyed. Also called the signor/sgnr.
-  authAddr?: string
-
-  // Optional list of addresses that must sign the transactions
-  signers?: string[]
-
-  // Optional base64 encoding of the canonical msgpack encoding of a
-  // SignedTxn corresponding to txn, when signers=[]
-  stxn?: string
-}
 
 export type SignTxnsResult = (string | null)[]
 

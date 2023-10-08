@@ -88,7 +88,7 @@ export abstract class BaseWallet {
 
   // ---------- Protected Methods ------------------------------------- //
 
-  protected handleDisconnect = (): void => {
+  protected onDisconnect = (): void => {
     this.store.dispatch(StoreActions.REMOVE_WALLET, this.id)
     this.notifySubscribers()
   }

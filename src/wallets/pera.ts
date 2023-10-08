@@ -39,6 +39,7 @@ export class PeraWallet extends BaseWallet {
   private initializeClient = async (): Promise<PeraWalletConnect> => {
     console.info('[PeraWallet] Initializing client...')
     const client = new PeraWalletConnect(this.options)
+    client.connector?.on('disconnect', this.onDisconnect)
     this.client = client
     return client
   }
@@ -47,9 +48,7 @@ export class PeraWallet extends BaseWallet {
     console.info('[PeraWallet] Connecting...')
     try {
       const client = this.client || (await this.initializeClient())
-
       const accounts = await client.connect()
-      client.connector?.on('disconnect', this.handleDisconnect)
 
       if (accounts.length === 0) {
         throw new Error('No accounts found!')
@@ -85,7 +84,7 @@ export class PeraWallet extends BaseWallet {
     console.info('[PeraWallet] Disconnecting...')
     try {
       await this.client?.disconnect()
-      this.handleDisconnect()
+      this.onDisconnect()
     } catch (error: any) {
       console.error(error)
     }
@@ -104,9 +103,7 @@ export class PeraWallet extends BaseWallet {
       console.info('[PeraWallet] Resuming session...')
 
       const client = this.client || (await this.initializeClient())
-
       const accounts = await client.reconnectSession()
-      client.connector?.on('disconnect', this.handleDisconnect)
 
       if (accounts.length === 0) {
         throw new Error('[PeraWallet] No accounts found!')
@@ -130,7 +127,7 @@ export class PeraWallet extends BaseWallet {
       }
     } catch (error: any) {
       console.error(error)
-      this.handleDisconnect()
+      this.onDisconnect()
     }
   }
 

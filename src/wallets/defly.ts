@@ -39,6 +39,7 @@ export class DeflyWallet extends BaseWallet {
   private initializeClient = async (): Promise<DeflyWalletConnect> => {
     console.info('[DeflyWallet] Initializing client...')
     const client = new DeflyWalletConnect(this.options)
+    client.connector?.on('disconnect', this.onDisconnect)
     this.client = client
     return client
   }
@@ -47,9 +48,7 @@ export class DeflyWallet extends BaseWallet {
     console.info('[DeflyWallet] Connecting...')
     try {
       const client = this.client || (await this.initializeClient())
-
       const accounts = await client.connect()
-      client.connector?.on('disconnect', this.handleDisconnect)
 
       if (accounts.length === 0) {
         throw new Error('[DeflyWallet] No accounts found!')
@@ -85,7 +84,7 @@ export class DeflyWallet extends BaseWallet {
     console.info('[DeflyWallet] Disconnecting...')
     try {
       await this.client?.disconnect()
-      this.handleDisconnect()
+      this.onDisconnect()
     } catch (error: any) {
       console.error(error)
     }
@@ -104,9 +103,7 @@ export class DeflyWallet extends BaseWallet {
       console.info('[DeflyWallet] Resuming session...')
 
       const client = this.client || (await this.initializeClient())
-
       const accounts = await client.reconnectSession()
-      client.connector?.on('disconnect', this.handleDisconnect)
 
       if (accounts.length === 0) {
         throw new Error('[DeflyWallet] No accounts found!')
@@ -130,7 +127,7 @@ export class DeflyWallet extends BaseWallet {
       }
     } catch (error: any) {
       console.error(error)
-      this.handleDisconnect()
+      this.onDisconnect()
     }
   }
 

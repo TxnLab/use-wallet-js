@@ -3,6 +3,7 @@ import type { DeflyWalletConnectOptions } from './wallets/defly'
 import type { ExodusOptions } from './wallets/exodus'
 import type { MyAlgoConnectOptions } from './wallets/myalgo'
 import type { PeraWalletConnectOptions } from './wallets/pera'
+import type { WalletConnectOptions } from './wallets/walletconnect'
 import type { NonEmptyArray } from './utilities'
 import type { Store } from 'src/store'
 import type { State } from './state'
@@ -12,6 +13,7 @@ export type ClientOptionsMap = {
   [WALLET_ID.EXODUS]: ExodusOptions
   [WALLET_ID.MYALGO]: MyAlgoConnectOptions
   [WALLET_ID.PERA]: PeraWalletConnectOptions
+  [WALLET_ID.WALLETCONNECT]: WalletConnectOptions
 }
 
 export type ClientConfigMap = {
@@ -35,6 +37,7 @@ export type WalletDef =
   | WalletConfig<WALLET_ID.EXODUS>
   | WalletConfig<WALLET_ID.MYALGO>
   | WalletConfig<WALLET_ID.PERA>
+  | WalletConfig<WALLET_ID.WALLETCONNECT>
   | WALLET_ID.DEFLY
   | WALLET_ID.EXODUS
   | WALLET_ID.MYALGO

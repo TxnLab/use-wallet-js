@@ -10,12 +10,8 @@ import {
 } from 'src/utils'
 import { StoreActions, type State } from 'src/types/state'
 import type { EncodedSignedTransaction, EncodedTransaction } from 'algosdk'
-import type {
-  Exodus,
-  ExodusOptions,
-  WalletTransaction,
-  WindowExtended
-} from 'src/types/wallets/exodus'
+import type { WalletTransaction } from 'src/types/transaction'
+import type { Exodus, ExodusOptions, WindowExtended } from 'src/types/wallets/exodus'
 import type { WalletAccount, WalletConstructor } from 'src/types/wallet'
 
 export class ExodusWallet extends BaseWallet {
@@ -83,7 +79,7 @@ export class ExodusWallet extends BaseWallet {
 
   public disconnect = async (): Promise<void> => {
     console.info('[ExodusWallet] Disconnecting...')
-    this.handleDisconnect()
+    this.onDisconnect()
   }
 
   public resumeSession = async (): Promise<void> => {
@@ -101,7 +97,7 @@ export class ExodusWallet extends BaseWallet {
       (window as WindowExtended).algorand === undefined ||
       (window as WindowExtended).algorand.isConnected !== true
     ) {
-      this.handleDisconnect()
+      this.onDisconnect()
     }
   }
 

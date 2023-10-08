@@ -5,8 +5,8 @@ export enum WALLET_ID {
   // KMD = 'kmd',
   // MNEMONIC = 'mnemonic',
   MYALGO = 'myalgo',
-  PERA = 'pera'
-  // WALLETCONNECT = 'walletconnect'
+  PERA = 'pera',
+  WALLETCONNECT = 'walletconnect'
 }
 
 export const LOCAL_STORAGE_KEY = '@txnlab/use-wallet'

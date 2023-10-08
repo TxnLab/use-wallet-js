@@ -3,6 +3,7 @@ import { DeflyWallet } from './defly'
 import { ExodusWallet } from './exodus'
 import { MyAlgoWallet } from './myalgo'
 import { PeraWallet } from './pera'
+import { WalletConnect } from './walletconnect'
 import { WALLET_ID } from 'src/constants'
 
 export type WalletMap = {
@@ -10,6 +11,7 @@ export type WalletMap = {
   [WALLET_ID.EXODUS]: typeof ExodusWallet
   [WALLET_ID.MYALGO]: typeof MyAlgoWallet
   [WALLET_ID.PERA]: typeof PeraWallet
+  [WALLET_ID.WALLETCONNECT]: typeof WalletConnect
 }
 
 function createWalletMap(): WalletMap {
@@ -17,7 +19,8 @@ function createWalletMap(): WalletMap {
     [WALLET_ID.DEFLY]: DeflyWallet,
     [WALLET_ID.EXODUS]: ExodusWallet,
     [WALLET_ID.MYALGO]: MyAlgoWallet,
-    [WALLET_ID.PERA]: PeraWallet
+    [WALLET_ID.PERA]: PeraWallet,
+    [WALLET_ID.WALLETCONNECT]: WalletConnect
   }
 }
 
