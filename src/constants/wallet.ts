@@ -2,7 +2,7 @@ export enum WALLET_ID {
   // DAFFI = 'daffi',
   DEFLY = 'defly',
   EXODUS = 'exodus',
-  // KMD = 'kmd',
+  KMD = 'kmd',
   MNEMONIC = 'mnemonic',
   MYALGO = 'myalgo',
   PERA = 'pera',
