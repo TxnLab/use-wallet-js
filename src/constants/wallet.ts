@@ -3,7 +3,7 @@ export enum WALLET_ID {
   DEFLY = 'defly',
   EXODUS = 'exodus',
   // KMD = 'kmd',
-  // MNEMONIC = 'mnemonic',
+  MNEMONIC = 'mnemonic',
   MYALGO = 'myalgo',
   PERA = 'pera',
   WALLETCONNECT = 'walletconnect'
