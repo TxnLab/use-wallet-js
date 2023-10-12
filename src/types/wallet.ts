@@ -1,4 +1,8 @@
-import { WALLET_ID } from 'src/constants'
+import type { NetworkId, WALLET_ID } from 'src/constants'
+import type { Store } from 'src/store'
+import type { NetworkConfig } from './network'
+import type { State } from './state'
+import type { NonEmptyArray } from './utilities'
 import type { DeflyWalletConnectOptions } from './wallets/defly'
 import type { ExodusOptions } from './wallets/exodus'
 import type { KmdOptions } from './wallets/kmd'
@@ -6,9 +10,6 @@ import type { MnemonicOptions } from './wallets/mnemonic'
 import type { MyAlgoConnectOptions } from './wallets/myalgo'
 import type { PeraWalletConnectOptions } from './wallets/pera'
 import type { WalletConnectOptions } from './wallets/walletconnect'
-import type { NonEmptyArray } from './utilities'
-import type { Store } from 'src/store'
-import type { State } from './state'
 
 export type ClientOptionsMap = {
   [WALLET_ID.DEFLY]: DeflyWalletConnectOptions
@@ -51,10 +52,12 @@ export type WalletDef =
   | WALLET_ID.MYALGO
   | WALLET_ID.PERA
 
-export type WalletsArray = NonEmptyArray<WalletDef>
+export type WalletsConfig = NonEmptyArray<WalletDef>
 
 export interface WalletManagerConstructor {
-  wallets: WalletsArray
+  wallets: WalletsConfig
+  network?: NetworkId
+  algod?: NetworkConfig
 }
 
 export interface BaseConstructor {

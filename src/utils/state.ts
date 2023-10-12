@@ -1,4 +1,4 @@
-import { WALLET_ID } from 'src/constants'
+import { NetworkId, WALLET_ID } from 'src/constants'
 import type { WalletAccount } from 'src/types'
 import type { State, WalletState } from 'src/types/state'
 
@@ -27,6 +27,10 @@ function isValidWalletState(wallet: any): wallet is WalletState {
   )
 }
 
+function isValidNetworkId(networkId: any): networkId is NetworkId {
+  return Object.values(NetworkId).includes(networkId)
+}
+
 export function isValidState(state: any): state is State {
   if (!state || typeof state !== 'object') return false
   if (!(state.wallets instanceof Map)) return false
@@ -34,6 +38,7 @@ export function isValidState(state: any): state is State {
     if (!isValidWalletId(walletId) || !isValidWalletState(wallet)) return false
   }
   if (state.activeWallet !== null && !isValidWalletId(state.activeWallet)) return false
+  if (!isValidNetworkId(state.activeNetwork)) return false
 
   return true
 }

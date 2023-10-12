@@ -27,7 +27,7 @@ export abstract class BaseWallet {
 
   public setActive = (): void => {
     console.info(`[Wallet] Set active wallet: ${this.id}`)
-    this.store.dispatch(StoreActions.SET_ACTIVE_WALLET, this.id)
+    this.store.dispatch(StoreActions.SET_ACTIVE_WALLET, { walletId: this.id })
 
     this.notifySubscribers()
   }
@@ -89,7 +89,7 @@ export abstract class BaseWallet {
   // ---------- Protected Methods ------------------------------------- //
 
   protected onDisconnect = (): void => {
-    this.store.dispatch(StoreActions.REMOVE_WALLET, this.id)
+    this.store.dispatch(StoreActions.REMOVE_WALLET, { walletId: this.id })
     this.notifySubscribers()
   }
 }

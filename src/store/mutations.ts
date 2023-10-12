@@ -1,8 +1,8 @@
-import type { WALLET_ID } from 'src/constants'
-import type { State, WalletState } from 'src/types/state'
+import type { NetworkId, WALLET_ID } from 'src/constants'
+import type { Mutations, State, WalletState } from 'src/types/state'
 import type { WalletAccount } from 'src/types/wallet'
 
-export const mutations = {
+export const mutations: Mutations<State> = {
   addWallet(state: State, { walletId, wallet }: { walletId: WALLET_ID; wallet: WalletState }) {
     const newWallets = new Map(state.wallets.entries())
     newWallets.set(walletId, wallet)
@@ -13,7 +13,7 @@ export const mutations = {
       activeWallet: walletId
     }
   },
-  removeWallet(state: State, walletId: WALLET_ID) {
+  removeWallet(state: State, { walletId }: { walletId: WALLET_ID }) {
     const newWallets = new Map(state.wallets.entries())
     newWallets.delete(walletId)
 
@@ -23,7 +23,7 @@ export const mutations = {
       activeWallet: state.activeWallet === walletId ? null : state.activeWallet
     }
   },
-  setActiveWallet(state: State, walletId: WALLET_ID | null) {
+  setActiveWallet(state: State, { walletId }: { walletId: WALLET_ID | null }) {
     return {
       ...state,
       activeWallet: walletId
@@ -79,6 +79,12 @@ export const mutations = {
     return {
       ...state,
       wallets: newWallets
+    }
+  },
+  setActiveNetwork(state: State, { networkId }: { networkId: NetworkId }) {
+    return {
+      ...state,
+      activeNetwork: networkId
     }
   }
 }

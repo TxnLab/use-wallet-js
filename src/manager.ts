@@ -1,8 +1,12 @@
-import { WALLET_ID } from 'src/constants'
+import algosdk from 'algosdk'
+import { defaultNetworkConfigMap, NetworkId, WALLET_ID } from 'src/constants'
 import { allWallets, BaseWallet } from 'src/wallets'
+import { Network } from 'src/network'
 import { createStore, defaultState, Store } from 'src/store'
+import { deepMerge, isNetworkConfigMap } from 'src/utils'
 import { StoreActions, type State } from 'src/types/state'
 import type { TransactionSigner } from 'algosdk'
+import type { NetworkConfig, NetworkConfigMap } from 'src/types/network'
 import type { TransactionSignerAccount } from './types/transaction'
 import type {
   WalletAccount,
@@ -14,11 +18,16 @@ import type {
 
 export class WalletManager {
   private _wallets: Map<WALLET_ID, BaseWallet> = new Map()
+  private network: Network
   private store: Store<State>
   private subscribers: Array<(state: State) => void> = []
 
-  constructor({ wallets }: WalletManagerConstructor) {
-    this.store = createStore(defaultState)
+  constructor({ wallets, network = NetworkId.TESTNET, algod = {} }: WalletManagerConstructor) {
+    this.store = createStore({
+      ...defaultState,
+      activeNetwork: network
+    })
+    this.network = this.initializeNetwork(network, algod)
     this.initializeWallets(wallets)
   }
 
@@ -73,9 +82,8 @@ export class WalletManager {
       })
 
       this._wallets.set(walletId, walletInstance)
-      console.info(`[Manager] Initialized wallet for wallet ID: ${walletId}`, walletInstance)
+      console.info(`[Manager] ✅ Initialized ${walletId}`)
     }
-    console.info('[Manager] Initialized wallets', this._wallets)
 
     const state = this.store.getState()
 
@@ -84,7 +92,7 @@ export class WalletManager {
     for (const walletId of connectedWallets) {
       if (!this._wallets.has(walletId)) {
         console.warn(`[Manager] Connected wallet not found: ${walletId}`)
-        this.store.dispatch(StoreActions.REMOVE_WALLET, walletId)
+        this.store.dispatch(StoreActions.REMOVE_WALLET, { walletId })
 
         this.notifySubscribers()
       }
@@ -93,7 +101,7 @@ export class WalletManager {
     // Check if active wallet is still valid
     if (state.activeWallet && !this._wallets.has(state.activeWallet)) {
       console.warn(`[Manager] Active wallet not found: ${state.activeWallet}`)
-      this.store.dispatch(StoreActions.SET_ACTIVE_WALLET, null)
+      this.store.dispatch(StoreActions.SET_ACTIVE_WALLET, { walletId: null })
 
       this.notifySubscribers()
     }
@@ -106,6 +114,51 @@ export class WalletManager {
   public resumeSessions = async (): Promise<void> => {
     const promises = this.wallets.map((wallet) => wallet?.resumeSession())
     await Promise.all(promises)
+  }
+
+  // ---------- Network ----------------------------------------------- //
+
+  private initializeNetwork = (network: NetworkId, config: NetworkConfig): Network => {
+    console.info('[Manager] Initializing network...')
+
+    let networkConfig: NetworkConfigMap = defaultNetworkConfigMap
+
+    if (isNetworkConfigMap(config)) {
+      // Config for multiple networks
+      networkConfig = deepMerge(networkConfig, config)
+    } else {
+      // Config for single (active) network
+      networkConfig[network] = deepMerge(networkConfig[network], config)
+    }
+
+    console.info('[Manager] Algodv2 config:', networkConfig)
+
+    return new Network({
+      config: networkConfig,
+      store: this.store,
+      subscribe: this.subscribe,
+      onStateChange: this.notifySubscribers
+    })
+  }
+
+  public setActiveNetwork = (network: NetworkId): void => {
+    this.network.setActiveNetwork(network)
+  }
+
+  public get activeNetwork(): NetworkId {
+    return this.network.activeNetwork
+  }
+
+  public get algodClient(): algosdk.Algodv2 {
+    return this.network.algodClient
+  }
+
+  public get blockExplorer(): string {
+    return this.network.blockExplorer
+  }
+
+  public get chainId(): string | undefined {
+    return this.network.chainId
   }
 
   // ---------- Active Wallet ----------------------------------------- //
