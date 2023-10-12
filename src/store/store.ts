@@ -27,18 +27,20 @@ export class Store<StateType extends object> {
   private createProxy<T extends object>(state: T): T {
     return new Proxy(state, {
       set: (target, key, value) => {
-        console.log('Proxy set callback', { target, key, value })
+        console.log('[Store] Proxy set callback', { target, key, value })
         if (key in target) {
           target[key as keyof T] = value
-          console.log(`stateChange: ${String(key)}: ${String(value)}`)
+
+          console.info(`[Store] stateChange: ${String(key)}: ${String(value)}`)
           this.events.publish('stateChange', this.state)
+
           if (this.status !== Status.MUTATION) {
-            console.warn(`You should use a mutation to set ${String(key)}`)
+            console.warn(`[Store] You should use a mutation to set ${String(key)}`)
           }
           this.status = Status.IDLE
           return true
         } else {
-          console.warn(`Property ${String(key)} does not exist on state object.`)
+          console.warn(`[Store] Property ${String(key)} does not exist on state object.`)
           return false
         }
       }
@@ -47,11 +49,11 @@ export class Store<StateType extends object> {
 
   public dispatch(actionKey: StoreActions, payload: any): boolean {
     if (typeof this.actions[actionKey] !== 'function') {
-      console.error(`Action "${actionKey}" doesn't exist.`)
+      console.error(`[Store] Action "${actionKey}" doesn't exist.`)
       return false
     }
 
-    console.groupCollapsed(`ACTION: ${actionKey}`)
+    console.groupCollapsed(`[Store] ACTION: ${actionKey}`)
 
     this.status = Status.ACTION
     this.actions[actionKey](this, payload)
@@ -66,7 +68,7 @@ export class Store<StateType extends object> {
       console.log(`Mutation "${mutationKey}" doesn't exist`)
       return false
     }
-    console.log(`MUTATION: ${mutationKey}`, payload)
+    console.info(`[Store] MUTATION: ${mutationKey}`, payload)
 
     this.status = Status.MUTATION
 
@@ -90,12 +92,12 @@ export class Store<StateType extends object> {
       }
       const parsedState = JSON.parse(serializedState, reviver)
       if (!isValidState(parsedState)) {
-        console.error('Parsed state:', parsedState)
+        console.error('[Store] Parsed state:', parsedState)
         throw new Error('Persisted state is invalid')
       }
       return parsedState as StateType
     } catch (error) {
-      console.error('Could not load state from local storage:', error)
+      console.error('[Store] Could not load state from local storage:', error)
       return null
     }
   }
