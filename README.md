@@ -1,8 +1,6 @@
 # UseWallet v3 Alpha - `use-wallet-js`
 
-<!-- [![npm version](https://badge.fury.io/js/%40txnlab%2Fuse-wallet-js.svg)](https://badge.fury.io/js/%40txnlab%2Fuse-wallet-js) -->
-
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![npm version](https://badge.fury.io/js/%40txnlab%2Fuse-wallet-js.svg)](https://badge.fury.io/js/%40txnlab%2Fuse-wallet-js) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 `use-wallet-js` is a TypeScript library aimed at integrating Algorand wallets into decentralized applications (dApps). This vanilla JS version is a framework agnostic rewrite of the `@txnlab/use-wallet` React library: https://github.com/TxnLab/use-wallet
 
