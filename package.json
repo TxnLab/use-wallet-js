@@ -1,6 +1,6 @@
 {
   "name": "@txnlab/use-wallet-js",
-  "version": "3.0.0-alpha.2",
+  "version": "3.0.0-alpha.3",
   "description": "TypeScript library for integrating Algorand wallets into decentralized applications",
   "main": "./dist/index.mjs",
   "module": "./dist/index.mjs",
