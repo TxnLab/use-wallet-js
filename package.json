@@ -1,7 +1,7 @@
 {
-  "name": "use-wallet-js",
+  "name": "@txnlab/use-wallet-js",
   "version": "3.0.0-alpha.1",
-  "description": "",
+  "description": "TypeScript library for integrating Algorand wallets into decentralized applications",
   "main": "./dist/index.mjs",
   "module": "./dist/index.mjs",
   "scripts": {
@@ -9,7 +9,21 @@
     "start": "bun run build -- --watch",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": [],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/txnlab/use-wallet-js.git"
+  },
+  "keywords": [
+    "algorand",
+    "wallet",
+    "walletconnect",
+    "pera",
+    "defly",
+    "exodus",
+    "myalgo",
+    "algosdk",
+    "kmd"
+  ],
   "author": "Doug Richar <drichar@gmail.com>",
   "license": "MIT",
   "exports": "./dist/index.mjs",
