@@ -1,6 +1,6 @@
 import algosdk from 'algosdk'
 import { BaseWallet } from './base'
-import { WALLET_ID } from 'src/constants'
+import { WALLET_ID, getWalletIcon } from 'src/constants'
 import { Store } from 'src/store'
 import {
   compareAccounts,
@@ -28,12 +28,18 @@ export class PeraWallet extends BaseWallet {
     store,
     subscribe,
     onStateChange,
-    options = {}
+    options = {},
+    metadata = {}
   }: WalletConstructor<WALLET_ID.PERA>) {
-    super({ id, store, subscribe, onStateChange })
+    super({ id, metadata, store, subscribe, onStateChange })
     this.options = options
     this.store = store
     this.notifySubscribers = onStateChange
+  }
+
+  static defaultMetadata = {
+    name: 'Pera',
+    icon: getWalletIcon(WALLET_ID.PERA)
   }
 
   private initializeClient = async (): Promise<PeraWalletConnect> => {

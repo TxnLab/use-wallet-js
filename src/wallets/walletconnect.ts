@@ -1,7 +1,7 @@
 import { getAppMetadata, getSdkError } from '@walletconnect/utils'
 import algosdk from 'algosdk'
 import { BaseWallet } from './base'
-import { ALGORAND_CHAINS_CAIP2, WALLET_ID } from 'src/constants'
+import { ALGORAND_CHAINS_CAIP2, WALLET_ID, getWalletIcon } from 'src/constants'
 import { Store } from 'src/store'
 import {
   compareAccounts,
@@ -36,29 +36,35 @@ export class WalletConnect extends BaseWallet {
     store,
     subscribe,
     onStateChange,
-    options
+    options,
+    metadata = {}
   }: WalletConstructor<WALLET_ID.WALLETCONNECT>) {
-    super({ id, store, subscribe, onStateChange })
+    super({ id, metadata, store, subscribe, onStateChange })
     if (!options) {
       throw new Error('[WalletConnect] Options are required.')
     }
     const {
       projectId,
       relayUrl = 'wss://relay.walletconnect.com',
-      metadata = getAppMetadata(),
+      metadata: _metadata = getAppMetadata(),
       ...modalOptions
     } = options
 
     this.options = {
       projectId,
       relayUrl,
-      ...metadata
+      ..._metadata
     }
 
     this.modalOptions = modalOptions
     this.chains = Array.from(ALGORAND_CHAINS_CAIP2.values())
     this.store = store
     this.notifySubscribers = onStateChange
+  }
+
+  static defaultMetadata = {
+    name: 'WalletConnect',
+    icon: getWalletIcon(WALLET_ID.WALLETCONNECT)
   }
 
   private initializeClient = async (): Promise<SignClient> => {

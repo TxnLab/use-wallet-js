@@ -10,10 +10,11 @@ import type { NetworkConfig, NetworkConfigMap } from 'src/types/network'
 import type { TransactionSignerAccount } from './types/transaction'
 import type {
   WalletAccount,
-  WalletConfig,
-  ClientConfigMap,
+  WalletIdConfig,
+  WalletConfigMap,
   WalletManagerConstructor,
-  ClientOptions
+  WalletOptions,
+  WalletMetadata
 } from 'src/types/wallet'
 
 export class WalletManager {
@@ -47,22 +48,24 @@ export class WalletManager {
 
   // ---------- Wallets ----------------------------------------------- //
 
-  private initializeWallets = <T extends keyof ClientConfigMap>(
-    wallets: Array<T | WalletConfig<T>>
+  private initializeWallets = <T extends keyof WalletConfigMap>(
+    walletsConfig: Array<T | WalletIdConfig<T>>
   ) => {
     console.info('[Manager] Initializing wallets...')
 
-    for (const wallet of wallets) {
+    for (const walletConfig of walletsConfig) {
       let walletId: T
-      let clientOptions: ClientOptions<T> | undefined
+      let walletOptions: WalletOptions<T> | undefined
+      let walletMetadata: Partial<WalletMetadata> | undefined
 
-      // Parse client config
-      if (typeof wallet === 'string') {
-        walletId = wallet
+      // Parse wallet config
+      if (typeof walletConfig === 'string') {
+        walletId = walletConfig
       } else {
-        const { id, options } = wallet
+        const { id, options, metadata } = walletConfig
         walletId = id
-        clientOptions = options
+        walletOptions = options
+        walletMetadata = metadata
       }
 
       // Get wallet class
@@ -75,8 +78,9 @@ export class WalletManager {
       // Initialize wallet
       const walletInstance = new WalletClass({
         id: walletId,
+        metadata: walletMetadata,
         store: this.store,
-        options: clientOptions as any,
+        options: walletOptions as any,
         subscribe: this.subscribe,
         onStateChange: this.notifySubscribers
       })

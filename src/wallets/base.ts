@@ -2,21 +2,41 @@ import algosdk from 'algosdk'
 import { WALLET_ID } from 'src/constants'
 import { Store } from 'src/store'
 import { StoreActions, type State } from 'src/types/state'
-import type { BaseConstructor, WalletAccount } from 'src/types/wallet'
+import type {
+  WalletMetadata,
+  WalletAccount,
+  WalletConstructor,
+  WalletConstructorType
+} from 'src/types/wallet'
 
 export abstract class BaseWallet {
   readonly id: WALLET_ID
+  readonly metadata: WalletMetadata
 
   protected store: Store<State>
   protected notifySubscribers: () => void
 
   public subscribe: (callback: (state: State) => void) => () => void
 
-  protected constructor({ id, store, subscribe, onStateChange }: BaseConstructor) {
+  protected constructor({
+    id,
+    metadata,
+    store,
+    subscribe,
+    onStateChange
+  }: WalletConstructor<WALLET_ID>) {
     this.id = id
     this.store = store
     this.subscribe = subscribe
     this.notifySubscribers = onStateChange
+
+    const ctor = this.constructor as WalletConstructorType
+    this.metadata = { ...ctor.defaultMetadata, ...metadata }
+  }
+
+  static defaultMetadata: WalletMetadata = {
+    name: 'Base Wallet',
+    icon: ''
   }
 
   // ---------- Public Methods ---------------------------------------- //

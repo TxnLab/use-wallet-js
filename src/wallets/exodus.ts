@@ -1,6 +1,6 @@
 import algosdk from 'algosdk'
 import { BaseWallet } from './base'
-import { WALLET_ID } from 'src/constants'
+import { WALLET_ID, getWalletIcon } from 'src/constants'
 import { Store } from 'src/store'
 import {
   isSignedTxnObject,
@@ -26,12 +26,18 @@ export class ExodusWallet extends BaseWallet {
     store,
     subscribe,
     onStateChange,
-    options = {}
+    options = {},
+    metadata = {}
   }: WalletConstructor<WALLET_ID.EXODUS>) {
-    super({ id, store, subscribe, onStateChange })
+    super({ id, metadata, store, subscribe, onStateChange })
     this.options = options
     this.store = store
     this.notifySubscribers = onStateChange
+  }
+
+  static defaultMetadata = {
+    name: 'Exodus',
+    icon: getWalletIcon(WALLET_ID.EXODUS)
   }
 
   private initializeClient = async (): Promise<Exodus> => {

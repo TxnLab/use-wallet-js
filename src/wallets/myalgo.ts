@@ -1,6 +1,6 @@
 import algosdk from 'algosdk'
 import { BaseWallet } from './base'
-import { WALLET_ID } from 'src/constants'
+import { WALLET_ID, getWalletIcon } from 'src/constants'
 import { Store } from 'src/store'
 import {
   isSignedTxnObject,
@@ -27,12 +27,18 @@ export class MyAlgoWallet extends BaseWallet {
     store,
     subscribe,
     onStateChange,
-    options = {}
+    options = {},
+    metadata = {}
   }: WalletConstructor<WALLET_ID.MYALGO>) {
-    super({ id, store, subscribe, onStateChange })
+    super({ id, metadata, store, subscribe, onStateChange })
     this.options = options
     this.store = store
     this.notifySubscribers = onStateChange
+  }
+
+  static defaultMetadata = {
+    name: 'MyAlgo',
+    icon: getWalletIcon(WALLET_ID.MYALGO)
   }
 
   private initializeClient = async (): Promise<MyAlgoConnect> => {

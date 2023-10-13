@@ -1,6 +1,6 @@
 import algosdk from 'algosdk'
 import { BaseWallet } from './base'
-import { WALLET_ID } from 'src/constants'
+import { WALLET_ID, getWalletIcon } from 'src/constants'
 import { Store } from 'src/store'
 import {
   isSignedTxnObject,
@@ -29,8 +29,15 @@ export class KmdWallet extends BaseWallet {
   protected store: Store<State>
   protected notifySubscribers: () => void
 
-  constructor({ id, store, subscribe, onStateChange, options }: WalletConstructor<WALLET_ID.KMD>) {
-    super({ id, store, subscribe, onStateChange })
+  constructor({
+    id,
+    store,
+    subscribe,
+    onStateChange,
+    options,
+    metadata = {}
+  }: WalletConstructor<WALLET_ID.KMD>) {
+    super({ id, metadata, store, subscribe, onStateChange })
 
     const {
       token = 'a'.repeat(64),
@@ -44,6 +51,11 @@ export class KmdWallet extends BaseWallet {
 
     this.store = store
     this.notifySubscribers = onStateChange
+  }
+
+  static defaultMetadata = {
+    name: 'KMD',
+    icon: getWalletIcon(WALLET_ID.KMD)
   }
 
   private initializeClient = async (): Promise<algosdk.Kmd> => {
