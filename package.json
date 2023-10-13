@@ -2,8 +2,8 @@
   "name": "@txnlab/use-wallet-js",
   "version": "3.0.0-alpha.3",
   "description": "TypeScript library for integrating Algorand wallets into decentralized applications",
-  "main": "./dist/index.mjs",
-  "module": "./dist/index.mjs",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
   "scripts": {
     "build": "tsup",
     "start": "bun run build -- --watch",
@@ -29,8 +29,9 @@
   "files": [
     "dist"
   ],
-  "exports": "./dist/index.mjs",
-  "types": "./dist/index.d.mts",
+  "type": "module",
+  "exports": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "peerDependencies": {
     "@blockshake/defly-connect": "^1.1.6",
     "@perawallet/connect": "^1.3.3",
