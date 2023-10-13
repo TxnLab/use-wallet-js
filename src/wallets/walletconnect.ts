@@ -1,7 +1,7 @@
 import { getAppMetadata, getSdkError } from '@walletconnect/utils'
 import algosdk from 'algosdk'
 import { BaseWallet } from './base'
-import { ALGORAND_CHAINS_CAIP2, WALLET_ID, getWalletIcon } from 'src/constants'
+import { NetworkId, WALLET_ID, caipChainId, getWalletIcon } from 'src/constants'
 import { Store } from 'src/store'
 import {
   compareAccounts,
@@ -57,7 +57,7 @@ export class WalletConnect extends BaseWallet {
     }
 
     this.modalOptions = modalOptions
-    this.chains = Array.from(ALGORAND_CHAINS_CAIP2.values())
+    this.chains = Object.values(caipChainId)
     this.store = store
     this.notifySubscribers = onStateChange
   }
@@ -243,6 +243,10 @@ export class WalletConnect extends BaseWallet {
     if (!this.session) {
       throw new Error('[WalletConnect] Session is not connected')
     }
+    if (this.activeNetwork === NetworkId.LOCALNET) {
+      throw new Error(`[WalletConnect] Invalid network: ${this.activeNetwork}`)
+    }
+
     const txnsToSign: WalletTransaction[] = []
     const signedIndexes: number[] = []
 
@@ -278,7 +282,7 @@ export class WalletConnect extends BaseWallet {
 
     // Sign transactions
     const signTxnsResult = await this.client.request<Array<string | null>>({
-      chainId: ALGORAND_CHAINS_CAIP2.get('mainnet')!, // @todo: Get active chain
+      chainId: caipChainId[this.activeNetwork]!,
       topic: this.session.topic,
       request
     })
@@ -310,6 +314,9 @@ export class WalletConnect extends BaseWallet {
     if (!this.session) {
       throw new Error('[WalletConnect] Session is not connected')
     }
+    if (this.activeNetwork === NetworkId.LOCALNET) {
+      throw new Error(`[WalletConnect] Invalid network: ${this.activeNetwork}`)
+    }
 
     const txnsToSign = txnGroup.reduce<WalletTransaction[]>((acc, txn, idx) => {
       const txnBase64 = Buffer.from(txn.toByte()).toString('base64')
@@ -327,7 +334,7 @@ export class WalletConnect extends BaseWallet {
 
     // Sign transactions
     const signTxnsResult = await this.client.request<Array<string | null>>({
-      chainId: ALGORAND_CHAINS_CAIP2.get('mainnet')!, // @todo: Get active chain
+      chainId: caipChainId[this.activeNetwork]!,
       topic: this.session.topic,
       request
     })

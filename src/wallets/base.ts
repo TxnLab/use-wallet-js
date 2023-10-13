@@ -1,5 +1,5 @@
 import algosdk from 'algosdk'
-import { WALLET_ID } from 'src/constants'
+import { NetworkId, WALLET_ID } from 'src/constants'
 import { Store } from 'src/store'
 import { StoreActions, type State } from 'src/types/state'
 import type {
@@ -93,6 +93,11 @@ export abstract class BaseWallet {
 
   public get activeAddress(): string | null {
     return this.activeAccount?.address ?? null
+  }
+
+  public get activeNetwork(): NetworkId {
+    const state = this.store.getState()
+    return state.activeNetwork
   }
 
   public get isConnected(): boolean {
