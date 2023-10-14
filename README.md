@@ -309,8 +309,7 @@ const walletManager = new WalletManager({
       id: WALLET_ID.WALLETCONNECT,
       options: { projectId: '<YOUR_PROJECT_ID>' }
     }
-  ],
-  network: NetworkId.BETANET
+  ]
 })
 
 document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
