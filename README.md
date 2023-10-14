@@ -92,7 +92,7 @@ To initialize wallets with default options, pass the wallet ID using the `WALLET
 
 The `network` property is used to set the default network for the application. It can be set to either `BETANET`, `TESTNET`, `MAINNET`, or `LOCALNET`. The default (if unset) is `TESTNET`.
 
-The active network is persisted to local storage. If your application supports [switching networks](), when a user revisits your app or refreshes the page, the active network will be restored from local storage.
+The active network is persisted to local storage. If your application supports [switching networks](#setactivenetworknetwork-networkid-void), when a user revisits your app or refreshes the page, the active network will be restored from local storage.
 
 #### `algod`
 
