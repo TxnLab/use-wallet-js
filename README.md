@@ -80,7 +80,7 @@ const walletManager = new WalletManager({
 })
 ```
 
-#### `wallets`
+#### `wallets` (required)
 
 Each wallet you wish to support must be included in the `wallets` array.
 
@@ -88,15 +88,15 @@ To initialize wallets with default options, pass the wallet ID using the `WALLET
 
 > **Note:** WalletConnect's `projectId` option is required. You can get a project ID by registering your application at https://cloud.walletconnect.com/
 
-#### `network`
+#### `network` (optional)
 
 The `network` property is used to set the default network for the application. It can be set to either `BETANET`, `TESTNET`, `MAINNET`, or `LOCALNET`. The default (if unset) is `TESTNET`.
 
-The active network is persisted to local storage. If your application supports [switching networks](#setactivenetworknetwork-networkid-void), when a user revisits your app or refreshes the page, the active network will be restored from local storage.
+The active network is persisted to local storage. If your application supports [switching networks](#setactivenetworknetwork-networkid-void), when a user revisits your app or refreshes the page, the active network from the previous session will be restored.
 
-#### `algod`
+#### `algod` (optional)
 
-The `WalletManager` class exposes an `algodClient` property, which is an instance of the `algosdk.Algodv2` class. This client is initialized with the default network, and can be used to make requests to the Algorand node.
+The `WalletManager` class exposes an `algodClient` property, which is an instance of the `algosdk.Algodv2` class. This client is initialized with the default network, and can be used to make requests to an Algorand node.
 
 ```ts
 const algodClient = walletManager.algodClient
@@ -104,7 +104,7 @@ const algodClient = walletManager.algodClient
 
 If the active network changes, the `algodClient` instance will be updated to reflect the new network.
 
-By default, the `algodClient` instance connects to [AlgoNode](https://algonode.io/api/)'s free (as in 🍺) API for public networks, and `http://localhost` for local networks. You can override this behavior by passing an `algod` configuration object to the `WalletManager` constructor.
+By default, the `algodClient` instance connects to [AlgoNode](https://algonode.io/api/)'s free (as in 🍺) API for public networks, and `http://localhost` for `LOCALNET`. You can override this behavior by passing an `algod` configuration object to the `WalletManager` constructor.
 
 To configure the `algodClient` for the active network only, pass an object with `token`, `baseServer` and `port` properties:
 
@@ -120,7 +120,7 @@ const walletManager = new WalletManager({
 })
 ```
 
-To configure the `algodClient` for multiple networks, pass a mapped object of the network(s) you wish to configure, where each key is a `NetworkId` and each value is an `algod` configuration object:
+To configure the `algodClient` for specific networks, pass a mapped object of the network(s) you wish to configure, where each key is a `NetworkId` and each value is an `algod` configuration object:
 
 ```ts
 const walletManager = new WalletManager({
@@ -148,7 +148,7 @@ The `WalletManager` class manages wallets, networks, and states.
 ```ts
 class WalletManager {
   constructor({
-    wallets?: Array<T | WalletIdConfig<T>>,
+    wallets: Array<T | WalletIdConfig<T>>,
     network?: NetworkId,
     algod?: NetworkConfig
   }: WalletManagerConstructor)
