@@ -1,11 +1,11 @@
-import { NetworkId, WALLET_ID } from 'src/constants'
+import { NetworkId, WalletId } from 'src/constants'
 import type { WalletAccount } from 'src/types'
 import type { State, WalletState } from 'src/types/state'
 
 // Type guards
 
-function isValidWalletId(walletId: any): walletId is WALLET_ID {
-  return Object.values(WALLET_ID).includes(walletId)
+function isValidWalletId(walletId: any): walletId is WalletId {
+  return Object.values(WalletId).includes(walletId)
 }
 
 function isValidWalletAccount(account: any): account is WalletAccount {

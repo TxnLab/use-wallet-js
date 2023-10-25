@@ -1,5 +1,5 @@
 import algosdk from 'algosdk'
-import { NetworkId, WALLET_ID } from 'src/constants'
+import { NetworkId, WalletId } from 'src/constants'
 import { Store } from 'src/store'
 import { StoreActions, type State } from 'src/types/state'
 import type {
@@ -10,7 +10,7 @@ import type {
 } from 'src/types/wallet'
 
 export abstract class BaseWallet {
-  readonly id: WALLET_ID
+  readonly id: WalletId
   readonly metadata: WalletMetadata
 
   protected store: Store<State>
@@ -24,7 +24,7 @@ export abstract class BaseWallet {
     store,
     subscribe,
     onStateChange
-  }: WalletConstructor<WALLET_ID>) {
+  }: WalletConstructor<WalletId>) {
     this.id = id
     this.store = store
     this.subscribe = subscribe

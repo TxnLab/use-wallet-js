@@ -1,5 +1,5 @@
 import algosdk from 'algosdk'
-import { defaultNetworkConfigMap, NetworkId, WALLET_ID } from 'src/constants'
+import { defaultNetworkConfigMap, NetworkId, WalletId } from 'src/constants'
 import { allWallets, BaseWallet } from 'src/wallets'
 import { Network } from 'src/network'
 import { createStore, defaultState, Store } from 'src/store'
@@ -18,7 +18,7 @@ import type {
 } from 'src/types/wallet'
 
 export class WalletManager {
-  private _wallets: Map<WALLET_ID, BaseWallet> = new Map()
+  private _wallets: Map<WalletId, BaseWallet> = new Map()
   private network: Network
   private store: Store<State>
   private subscribers: Array<(state: State) => void> = []

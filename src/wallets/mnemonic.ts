@@ -1,6 +1,6 @@
 import algosdk from 'algosdk'
 import { BaseWallet } from './base'
-import { WALLET_ID, getWalletIcon } from 'src/constants'
+import { WalletId, getWalletIcon } from 'src/constants'
 import { Store } from 'src/store'
 import { isSignedTxnObject, normalizeTxnGroup } from 'src/utils'
 import { StoreActions, type State } from 'src/types/state'
@@ -22,7 +22,7 @@ export class MnemonicWallet extends BaseWallet {
     onStateChange,
     options,
     metadata = {}
-  }: WalletConstructor<WALLET_ID.MNEMONIC>) {
+  }: WalletConstructor<WalletId.MNEMONIC>) {
     super({ id, metadata, store, subscribe, onStateChange })
 
     const { persistToStorage = false } = options || {}
@@ -34,7 +34,7 @@ export class MnemonicWallet extends BaseWallet {
 
   static defaultMetadata = {
     name: 'Mnemonic',
-    icon: getWalletIcon(WALLET_ID.MNEMONIC)
+    icon: getWalletIcon(WalletId.MNEMONIC)
   }
 
   // @todo: Show explicit security warning if persistToStorage is true

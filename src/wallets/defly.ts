@@ -1,6 +1,6 @@
 import algosdk from 'algosdk'
 import { BaseWallet } from './base'
-import { WALLET_ID, getWalletIcon } from 'src/constants'
+import { WalletId, getWalletIcon } from 'src/constants'
 import { Store } from 'src/store'
 import {
   compareAccounts,
@@ -30,7 +30,7 @@ export class DeflyWallet extends BaseWallet {
     onStateChange,
     options = {},
     metadata = {}
-  }: WalletConstructor<WALLET_ID.DEFLY>) {
+  }: WalletConstructor<WalletId.DEFLY>) {
     super({ id, metadata, store, subscribe, onStateChange })
     this.options = options
     this.store = store
@@ -39,7 +39,7 @@ export class DeflyWallet extends BaseWallet {
 
   static defaultMetadata = {
     name: 'Defly',
-    icon: getWalletIcon(WALLET_ID.DEFLY)
+    icon: getWalletIcon(WalletId.DEFLY)
   }
 
   private initializeClient = async (): Promise<DeflyWalletConnect> => {

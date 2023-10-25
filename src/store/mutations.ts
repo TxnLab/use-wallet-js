@@ -1,9 +1,9 @@
-import type { NetworkId, WALLET_ID } from 'src/constants'
+import type { NetworkId, WalletId } from 'src/constants'
 import type { Mutations, State, WalletState } from 'src/types/state'
 import type { WalletAccount } from 'src/types/wallet'
 
 export const mutations: Mutations<State> = {
-  addWallet(state: State, { walletId, wallet }: { walletId: WALLET_ID; wallet: WalletState }) {
+  addWallet(state: State, { walletId, wallet }: { walletId: WalletId; wallet: WalletState }) {
     const newWallets = new Map(state.wallets.entries())
     newWallets.set(walletId, wallet)
 
@@ -13,7 +13,7 @@ export const mutations: Mutations<State> = {
       activeWallet: walletId
     }
   },
-  removeWallet(state: State, { walletId }: { walletId: WALLET_ID }) {
+  removeWallet(state: State, { walletId }: { walletId: WalletId }) {
     const newWallets = new Map(state.wallets.entries())
     newWallets.delete(walletId)
 
@@ -23,13 +23,13 @@ export const mutations: Mutations<State> = {
       activeWallet: state.activeWallet === walletId ? null : state.activeWallet
     }
   },
-  setActiveWallet(state: State, { walletId }: { walletId: WALLET_ID | null }) {
+  setActiveWallet(state: State, { walletId }: { walletId: WalletId | null }) {
     return {
       ...state,
       activeWallet: walletId
     }
   },
-  setActiveAccount(state: State, { walletId, address }: { walletId: WALLET_ID; address: string }) {
+  setActiveAccount(state: State, { walletId, address }: { walletId: WalletId; address: string }) {
     const wallet = state.wallets.get(walletId)
     if (!wallet) {
       return state
@@ -52,7 +52,7 @@ export const mutations: Mutations<State> = {
   },
   setAccounts(
     state: State,
-    { walletId, accounts }: { walletId: WALLET_ID; accounts: WalletAccount[] }
+    { walletId, accounts }: { walletId: WalletId; accounts: WalletAccount[] }
   ) {
     const wallet = state.wallets.get(walletId)
     if (!wallet) {

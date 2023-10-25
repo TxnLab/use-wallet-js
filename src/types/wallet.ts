@@ -1,4 +1,4 @@
-import type { NetworkId, WALLET_ID } from 'src/constants'
+import type { NetworkId, WalletId } from 'src/constants'
 import type { Store } from 'src/store'
 import type { BaseWallet } from 'src/wallets/base'
 import type { NetworkConfig } from './network'
@@ -13,13 +13,13 @@ import type { PeraWalletConnectOptions } from './wallets/pera'
 import type { WalletConnectOptions } from './wallets/walletconnect'
 
 export type WalletOptionsMap = {
-  [WALLET_ID.DEFLY]: DeflyWalletConnectOptions
-  [WALLET_ID.EXODUS]: ExodusOptions
-  [WALLET_ID.KMD]: KmdOptions
-  [WALLET_ID.MNEMONIC]: MnemonicOptions
-  [WALLET_ID.MYALGO]: MyAlgoConnectOptions
-  [WALLET_ID.PERA]: PeraWalletConnectOptions
-  [WALLET_ID.WALLETCONNECT]: WalletConnectOptions
+  [WalletId.DEFLY]: DeflyWalletConnectOptions
+  [WalletId.EXODUS]: ExodusOptions
+  [WalletId.KMD]: KmdOptions
+  [WalletId.MNEMONIC]: MnemonicOptions
+  [WalletId.MYALGO]: MyAlgoConnectOptions
+  [WalletId.PERA]: PeraWalletConnectOptions
+  [WalletId.WALLETCONNECT]: WalletConnectOptions
 }
 
 export type WalletConfigMap = {
@@ -40,19 +40,19 @@ export type WalletIdConfig<T extends keyof WalletConfigMap> = {
 }[T]
 
 export type SupportedWallet =
-  | WalletIdConfig<WALLET_ID.DEFLY>
-  | WalletIdConfig<WALLET_ID.EXODUS>
-  | WalletIdConfig<WALLET_ID.KMD>
-  | WalletIdConfig<WALLET_ID.MNEMONIC>
-  | WalletIdConfig<WALLET_ID.MYALGO>
-  | WalletIdConfig<WALLET_ID.PERA>
-  | WalletIdConfig<WALLET_ID.WALLETCONNECT>
-  | WALLET_ID.DEFLY
-  | WALLET_ID.EXODUS
-  | WALLET_ID.KMD
-  | WALLET_ID.MNEMONIC
-  | WALLET_ID.MYALGO
-  | WALLET_ID.PERA
+  | WalletIdConfig<WalletId.DEFLY>
+  | WalletIdConfig<WalletId.EXODUS>
+  | WalletIdConfig<WalletId.KMD>
+  | WalletIdConfig<WalletId.MNEMONIC>
+  | WalletIdConfig<WalletId.MYALGO>
+  | WalletIdConfig<WalletId.PERA>
+  | WalletIdConfig<WalletId.WALLETCONNECT>
+  | WalletId.DEFLY
+  | WalletId.EXODUS
+  | WalletId.KMD
+  | WalletId.MNEMONIC
+  | WalletId.MYALGO
+  | WalletId.PERA
 
 export type SupportedWallets = NonEmptyArray<SupportedWallet>
 
@@ -73,7 +73,7 @@ export interface WalletConstructorType {
 }
 
 export interface BaseWalletConstructor {
-  id: WALLET_ID
+  id: WalletId
   metadata: Partial<WalletMetadata> | undefined
   store: Store<State>
   onStateChange: () => void

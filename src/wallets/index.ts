@@ -6,27 +6,27 @@ import { MnemonicWallet } from './mnemonic'
 import { MyAlgoWallet } from './myalgo'
 import { PeraWallet } from './pera'
 import { WalletConnect } from './walletconnect'
-import { WALLET_ID } from 'src/constants'
+import { WalletId } from 'src/constants'
 
 export type WalletMap = {
-  [WALLET_ID.DEFLY]: typeof DeflyWallet
-  [WALLET_ID.EXODUS]: typeof ExodusWallet
-  [WALLET_ID.KMD]: typeof KmdWallet
-  [WALLET_ID.MNEMONIC]: typeof MnemonicWallet
-  [WALLET_ID.MYALGO]: typeof MyAlgoWallet
-  [WALLET_ID.PERA]: typeof PeraWallet
-  [WALLET_ID.WALLETCONNECT]: typeof WalletConnect
+  [WalletId.DEFLY]: typeof DeflyWallet
+  [WalletId.EXODUS]: typeof ExodusWallet
+  [WalletId.KMD]: typeof KmdWallet
+  [WalletId.MNEMONIC]: typeof MnemonicWallet
+  [WalletId.MYALGO]: typeof MyAlgoWallet
+  [WalletId.PERA]: typeof PeraWallet
+  [WalletId.WALLETCONNECT]: typeof WalletConnect
 }
 
 function createWalletMap(): WalletMap {
   return {
-    [WALLET_ID.DEFLY]: DeflyWallet,
-    [WALLET_ID.EXODUS]: ExodusWallet,
-    [WALLET_ID.KMD]: KmdWallet,
-    [WALLET_ID.MNEMONIC]: MnemonicWallet,
-    [WALLET_ID.MYALGO]: MyAlgoWallet,
-    [WALLET_ID.PERA]: PeraWallet,
-    [WALLET_ID.WALLETCONNECT]: WalletConnect
+    [WalletId.DEFLY]: DeflyWallet,
+    [WalletId.EXODUS]: ExodusWallet,
+    [WalletId.KMD]: KmdWallet,
+    [WalletId.MNEMONIC]: MnemonicWallet,
+    [WalletId.MYALGO]: MyAlgoWallet,
+    [WalletId.PERA]: PeraWallet,
+    [WalletId.WALLETCONNECT]: WalletConnect
   }
 }
 

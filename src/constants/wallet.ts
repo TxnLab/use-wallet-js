@@ -1,4 +1,4 @@
-export enum WALLET_ID {
+export enum WalletId {
   // DAFFI = 'daffi',
   DEFLY = 'defly',
   EXODUS = 'exodus',

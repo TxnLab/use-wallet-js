@@ -1,4 +1,4 @@
-import type { NetworkId, WALLET_ID } from 'src/constants'
+import type { NetworkId, WalletId } from 'src/constants'
 import type { Store } from 'src/store/store'
 import type { WalletAccount } from 'src/types/wallet'
 
@@ -8,8 +8,8 @@ export type WalletState = {
 }
 
 export interface State {
-  wallets: Map<WALLET_ID, WalletState>
-  activeWallet: WALLET_ID | null
+  wallets: Map<WalletId, WalletState>
+  activeWallet: WalletId | null
   activeNetwork: NetworkId
 }
 
@@ -29,11 +29,11 @@ export enum StoreMutations {
 }
 
 export interface MutationPayloads {
-  [StoreMutations.ADD_WALLET]: { walletId: WALLET_ID; wallet: WalletState }
-  [StoreMutations.REMOVE_WALLET]: { walletId: WALLET_ID }
-  [StoreMutations.SET_ACTIVE_WALLET]: { walletId: WALLET_ID | null }
-  [StoreMutations.SET_ACTIVE_ACCOUNT]: { walletId: WALLET_ID; address: string }
-  [StoreMutations.SET_ACCOUNTS]: { walletId: WALLET_ID; accounts: WalletAccount[] }
+  [StoreMutations.ADD_WALLET]: { walletId: WalletId; wallet: WalletState }
+  [StoreMutations.REMOVE_WALLET]: { walletId: WalletId }
+  [StoreMutations.SET_ACTIVE_WALLET]: { walletId: WalletId | null }
+  [StoreMutations.SET_ACTIVE_ACCOUNT]: { walletId: WalletId; address: string }
+  [StoreMutations.SET_ACCOUNTS]: { walletId: WalletId; accounts: WalletAccount[] }
   [StoreMutations.SET_ACTIVE_NETWORK]: { networkId: NetworkId }
 }
 
@@ -47,31 +47,31 @@ export enum StoreActions {
 }
 
 export interface ActionPayloads {
-  [StoreActions.ADD_WALLET]: { walletId: WALLET_ID; wallet: WalletState }
-  [StoreActions.REMOVE_WALLET]: { walletId: WALLET_ID }
-  [StoreActions.SET_ACTIVE_WALLET]: { walletId: WALLET_ID | null }
-  [StoreActions.SET_ACTIVE_ACCOUNT]: { walletId: WALLET_ID; address: string }
-  [StoreActions.SET_ACCOUNTS]: { walletId: WALLET_ID; accounts: WalletAccount[] }
+  [StoreActions.ADD_WALLET]: { walletId: WalletId; wallet: WalletState }
+  [StoreActions.REMOVE_WALLET]: { walletId: WalletId }
+  [StoreActions.SET_ACTIVE_WALLET]: { walletId: WalletId | null }
+  [StoreActions.SET_ACTIVE_ACCOUNT]: { walletId: WalletId; address: string }
+  [StoreActions.SET_ACCOUNTS]: { walletId: WalletId; accounts: WalletAccount[] }
   [StoreActions.SET_ACTIVE_NETWORK]: { networkId: NetworkId }
 }
 
 export interface Mutations<S extends object> {
-  addWallet: (state: S, payload: { walletId: WALLET_ID; wallet: WalletState }) => S
-  removeWallet: (state: S, payload: { walletId: WALLET_ID }) => S
-  setActiveWallet: (state: S, payload: { walletId: WALLET_ID | null }) => S
-  setActiveAccount: (state: S, payload: { walletId: WALLET_ID; address: string }) => S
-  setAccounts: (state: S, payload: { walletId: WALLET_ID; accounts: WalletAccount[] }) => S
+  addWallet: (state: S, payload: { walletId: WalletId; wallet: WalletState }) => S
+  removeWallet: (state: S, payload: { walletId: WalletId }) => S
+  setActiveWallet: (state: S, payload: { walletId: WalletId | null }) => S
+  setActiveAccount: (state: S, payload: { walletId: WalletId; address: string }) => S
+  setAccounts: (state: S, payload: { walletId: WalletId; accounts: WalletAccount[] }) => S
   setActiveNetwork: (state: S, payload: { networkId: NetworkId }) => S
 }
 
 export interface Actions<S extends object> {
-  addWallet: (context: Store<S>, payload: { walletId: WALLET_ID; wallet: WalletState }) => void
-  removeWallet: (context: Store<S>, payload: { walletId: WALLET_ID }) => void
-  setActiveWallet: (context: Store<S>, payload: { walletId: WALLET_ID | null }) => void
-  setActiveAccount: (context: Store<S>, payload: { walletId: WALLET_ID; address: string }) => void
+  addWallet: (context: Store<S>, payload: { walletId: WalletId; wallet: WalletState }) => void
+  removeWallet: (context: Store<S>, payload: { walletId: WalletId }) => void
+  setActiveWallet: (context: Store<S>, payload: { walletId: WalletId | null }) => void
+  setActiveAccount: (context: Store<S>, payload: { walletId: WalletId; address: string }) => void
   setAccounts: (
     context: Store<S>,
-    payload: { walletId: WALLET_ID; accounts: WalletAccount[] }
+    payload: { walletId: WalletId; accounts: WalletAccount[] }
   ) => void
   setActiveNetwork: (context: Store<S>, payload: { networkId: NetworkId }) => void
 }
