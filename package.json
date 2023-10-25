@@ -7,7 +7,8 @@
   "scripts": {
     "build": "tsup",
     "start": "bun run build -- --watch",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "types": "tsc --noEmit"
   },
   "repository": {
     "type": "git",
