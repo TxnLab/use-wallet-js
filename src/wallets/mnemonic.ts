@@ -1,9 +1,8 @@
 import algosdk from 'algosdk'
 import { BaseWallet } from './base'
 import { WalletId, getWalletIcon } from 'src/constants'
-import { Store } from 'src/store'
+import { StoreActions, type State, type Store } from 'src/store'
 import { isSignedTxnObject, normalizeTxnGroup } from 'src/utils'
-import { StoreActions, type State } from 'src/types/state'
 import type { EncodedSignedTransaction, EncodedTransaction } from 'algosdk'
 import type { WalletAccount, WalletConstructor } from 'src/types/wallet'
 

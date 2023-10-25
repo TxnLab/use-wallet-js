@@ -1,8 +1,7 @@
 import algosdk from 'algosdk'
 import { NetworkId, blockExplorer, caipChainId } from 'src/constants'
-import { StoreActions, type State } from './types/state'
+import { StoreActions, type State, type Store } from 'src/store'
 import type { AlgodConfig, NetworkConfigMap, NetworkConstructor } from 'src/types/network'
-import type { Store } from './store'
 
 export class Network {
   private config: NetworkConfigMap

@@ -1,7 +1,6 @@
 import type { AlgodTokenHeader, BaseHTTPClient, CustomTokenHeader } from 'algosdk'
 import type { NetworkId } from 'src/constants'
-import type { Store } from 'src/store'
-import type { State } from 'src/types/state'
+import type { State, Store } from 'src/store'
 
 export type NetworkLabelMap = Record<NetworkId, string>
 export type BlockExplorerMap = Record<NetworkId, string>

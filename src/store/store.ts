@@ -1,20 +1,38 @@
-import { LOCAL_STORAGE_KEY } from 'src/constants'
+import { LOCAL_STORAGE_KEY, NetworkId } from 'src/constants'
 import { PubSub } from 'src/lib/pubsub'
-import { Actions, Mutations, Status, StoreActions, StoreMutations } from 'src/types/state'
-import { isValidState, replacer, reviver } from 'src/utils'
+import { actions, type Actions, type StoreActions } from './actions'
+import { mutations, type Mutations, type StoreMutations } from './mutations'
+import { isValidState, replacer, reviver } from './utils'
+import type { State } from './types'
 
-export class Store<StateType extends object> {
-  private actions: Actions<StateType>
-  private mutations: Mutations<StateType>
-  private state: StateType
+export enum Status {
+  IDLE = 'idle',
+  ACTION = 'action',
+  MUTATION = 'mutation'
+}
+
+export const defaultState: State = {
+  wallets: new Map(),
+  activeWallet: null,
+  activeNetwork: NetworkId.TESTNET
+}
+
+export const createStore = (state: State) => {
+  return new Store<State>({
+    state,
+    mutations,
+    actions
+  })
+}
+
+export class Store<TState extends object> {
+  private actions: Actions<TState>
+  private mutations: Mutations<TState>
+  private state: TState
   private status: Status
   private events: PubSub
 
-  constructor(params: {
-    actions: Actions<StateType>
-    mutations: Mutations<StateType>
-    state: StateType
-  }) {
+  constructor(params: { actions: Actions<TState>; mutations: Mutations<TState>; state: TState }) {
     this.actions = params.actions
     this.mutations = params.mutations
     this.status = Status.IDLE
@@ -80,11 +98,11 @@ export class Store<StateType extends object> {
     return true
   }
 
-  public getState(): StateType {
+  public getState(): TState {
     return this.state
   }
 
-  public loadPersistedState(): StateType | null {
+  public loadPersistedState(): TState | null {
     try {
       const serializedState = localStorage.getItem(LOCAL_STORAGE_KEY)
       if (serializedState === null) {
@@ -95,7 +113,7 @@ export class Store<StateType extends object> {
         console.error('[Store] Parsed state:', parsedState)
         throw new Error('Persisted state is invalid')
       }
-      return parsedState as StateType
+      return parsedState as TState
     } catch (error) {
       console.error('[Store] Could not load state from local storage:', error)
       return null

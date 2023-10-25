@@ -1,5 +1,5 @@
 import type { NetworkId, WalletId } from 'src/constants'
-import type { Store } from 'src/store'
+import type { State, Store } from 'src/store'
 import type { BaseWallet } from 'src/wallets/base'
 import type { DeflyWalletConnectOptions } from 'src/wallets/defly'
 import type { ExodusOptions } from 'src/wallets/exodus'
@@ -9,7 +9,6 @@ import type { MyAlgoConnectOptions } from 'src/wallets/myalgo'
 import type { PeraWalletConnectOptions } from 'src/wallets/pera'
 import type { WalletConnectOptions } from 'src/wallets/walletconnect'
 import type { NetworkConfig } from './network'
-import type { State } from './state'
 import type { NonEmptyArray } from './utilities'
 
 export type WalletOptionsMap = {

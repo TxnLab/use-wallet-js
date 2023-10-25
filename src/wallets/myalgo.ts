@@ -1,14 +1,13 @@
 import algosdk from 'algosdk'
 import { BaseWallet } from './base'
 import { WalletId, getWalletIcon } from 'src/constants'
-import { Store } from 'src/store'
+import { StoreActions, type State, type Store } from 'src/store'
 import {
   isSignedTxnObject,
   mergeSignedTxnsWithGroup,
   normalizeTxnGroup,
   shouldSignTxnObject
 } from 'src/utils'
-import { StoreActions, type State } from 'src/types/state'
 import type MyAlgoConnect from '@randlabs/myalgo-connect'
 import type { EncodedSignedTransaction, EncodedTransaction } from 'algosdk'
 import type { WalletTransaction } from 'src/types/transaction'

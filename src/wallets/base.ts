@@ -1,7 +1,6 @@
 import algosdk from 'algosdk'
 import { NetworkId, WalletId } from 'src/constants'
-import { Store } from 'src/store'
-import { StoreActions, type State } from 'src/types/state'
+import { StoreActions, type State, type Store } from 'src/store'
 import type {
   WalletMetadata,
   WalletAccount,

@@ -1,7 +1,7 @@
 import algosdk from 'algosdk'
 import { BaseWallet } from './base'
 import { WalletId, getWalletIcon } from 'src/constants'
-import { Store } from 'src/store'
+import { StoreActions, type State, type Store } from 'src/store'
 import {
   compareAccounts,
   isSignedTxnObject,
@@ -9,7 +9,6 @@ import {
   normalizeTxnGroup,
   shouldSignTxnObject
 } from 'src/utils'
-import { StoreActions, type State } from 'src/types/state'
 import type { DeflyWalletConnect } from '@blockshake/defly-connect'
 import type { EncodedSignedTransaction, EncodedTransaction } from 'algosdk'
 import type { SignerTransaction } from 'src/types/transaction'

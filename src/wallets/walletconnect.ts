@@ -2,7 +2,7 @@ import { getAppMetadata, getSdkError } from '@walletconnect/utils'
 import algosdk from 'algosdk'
 import { BaseWallet } from './base'
 import { NetworkId, WalletId, caipChainId, getWalletIcon } from 'src/constants'
-import { Store } from 'src/store'
+import { StoreActions, type State, type Store } from 'src/store'
 import {
   compareAccounts,
   formatJsonRpcRequest,
@@ -11,7 +11,6 @@ import {
   normalizeTxnGroup,
   shouldSignTxnObject
 } from 'src/utils'
-import { StoreActions, type State } from 'src/types/state'
 import type { WalletConnectModal, WalletConnectModalConfig } from '@walletconnect/modal'
 import type SignClient from '@walletconnect/sign-client'
 import type { SessionTypes, SignClientTypes } from '@walletconnect/types'

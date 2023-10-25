@@ -1,6 +1,24 @@
 import type { NetworkId, WalletId } from 'src/constants'
-import type { Mutations, State, WalletState } from 'src/types/state'
 import type { WalletAccount } from 'src/types/wallet'
+import type { State, WalletState } from './types'
+
+export enum StoreMutations {
+  ADD_WALLET = 'addWallet',
+  REMOVE_WALLET = 'removeWallet',
+  SET_ACTIVE_WALLET = 'setActiveWallet',
+  SET_ACTIVE_ACCOUNT = 'setActiveAccount',
+  SET_ACCOUNTS = 'setAccounts',
+  SET_ACTIVE_NETWORK = 'setActiveNetwork'
+}
+
+export interface Mutations<TState extends object> {
+  addWallet: (state: TState, payload: { walletId: WalletId; wallet: WalletState }) => TState
+  removeWallet: (state: TState, payload: { walletId: WalletId }) => TState
+  setActiveWallet: (state: TState, payload: { walletId: WalletId | null }) => TState
+  setActiveAccount: (state: TState, payload: { walletId: WalletId; address: string }) => TState
+  setAccounts: (state: TState, payload: { walletId: WalletId; accounts: WalletAccount[] }) => TState
+  setActiveNetwork: (state: TState, payload: { networkId: NetworkId }) => TState
+}
 
 export const mutations: Mutations<State> = {
   addWallet(state: State, { walletId, wallet }: { walletId: WalletId; wallet: WalletState }) {

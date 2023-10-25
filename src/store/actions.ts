@@ -1,7 +1,32 @@
-import { Actions, StoreMutations, type State, type WalletState } from 'src/types/state'
+import { StoreMutations } from './mutations'
 import type { NetworkId, WalletId } from 'src/constants'
 import type { Store } from 'src/store'
 import type { WalletAccount } from 'src/types/wallet'
+import type { State, WalletState } from './types'
+
+export enum StoreActions {
+  ADD_WALLET = 'addWallet',
+  REMOVE_WALLET = 'removeWallet',
+  SET_ACTIVE_WALLET = 'setActiveWallet',
+  SET_ACTIVE_ACCOUNT = 'setActiveAccount',
+  SET_ACCOUNTS = 'setAccounts',
+  SET_ACTIVE_NETWORK = 'setActiveNetwork'
+}
+
+export interface Actions<TState extends object> {
+  addWallet: (context: Store<TState>, payload: { walletId: WalletId; wallet: WalletState }) => void
+  removeWallet: (context: Store<TState>, payload: { walletId: WalletId }) => void
+  setActiveWallet: (context: Store<TState>, payload: { walletId: WalletId | null }) => void
+  setActiveAccount: (
+    context: Store<TState>,
+    payload: { walletId: WalletId; address: string }
+  ) => void
+  setAccounts: (
+    context: Store<TState>,
+    payload: { walletId: WalletId; accounts: WalletAccount[] }
+  ) => void
+  setActiveNetwork: (context: Store<TState>, payload: { networkId: NetworkId }) => void
+}
 
 export const actions: Actions<State> = {
   addWallet(
