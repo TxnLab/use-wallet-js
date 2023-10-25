@@ -1,5 +1,0 @@
-export * from './exodus'
-export * from './pera'
-export * from './myalgo'
-export * from './walletconnect'
-export * from './defly'

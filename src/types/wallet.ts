@@ -1,16 +1,16 @@
 import type { NetworkId, WalletId } from 'src/constants'
 import type { Store } from 'src/store'
 import type { BaseWallet } from 'src/wallets/base'
+import type { DeflyWalletConnectOptions } from 'src/wallets/defly'
+import type { ExodusOptions } from 'src/wallets/exodus'
+import type { KmdOptions } from 'src/wallets/kmd'
+import type { MnemonicOptions } from 'src/wallets/mnemonic'
+import type { MyAlgoConnectOptions } from 'src/wallets/myalgo'
+import type { PeraWalletConnectOptions } from 'src/wallets/pera'
+import type { WalletConnectOptions } from 'src/wallets/walletconnect'
 import type { NetworkConfig } from './network'
 import type { State } from './state'
 import type { NonEmptyArray } from './utilities'
-import type { DeflyWalletConnectOptions } from './wallets/defly'
-import type { ExodusOptions } from './wallets/exodus'
-import type { KmdOptions } from './wallets/kmd'
-import type { MnemonicOptions } from './wallets/mnemonic'
-import type { MyAlgoConnectOptions } from './wallets/myalgo'
-import type { PeraWalletConnectOptions } from './wallets/pera'
-import type { WalletConnectOptions } from './wallets/walletconnect'
 
 export type WalletOptionsMap = {
   [WalletId.DEFLY]: DeflyWalletConnectOptions
@@ -62,11 +62,6 @@ export interface WalletManagerConstructor {
   algod?: NetworkConfig
 }
 
-export type WalletMetadata = {
-  name: string
-  icon: string
-}
-
 export interface WalletConstructorType {
   new (...args: any[]): BaseWallet
   defaultMetadata: WalletMetadata
@@ -83,6 +78,11 @@ export interface BaseWalletConstructor {
 export type WalletConstructor<T extends keyof WalletOptionsMap> = BaseWalletConstructor & {
   options?: WalletOptions<T>
   defaultMetadata?: WalletMetadata
+}
+
+export type WalletMetadata = {
+  name: string
+  icon: string
 }
 
 export type WalletAccount = {

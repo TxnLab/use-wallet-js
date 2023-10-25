@@ -12,13 +12,30 @@ import {
   shouldSignTxnObject
 } from 'src/utils'
 import { StoreActions, type State } from 'src/types/state'
-import type { WalletConnectModal } from '@walletconnect/modal'
+import type { WalletConnectModal, WalletConnectModalConfig } from '@walletconnect/modal'
 import type SignClient from '@walletconnect/sign-client'
-import type { SessionTypes } from '@walletconnect/types'
+import type { SessionTypes, SignClientTypes } from '@walletconnect/types'
 import type { EncodedSignedTransaction, EncodedTransaction } from 'algosdk'
 import type { WalletTransaction } from 'src/types/transaction'
 import type { WalletAccount, WalletConstructor } from 'src/types/wallet'
-import type { SignClientOptions, WalletConnectModalOptions } from 'src/types/wallets/walletconnect'
+
+interface SignClientOptions {
+  projectId: string
+  relayUrl?: string
+  metadata?: SignClientTypes.Metadata
+}
+
+type WalletConnectModalOptions = Pick<
+  WalletConnectModalConfig,
+  | 'enableExplorer'
+  | 'explorerRecommendedWalletIds'
+  | 'privacyPolicyUrl'
+  | 'termsOfServiceUrl'
+  | 'themeMode'
+  | 'themeVariables'
+>
+
+export type WalletConnectOptions = SignClientOptions & WalletConnectModalOptions
 
 export class WalletConnect extends BaseWallet {
   private client: SignClient | null = null

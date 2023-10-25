@@ -1,4 +1,3 @@
-export * from './wallets'
 export * from './state'
 export * from './transaction'
 export * from './utilities'

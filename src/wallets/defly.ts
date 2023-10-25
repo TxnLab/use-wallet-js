@@ -14,7 +14,12 @@ import type { DeflyWalletConnect } from '@blockshake/defly-connect'
 import type { EncodedSignedTransaction, EncodedTransaction } from 'algosdk'
 import type { SignerTransaction } from 'src/types/transaction'
 import type { WalletAccount, WalletConstructor } from 'src/types/wallet'
-import type { DeflyWalletConnectOptions } from 'src/types/wallets/defly'
+
+export interface DeflyWalletConnectOptions {
+  bridge?: string
+  shouldShowSignTxnToast?: boolean
+  chainId?: 416001 | 416002 | 416003 | 4160
+}
 
 export class DeflyWallet extends BaseWallet {
   private client: DeflyWalletConnect | null = null

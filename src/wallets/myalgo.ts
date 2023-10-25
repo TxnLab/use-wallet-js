@@ -13,7 +13,12 @@ import type MyAlgoConnect from '@randlabs/myalgo-connect'
 import type { EncodedSignedTransaction, EncodedTransaction } from 'algosdk'
 import type { WalletTransaction } from 'src/types/transaction'
 import type { WalletAccount, WalletConstructor } from 'src/types/wallet'
-import type { MyAlgoConnectOptions } from 'src/types/wallets/myalgo'
+
+export interface MyAlgoConnectOptions {
+  timeout?: number
+  bridgeUrl?: string
+  disableLedgerNano?: boolean
+}
 
 export class MyAlgoWallet extends BaseWallet {
   private client: MyAlgoConnect | null = null

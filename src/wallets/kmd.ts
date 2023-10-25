@@ -9,15 +9,52 @@ import {
   shouldSignTxnObject
 } from 'src/utils'
 import { StoreActions, type State } from 'src/types/state'
-import type { EncodedSignedTransaction, EncodedTransaction } from 'algosdk'
-import type { WalletAccount, WalletConstructor } from 'src/types/wallet'
 import type {
-  InitWalletHandleResponse,
-  KmdConstructor,
-  KmdWalletRecord,
-  ListKeysResponse,
-  ListWalletsResponse
-} from 'src/types/wallets/kmd'
+  CustomTokenHeader,
+  EncodedSignedTransaction,
+  EncodedTransaction,
+  KMDTokenHeader
+} from 'algosdk'
+import type { WalletAccount, WalletConstructor } from 'src/types/wallet'
+
+interface KmdConstructor {
+  token: string | KMDTokenHeader | CustomTokenHeader
+  baseServer?: string
+  port?: string | number
+  headers?: Record<string, string>
+}
+
+export type KmdOptions = Partial<Pick<KmdConstructor, 'token'>> &
+  Omit<KmdConstructor, 'token'> & {
+    wallet: string
+  }
+
+interface KmdWalletRecord {
+  id: string
+  name: string
+  driver_name?: string
+  driver_version?: number
+  mnemonic_ux?: boolean
+  supported_txs?: Array<any>
+}
+
+interface ListWalletsResponse {
+  wallets: KmdWalletRecord[]
+  message?: string
+  error?: boolean
+}
+
+interface InitWalletHandleResponse {
+  wallet_handle_token: string
+  message?: string
+  error?: boolean
+}
+
+interface ListKeysResponse {
+  addresses: string[]
+  message?: string
+  error?: boolean
+}
 
 export class KmdWallet extends BaseWallet {
   private client: algosdk.Kmd | null = null

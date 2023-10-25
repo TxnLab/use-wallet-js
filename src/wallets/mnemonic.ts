@@ -6,7 +6,10 @@ import { isSignedTxnObject, normalizeTxnGroup } from 'src/utils'
 import { StoreActions, type State } from 'src/types/state'
 import type { EncodedSignedTransaction, EncodedTransaction } from 'algosdk'
 import type { WalletAccount, WalletConstructor } from 'src/types/wallet'
-import type { MnemonicOptions } from 'src/types/wallets/mnemonic'
+
+export type MnemonicOptions = {
+  persistToStorage?: boolean
+}
 
 export class MnemonicWallet extends BaseWallet {
   private account: algosdk.Account | null = null

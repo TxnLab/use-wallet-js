@@ -11,8 +11,42 @@ import {
 import { StoreActions, type State } from 'src/types/state'
 import type { EncodedSignedTransaction, EncodedTransaction } from 'algosdk'
 import type { WalletTransaction } from 'src/types/transaction'
-import type { Exodus, ExodusOptions, WindowExtended } from 'src/types/wallets/exodus'
 import type { WalletAccount, WalletConstructor } from 'src/types/wallet'
+
+/** @see https://docs.exodus.com/api-reference/algorand-provider-arc-api/ */
+
+interface EnableNetworkOpts {
+  genesisID?: string
+  genesisHash?: string
+}
+
+interface EnableAccountsOpts {
+  accounts?: string[]
+}
+
+export type ExodusOptions = EnableNetworkOpts & EnableAccountsOpts
+
+interface EnableNetworkResult {
+  genesisID: string
+  genesisHash: string
+}
+
+interface EnableAccountsResult {
+  accounts: string[]
+}
+
+type EnableResult = EnableNetworkResult & EnableAccountsResult
+
+type SignTxnsResult = (string | null)[]
+
+interface Exodus {
+  isConnected: boolean
+  address: string | null
+  enable: (options?: ExodusOptions) => Promise<EnableResult>
+  signTxns: (transactions: WalletTransaction[]) => Promise<SignTxnsResult>
+}
+
+type WindowExtended = { algorand: Exodus } & Window & typeof globalThis
 
 export class ExodusWallet extends BaseWallet {
   private client: Exodus | null = null
