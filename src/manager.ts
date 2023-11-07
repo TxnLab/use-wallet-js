@@ -1,11 +1,17 @@
 import algosdk from 'algosdk'
-import { defaultNetworkConfigMap, NetworkId, WalletId } from 'src/constants'
+import { WalletId } from 'src/constants'
 import { allWallets, BaseWallet } from 'src/wallets'
-import { Network } from 'src/network'
+import {
+  defaultNetworkConfigMap,
+  isNetworkConfigMap,
+  Network,
+  NetworkId,
+  type NetworkConfig,
+  type NetworkConfigMap
+} from 'src/network'
 import { createStore, defaultState, StoreActions, type State, type Store } from 'src/store'
-import { deepMerge, isNetworkConfigMap } from 'src/utils'
+import { deepMerge } from 'src/utils'
 import type { TransactionSigner } from 'algosdk'
-import type { NetworkConfig, NetworkConfigMap } from 'src/types/network'
 import type { TransactionSignerAccount } from './types/transaction'
 import type {
   WalletAccount,

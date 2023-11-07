@@ -1,4 +1,5 @@
-import { NetworkId, WalletId } from 'src/constants'
+import { WalletId } from 'src/constants'
+import { NetworkId } from 'src/network'
 import type { WalletAccount } from 'src/types'
 import type { State, WalletState } from './types'
 

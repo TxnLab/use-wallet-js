@@ -1,5 +1,5 @@
 import type { AlgodTokenHeader, BaseHTTPClient, CustomTokenHeader } from 'algosdk'
-import type { NetworkId } from 'src/constants'
+import type { NetworkId } from './constants'
 import type { State, Store } from 'src/store'
 
 export type NetworkLabelMap = Record<NetworkId, string>

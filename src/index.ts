@@ -1,4 +1,5 @@
 export { WalletManager } from './manager.ts'
 export { BaseWallet } from './wallets/base.ts'
-export { WalletId, NetworkId } from './constants'
+export { WalletId } from './constants'
+export { NetworkId } from './network'
 export * from './types'

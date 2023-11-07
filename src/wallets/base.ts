@@ -1,5 +1,6 @@
 import algosdk from 'algosdk'
-import { NetworkId, WalletId } from 'src/constants'
+import { WalletId } from 'src/constants'
+import { NetworkId } from 'src/network'
 import { StoreActions, type State, type Store } from 'src/store'
 import type {
   WalletMetadata,

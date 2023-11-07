@@ -1,5 +1,6 @@
-import { LOCAL_STORAGE_KEY, NetworkId } from 'src/constants'
+import { LOCAL_STORAGE_KEY } from 'src/constants'
 import { PubSub } from 'src/lib/pubsub'
+import { NetworkId } from 'src/network'
 import { actions, type Actions, type StoreActions } from './actions'
 import { mutations, type Mutations, type StoreMutations } from './mutations'
 import { isValidState, replacer, reviver } from './utils'

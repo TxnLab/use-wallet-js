@@ -1,7 +1,8 @@
 import { getAppMetadata, getSdkError } from '@walletconnect/utils'
 import algosdk from 'algosdk'
 import { BaseWallet } from './base'
-import { NetworkId, WalletId, caipChainId, getWalletIcon } from 'src/constants'
+import { WalletId, getWalletIcon } from 'src/constants'
+import { NetworkId, caipChainId } from 'src/network'
 import { StoreActions, type State, type Store } from 'src/store'
 import {
   compareAccounts,

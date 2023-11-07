@@ -1,11 +1,11 @@
+import { createDefaultConfig } from './utils'
 import type {
-  AlgodConfig,
   BlockExplorerMap,
   CaipChainMap,
   NetworkConfigMap,
   NetworkLabelMap,
   NodeServerMap
-} from 'src/types/network'
+} from './types'
 
 export enum NetworkId {
   MAINNET = 'mainnet',
@@ -39,15 +39,6 @@ export const nodeServerMap: NodeServerMap = {
   [NetworkId.TESTNET]: 'https://testnet-api.algonode.cloud',
   [NetworkId.BETANET]: 'https://betanet-api.algonode.cloud',
   [NetworkId.LOCALNET]: 'http://localhost'
-}
-
-function createDefaultConfig(networkId: NetworkId): AlgodConfig {
-  return {
-    token: '',
-    baseServer: nodeServerMap[networkId],
-    port: '',
-    headers: {}
-  }
 }
 
 export const defaultNetworkConfigMap: NetworkConfigMap = {
