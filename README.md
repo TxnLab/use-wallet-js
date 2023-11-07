@@ -63,16 +63,16 @@ npm install @blockshake/defly-connect @perawallet/connect @randlabs/myalgo-conne
 The `WalletManager` class is the main entry point for the library. It is responsible for initializing the wallet SDKs, managing the network, and handling wallet connections.
 
 ```ts
-import { NetworkId, WALLET_ID, WalletManager } from '@txnlab/use-wallet-js'
+import { NetworkId, WalletId, WalletManager } from '@txnlab/use-wallet-js'
 
 const walletManager = new WalletManager({
   wallets: [
-    WALLET_ID.DEFLY,
-    WALLET_ID.EXODUS,
-    WALLET_ID.MYALGO,
-    WALLET_ID.PERA,
+    WalletId.DEFLY,
+    WalletId.EXODUS,
+    WalletId.MYALGO,
+    WalletId.PERA,
     {
-      id: WALLET_ID.WALLETCONNECT,
+      id: WalletId.WALLETCONNECT,
       options: { projectId: '<YOUR_PROJECT_ID>' }
     }
   ],
@@ -84,7 +84,7 @@ const walletManager = new WalletManager({
 
 Each wallet you wish to support must be included in the `wallets` array.
 
-To initialize wallets with default options, pass the wallet ID using the `WALLET_ID` enum. To use custom options, pass an object with the `id` and `options` properties.
+To initialize wallets with default options, pass the wallet ID using the `WalletId` enum. To use custom options, pass an object with the `id` and `options` properties.
 
 > **Note:** WalletConnect's `projectId` option is required. You can get a project ID by registering your application at https://cloud.walletconnect.com/
 
@@ -296,17 +296,17 @@ pnpm create vite use-wallet-js-demo --template vanilla-ts
 
 ```ts
 import './style.css'
-import { NetworkId, WALLET_ID, WalletManager } from '@txnlab/use-wallet-js'
+import { NetworkId, WalletId, WalletManager } from '@txnlab/use-wallet-js'
 import { WalletComponent } from './WalletComponent'
 
 const walletManager = new WalletManager({
   wallets: [
-    WALLET_ID.DEFLY,
-    WALLET_ID.EXODUS,
-    WALLET_ID.MYALGO,
-    WALLET_ID.PERA,
+    WalletId.DEFLY,
+    WalletId.EXODUS,
+    WalletId.MYALGO,
+    WalletId.PERA,
     {
-      id: WALLET_ID.WALLETCONNECT,
+      id: WalletId.WALLETCONNECT,
       options: { projectId: '<YOUR_PROJECT_ID>' }
     }
   ]
