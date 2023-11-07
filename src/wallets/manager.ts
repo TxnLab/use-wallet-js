@@ -1,6 +1,4 @@
 import algosdk from 'algosdk'
-import { WalletId } from 'src/constants'
-import { allWallets, BaseWallet } from 'src/wallets'
 import {
   defaultNetworkConfigMap,
   isNetworkConfigMap,
@@ -10,17 +8,18 @@ import {
   type NetworkConfigMap
 } from 'src/network'
 import { createStore, defaultState, StoreActions, type State, type Store } from 'src/store'
-import { deepMerge } from 'src/utils'
-import type { TransactionSigner } from 'algosdk'
-import type { TransactionSignerAccount } from './types/transaction'
+import { BaseWallet } from './base'
+import { WalletId, walletMap } from './constants'
+import { deepMerge } from './utils'
 import type {
+  TransactionSignerAccount,
   WalletAccount,
-  WalletIdConfig,
   WalletConfigMap,
+  WalletIdConfig,
   WalletManagerConstructor,
-  WalletOptions,
-  WalletMetadata
-} from 'src/types/wallet'
+  WalletMetadata,
+  WalletOptions
+} from './types'
 
 export class WalletManager {
   private _wallets: Map<WalletId, BaseWallet> = new Map()
@@ -74,7 +73,7 @@ export class WalletManager {
       }
 
       // Get wallet class
-      const WalletClass = allWallets[walletId]
+      const WalletClass = walletMap[walletId]
       if (!WalletClass) {
         console.error(`[Manager] Wallet not found: ${walletId}`)
         continue
@@ -232,7 +231,7 @@ export class WalletManager {
    *   array will be the same as the length of indexesToSign, and each index i in the array
    *   corresponds to the signed transaction from txnGroup[indexesToSign[i]]
    */
-  public get transactionSigner(): TransactionSigner {
+  public get transactionSigner(): algosdk.TransactionSigner {
     if (!this.activeWallet) {
       throw new Error('[Manager] No active wallet found!')
     }

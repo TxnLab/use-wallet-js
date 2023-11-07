@@ -1,13 +1,8 @@
 import algosdk from 'algosdk'
-import { WalletId } from 'src/constants'
 import { NetworkId } from 'src/network'
 import { StoreActions, type State, type Store } from 'src/store'
-import type {
-  WalletMetadata,
-  WalletAccount,
-  WalletConstructor,
-  WalletConstructorType
-} from 'src/types/wallet'
+import { WalletId } from './constants'
+import { WalletAccount, WalletConstructor, WalletConstructorType, WalletMetadata } from './types'
 
 export abstract class BaseWallet {
   readonly id: WalletId

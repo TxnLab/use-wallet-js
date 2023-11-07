@@ -1,6 +1,5 @@
-import type { WalletId } from 'src/constants'
 import type { NetworkId } from 'src/network'
-import type { WalletAccount } from 'src/types/wallet'
+import type { WalletAccount, WalletId } from 'src/wallets'
 
 export type WalletState = {
   accounts: WalletAccount[]

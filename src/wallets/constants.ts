@@ -1,5 +1,6 @@
+import { createWalletMap } from './utils'
+
 export enum WalletId {
-  // DAFFI = 'daffi',
   DEFLY = 'defly',
   EXODUS = 'exodus',
   KMD = 'kmd',
@@ -9,4 +10,4 @@ export enum WalletId {
   WALLETCONNECT = 'walletconnect'
 }
 
-export const LOCAL_STORAGE_KEY = '@txnlab/use-wallet'
+export const walletMap = createWalletMap()

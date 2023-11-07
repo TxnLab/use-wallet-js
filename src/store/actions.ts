@@ -1,8 +1,7 @@
 import { StoreMutations } from './mutations'
-import type { WalletId } from 'src/constants'
 import type { NetworkId } from 'src/network'
 import type { Store } from 'src/store'
-import type { WalletAccount } from 'src/types/wallet'
+import type { WalletAccount, WalletId } from 'src/wallets'
 import type { State, WalletState } from './types'
 
 export enum StoreActions {

@@ -1,23 +1,24 @@
 import algosdk from 'algosdk'
-import { BaseWallet } from './base'
-import { WalletId, getWalletIcon } from 'src/constants'
 import { StoreActions, type State, type Store } from 'src/store'
+import { BaseWallet } from '../base'
+import { WalletId } from '../constants'
 import {
   isSignedTxnObject,
   mergeSignedTxnsWithGroup,
   normalizeTxnGroup,
   shouldSignTxnObject
-} from 'src/utils'
+} from '../utils'
 import type MyAlgoConnect from '@randlabs/myalgo-connect'
-import type { EncodedSignedTransaction, EncodedTransaction } from 'algosdk'
-import type { WalletTransaction } from 'src/types/transaction'
-import type { WalletAccount, WalletConstructor } from 'src/types/wallet'
+import type { WalletAccount, WalletConstructor, WalletTransaction } from '../types'
 
 export interface MyAlgoConnectOptions {
   timeout?: number
   bridgeUrl?: string
   disableLedgerNano?: boolean
 }
+
+const icon =
+  'data:image/svg+xml;base64,PHN2ZyB2aWV3Qm94PSIwIDAgMzIgMzIiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiPgogIDxjaXJjbGUgZmlsbD0iIzI0NUVDNiIgY3g9IjE2IiBjeT0iMTYiIHI9IjE2Ii8+CiAgPHBvbHlnb24gZmlsbD0iI0ZGRkZGRiIgcG9pbnRzPSIxMi40LDIxLjIgMTQuNSwyMS4yIDE1LjMsMTkuOSAxNi42LDE3LjYgMTguMSwxNC45IDE5LjksMTEuNyAyMC4yLDExLjIgMjAuMywxMS43IDIyLjksMjEuMiAyNSwyMS4yIDIxLjUsOC45IDIxLjQsOC42IDE5LjUsOC42IDE5LjUsOC43IDE3LjgsMTEuOCAxNiwxNC45IDE1LjgsMTQuMSAxNS4yLDExLjcgMTUuMSwxMS41IDE0LjQsOC45IDE0LjMsOC42IDEyLjQsOC42IDEyLjQsOC43IDEwLjcsMTEuOCA4LjksMTUgNy4xLDE4IDUuMywyMS4yIDcuNCwyMS4yIDkuMiwxOCAxMSwxNC44IDEyLjgsMTEuNiAxMy4xLDExLjEgMTMuMiwxMS42IDEzLjcsMTMuNyAxNC40LDE2LjMgMTQuNiwxNy4yIDE0LjIsMTgiLz4KPC9zdmc+'
 
 export class MyAlgoWallet extends BaseWallet {
   private client: MyAlgoConnect | null = null
@@ -40,10 +41,7 @@ export class MyAlgoWallet extends BaseWallet {
     this.notifySubscribers = onStateChange
   }
 
-  static defaultMetadata = {
-    name: 'MyAlgo',
-    icon: getWalletIcon(WalletId.MYALGO)
-  }
+  static defaultMetadata = { name: 'MyAlgo', icon }
 
   private initializeClient = async (): Promise<MyAlgoConnect> => {
     console.info('[MyAlgoWallet] Initializing client...')
@@ -137,7 +135,7 @@ export class MyAlgoWallet extends BaseWallet {
     // Decode transactions to access properties
     const decodedObjects = msgpackTxnGroup.map((txn) => {
       return algosdk.decodeObj(txn)
-    }) as Array<EncodedTransaction | EncodedSignedTransaction>
+    }) as Array<algosdk.EncodedTransaction | algosdk.EncodedSignedTransaction>
 
     // Marshal transactions into `WalletTransaction[]`
     decodedObjects.forEach((txnObject, idx) => {

@@ -1,6 +1,43 @@
 import algosdk from 'algosdk'
-import type { EncodedSignedTransaction, EncodedTransaction } from 'algosdk'
-import type { JsonRpcRequest } from 'src/types/transaction'
+import { WalletId } from './constants'
+import { DeflyWallet } from './supported/defly'
+import { ExodusWallet } from './supported/exodus'
+import { KmdWallet } from './supported/kmd'
+import { MnemonicWallet } from './supported/mnemonic'
+import { MyAlgoWallet } from './supported/myalgo'
+import { PeraWallet } from './supported/pera'
+import { WalletConnect } from './supported/walletconnect'
+import type { JsonRpcRequest, WalletAccount, WalletMap } from './types'
+
+export function createWalletMap(): WalletMap {
+  return {
+    [WalletId.DEFLY]: DeflyWallet,
+    [WalletId.EXODUS]: ExodusWallet,
+    [WalletId.KMD]: KmdWallet,
+    [WalletId.MNEMONIC]: MnemonicWallet,
+    [WalletId.MYALGO]: MyAlgoWallet,
+    [WalletId.PERA]: PeraWallet,
+    [WalletId.WALLETCONNECT]: WalletConnect
+  }
+}
+
+export function compareAccounts(accounts: WalletAccount[], compareTo: WalletAccount[]): boolean {
+  const addresses = new Set(accounts.map((account) => account.address))
+  const compareAddresses = new Set(compareTo.map((account) => account.address))
+
+  if (addresses.size !== compareAddresses.size) {
+    return false
+  }
+
+  // Check if every address in addresses is also in compareAddresses
+  for (const address of addresses) {
+    if (!compareAddresses.has(address)) {
+      return false
+    }
+  }
+
+  return true
+}
 
 export function isTransaction(
   item: algosdk.Transaction | algosdk.Transaction[] | Uint8Array | Uint8Array[]
@@ -24,9 +61,9 @@ export function isTransaction(
 }
 
 export function isSignedTxnObject(
-  item: EncodedTransaction | EncodedSignedTransaction
-): item is EncodedSignedTransaction {
-  return (item as EncodedSignedTransaction).txn !== undefined
+  item: algosdk.EncodedTransaction | algosdk.EncodedSignedTransaction
+): item is algosdk.EncodedSignedTransaction {
+  return (item as algosdk.EncodedSignedTransaction).txn !== undefined
 }
 
 export function normalizeTxnGroup(
@@ -103,4 +140,27 @@ export function formatJsonRpcRequest<T = any>(method: string, params: T): JsonRp
     method,
     params
   }
+}
+
+export function deepMerge(target: any, source: any): any {
+  const isObject = (obj: any) => obj && typeof obj === 'object'
+
+  if (!isObject(target) || !isObject(source)) {
+    throw new Error('Target and source must be objects')
+  }
+
+  Object.keys(source).forEach((key) => {
+    const targetValue = target[key]
+    const sourceValue = source[key]
+
+    if (Array.isArray(targetValue) && Array.isArray(sourceValue)) {
+      target[key] = targetValue.concat(sourceValue)
+    } else if (isObject(targetValue) && isObject(sourceValue)) {
+      target[key] = deepMerge(Object.assign({}, targetValue), sourceValue)
+    } else {
+      target[key] = sourceValue
+    }
+  })
+
+  return target
 }
