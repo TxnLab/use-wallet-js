@@ -1,8 +1,6 @@
-import type { Transaction, TransactionSigner } from 'algosdk'
-import type { NetworkConfig, NetworkId } from 'src/network'
+import algosdk from 'algosdk'
+import { WalletId } from './constants'
 import type { State, Store } from 'src/store'
-import type { BaseWallet } from './base'
-import type { WalletId } from './constants'
 import type { DeflyWallet, DeflyWalletConnectOptions } from './supported/defly'
 import type { ExodusOptions, ExodusWallet } from './supported/exodus'
 import type { KmdOptions, KmdWallet } from './supported/kmd'
@@ -67,15 +65,9 @@ type NonEmptyArray<T> = [T, ...T[]]
 
 export type SupportedWallets = NonEmptyArray<SupportedWallet>
 
-export interface WalletManagerConstructor {
-  wallets: SupportedWallets
-  network?: NetworkId
-  algod?: NetworkConfig
-}
-
-export interface WalletConstructorType {
-  new (...args: any[]): BaseWallet
-  defaultMetadata: WalletMetadata
+export type WalletMetadata = {
+  name: string
+  icon: string
 }
 
 export interface BaseWalletConstructor {
@@ -89,11 +81,6 @@ export interface BaseWalletConstructor {
 export type WalletConstructor<T extends keyof WalletOptionsMap> = BaseWalletConstructor & {
   options?: WalletOptions<T>
   defaultMetadata?: WalletMetadata
-}
-
-export type WalletMetadata = {
-  name: string
-  icon: string
 }
 
 export type WalletAccount = {
@@ -166,7 +153,7 @@ export interface WalletTransaction {
 
 /** @see https://github.com/perawallet/connect/blob/1.3.3/src/util/model/peraWalletModels.ts */
 export interface SignerTransaction {
-  txn: Transaction
+  txn: algosdk.Transaction
 
   /**
    * Optional authorized address used to sign the transaction when
@@ -190,7 +177,7 @@ export interface SignerTransaction {
 /** @see https://github.com/algorandfoundation/algokit-utils-ts/blob/v4.0.0/src/types/account.ts#L107-L111 */
 export interface TransactionSignerAccount {
   addr: Readonly<string>
-  signer: TransactionSigner
+  signer: algosdk.TransactionSigner
 }
 
 export interface JsonRpcRequest<T = any> {

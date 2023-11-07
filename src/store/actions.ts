@@ -1,7 +1,7 @@
+import { NetworkId } from 'src/network'
+import { WalletId, type WalletAccount } from 'src/wallets'
 import { StoreMutations } from './mutations'
-import type { NetworkId } from 'src/network'
-import type { Store } from 'src/store'
-import type { WalletAccount, WalletId } from 'src/wallets'
+import { Store } from './store'
 import type { State, WalletState } from './types'
 
 export enum StoreActions {

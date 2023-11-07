@@ -1,5 +1,5 @@
 import algosdk from 'algosdk'
-import { StoreActions, type State, type Store } from 'src/store'
+import { Store, StoreActions, type State } from 'src/store'
 import { BaseWallet } from '../base'
 import { WalletId } from '../constants'
 import {

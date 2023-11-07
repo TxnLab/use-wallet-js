@@ -1,7 +1,7 @@
 import { getAppMetadata, getSdkError } from '@walletconnect/utils'
 import algosdk from 'algosdk'
 import { NetworkId, caipChainId } from 'src/network'
-import { StoreActions, type State, type Store } from 'src/store'
+import { Store, StoreActions, type State } from 'src/store'
 import { BaseWallet } from '../base'
 import { WalletId } from '../constants'
 import {

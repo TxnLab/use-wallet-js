@@ -1,5 +1,5 @@
-import type { AlgodTokenHeader, BaseHTTPClient, CustomTokenHeader } from 'algosdk'
-import type { NetworkId } from './constants'
+import algosdk from 'algosdk'
+import { NetworkId } from './constants'
 import type { State, Store } from 'src/store'
 
 export type NetworkLabelMap = Record<NetworkId, string>
@@ -8,7 +8,7 @@ export type CaipChainMap = Partial<Record<NetworkId, string>>
 export type NodeServerMap = Record<NetworkId, string>
 
 export interface AlgodConfig {
-  token: string | AlgodTokenHeader | CustomTokenHeader | BaseHTTPClient
+  token: string | algosdk.AlgodTokenHeader | algosdk.CustomTokenHeader | algosdk.BaseHTTPClient
   baseServer: string
   port?: string | number
   headers?: Record<string, string>

@@ -1,8 +1,13 @@
 import algosdk from 'algosdk'
 import { NetworkId } from 'src/network'
-import { StoreActions, type State, type Store } from 'src/store'
+import { Store, StoreActions, type State } from 'src/store'
 import { WalletId } from './constants'
-import { WalletAccount, WalletConstructor, WalletConstructorType, WalletMetadata } from './types'
+import type { WalletAccount, WalletConstructor, WalletMetadata } from './types'
+
+interface WalletConstructorType {
+  new (...args: any[]): BaseWallet
+  defaultMetadata: WalletMetadata
+}
 
 export abstract class BaseWallet {
   readonly id: WalletId
@@ -29,10 +34,7 @@ export abstract class BaseWallet {
     this.metadata = { ...ctor.defaultMetadata, ...metadata }
   }
 
-  static defaultMetadata: WalletMetadata = {
-    name: 'Base Wallet',
-    icon: ''
-  }
+  static defaultMetadata: WalletMetadata = { name: 'Base Wallet', icon: '' }
 
   // ---------- Public Methods ---------------------------------------- //
 

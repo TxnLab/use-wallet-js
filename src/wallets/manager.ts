@@ -7,19 +7,25 @@ import {
   type NetworkConfig,
   type NetworkConfigMap
 } from 'src/network'
-import { createStore, defaultState, StoreActions, type State, type Store } from 'src/store'
+import { createStore, defaultState, Store, StoreActions, type State } from 'src/store'
 import { BaseWallet } from './base'
 import { WalletId, walletMap } from './constants'
 import { deepMerge } from './utils'
 import type {
+  SupportedWallets,
   TransactionSignerAccount,
   WalletAccount,
   WalletConfigMap,
   WalletIdConfig,
-  WalletManagerConstructor,
   WalletMetadata,
   WalletOptions
 } from './types'
+
+interface ManagerConstructor {
+  wallets: SupportedWallets
+  network?: NetworkId
+  algod?: NetworkConfig
+}
 
 export class WalletManager {
   private _wallets: Map<WalletId, BaseWallet> = new Map()
@@ -27,7 +33,7 @@ export class WalletManager {
   private store: Store<State>
   private subscribers: Array<(state: State) => void> = []
 
-  constructor({ wallets, network = NetworkId.TESTNET, algod = {} }: WalletManagerConstructor) {
+  constructor({ wallets, network = NetworkId.TESTNET, algod = {} }: ManagerConstructor) {
     this.store = createStore({
       ...defaultState,
       activeNetwork: network
