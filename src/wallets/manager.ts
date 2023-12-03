@@ -9,7 +9,7 @@ import {
 } from 'src/network'
 import { createStore, defaultState, Store, StoreActions, type State } from 'src/store'
 import { BaseWallet } from './base'
-import { WalletId, walletMap } from './constants'
+import { WalletId, walletMap } from './supported'
 import { deepMerge } from './utils'
 import type {
   SupportedWallets,

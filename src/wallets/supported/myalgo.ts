@@ -1,7 +1,7 @@
 import algosdk from 'algosdk'
 import { Store, StoreActions, type State } from 'src/store'
 import { BaseWallet } from '../base'
-import { WalletId } from '../constants'
+import { WalletId } from './constants'
 import {
   isSignedTxnObject,
   mergeSignedTxnsWithGroup,

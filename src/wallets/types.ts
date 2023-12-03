@@ -1,33 +1,6 @@
-import algosdk from 'algosdk'
-import { WalletId } from './constants'
+import type algosdk from 'algosdk'
 import type { State, Store } from 'src/store'
-import type { DeflyWallet, DeflyWalletConnectOptions } from './supported/defly'
-import type { ExodusOptions, ExodusWallet } from './supported/exodus'
-import type { KmdOptions, KmdWallet } from './supported/kmd'
-import type { MnemonicOptions, MnemonicWallet } from './supported/mnemonic'
-import type { MyAlgoConnectOptions, MyAlgoWallet } from './supported/myalgo'
-import type { PeraWallet, PeraWalletConnectOptions } from './supported/pera'
-import type { WalletConnect, WalletConnectOptions } from './supported/walletconnect'
-
-export type WalletMap = {
-  [WalletId.DEFLY]: typeof DeflyWallet
-  [WalletId.EXODUS]: typeof ExodusWallet
-  [WalletId.KMD]: typeof KmdWallet
-  [WalletId.MNEMONIC]: typeof MnemonicWallet
-  [WalletId.MYALGO]: typeof MyAlgoWallet
-  [WalletId.PERA]: typeof PeraWallet
-  [WalletId.WALLETCONNECT]: typeof WalletConnect
-}
-
-export type WalletOptionsMap = {
-  [WalletId.DEFLY]: DeflyWalletConnectOptions
-  [WalletId.EXODUS]: ExodusOptions
-  [WalletId.KMD]: KmdOptions
-  [WalletId.MNEMONIC]: MnemonicOptions
-  [WalletId.MYALGO]: MyAlgoConnectOptions
-  [WalletId.PERA]: PeraWalletConnectOptions
-  [WalletId.WALLETCONNECT]: WalletConnectOptions
-}
+import type { WalletId, SupportedWallet, WalletOptionsMap } from './supported'
 
 export type WalletConfigMap = {
   [K in keyof WalletOptionsMap]: {
@@ -45,21 +18,6 @@ export type WalletIdConfig<T extends keyof WalletConfigMap> = {
     id: K
   } & WalletConfigMap[K]
 }[T]
-
-export type SupportedWallet =
-  | WalletIdConfig<WalletId.DEFLY>
-  | WalletIdConfig<WalletId.EXODUS>
-  | WalletIdConfig<WalletId.KMD>
-  | WalletIdConfig<WalletId.MNEMONIC>
-  | WalletIdConfig<WalletId.MYALGO>
-  | WalletIdConfig<WalletId.PERA>
-  | WalletIdConfig<WalletId.WALLETCONNECT>
-  | WalletId.DEFLY
-  | WalletId.EXODUS
-  | WalletId.KMD
-  | WalletId.MNEMONIC
-  | WalletId.MYALGO
-  | WalletId.PERA
 
 type NonEmptyArray<T> = [T, ...T[]]
 

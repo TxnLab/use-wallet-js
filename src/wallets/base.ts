@@ -1,7 +1,7 @@
 import algosdk from 'algosdk'
 import { NetworkId } from 'src/network'
 import { Store, StoreActions, type State } from 'src/store'
-import { WalletId } from './constants'
+import { WalletId } from './supported'
 import type { WalletAccount, WalletConstructor, WalletMetadata } from './types'
 
 interface WalletConstructorType {

@@ -3,7 +3,7 @@ import algosdk from 'algosdk'
 import { NetworkId, caipChainId } from 'src/network'
 import { Store, StoreActions, type State } from 'src/store'
 import { BaseWallet } from '../base'
-import { WalletId } from '../constants'
+import { WalletId } from './constants'
 import {
   compareAccounts,
   formatJsonRpcRequest,
