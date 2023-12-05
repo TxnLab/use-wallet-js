@@ -88,7 +88,7 @@ export class KmdWallet extends BaseWallet {
 
   static defaultMetadata = { name: 'KMD', icon }
 
-  private initializeClient = async (): Promise<algosdk.Kmd> => {
+  private async initializeClient(): Promise<algosdk.Kmd> {
     console.info('[KmdWallet] Initializing client...')
     const { token, baseServer, port } = this.options
     const client = new algosdk.Kmd(token, baseServer, port)
@@ -96,7 +96,7 @@ export class KmdWallet extends BaseWallet {
     return client
   }
 
-  public connect = async (): Promise<WalletAccount[]> => {
+  public async connect(): Promise<WalletAccount[]> {
     console.info('[KmdWallet] Connecting...')
     try {
       if (!this.client) {
@@ -139,20 +139,20 @@ export class KmdWallet extends BaseWallet {
     }
   }
 
-  public disconnect = async (): Promise<void> => {
+  public async disconnect(): Promise<void> {
     console.info('[KmdWallet] Disconnecting...')
     this.onDisconnect()
   }
 
-  public resumeSession = (): Promise<void> => {
+  public resumeSession(): Promise<void> {
     return Promise.resolve()
   }
 
-  public signTransactions = async (
+  public async signTransactions(
     txnGroup: algosdk.Transaction[] | algosdk.Transaction[][] | Uint8Array[] | Uint8Array[][],
     indexesToSign?: number[],
     returnGroup = true
-  ): Promise<Uint8Array[]> => {
+  ): Promise<Uint8Array[]> {
     if (!this.client) {
       throw new Error('[KmdWallet] Client not initialized!')
     }
@@ -204,10 +204,10 @@ export class KmdWallet extends BaseWallet {
     return txnGroupSigned
   }
 
-  public transactionSigner = async (
+  public async transactionSigner(
     txnGroup: algosdk.Transaction[],
     indexesToSign: number[]
-  ): Promise<Uint8Array[]> => {
+  ): Promise<Uint8Array[]> {
     if (!this.client) {
       throw new Error('[KmdWallet] Client not initialized!')
     }
@@ -228,7 +228,7 @@ export class KmdWallet extends BaseWallet {
     return signedTxns
   }
 
-  private fetchWalletId = async (): Promise<string> => {
+  private async fetchWalletId(): Promise<string> {
     console.info('[KmdWallet] Fetching wallet data...')
     if (!this.client) {
       throw new Error('Client not initialized!')
@@ -243,7 +243,7 @@ export class KmdWallet extends BaseWallet {
     return wallet.id
   }
 
-  private fetchToken = async (walletId: string, password: string): Promise<string> => {
+  private async fetchToken(walletId: string, password: string): Promise<string> {
     console.info('[KmdWallet] Fetching token...')
     if (!this.client) {
       throw new Error('Client not initialized!')
@@ -255,7 +255,7 @@ export class KmdWallet extends BaseWallet {
     return wallet_handle_token
   }
 
-  private fetchAccounts = async (token: string): Promise<string[]> => {
+  private async fetchAccounts(token: string): Promise<string[]> {
     console.info('[KmdWallet] Fetching accounts...')
     if (!this.client) {
       throw new Error('Client not initialized!')
@@ -264,7 +264,7 @@ export class KmdWallet extends BaseWallet {
     return addresses
   }
 
-  private releaseToken = async (token: string): Promise<void> => {
+  private async releaseToken(token: string): Promise<void> {
     console.info('[KmdWallet] Releasing token...')
     if (!this.client) {
       throw new Error('Client not initialized!')
@@ -272,7 +272,7 @@ export class KmdWallet extends BaseWallet {
     await this.client.releaseWalletHandle(token)
   }
 
-  private getPassword = (): string => {
+  private getPassword(): string {
     if (this.password) {
       return this.password
     }

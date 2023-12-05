@@ -45,7 +45,7 @@ export class PeraWallet extends BaseWallet {
 
   static defaultMetadata = { name: 'Pera', icon }
 
-  private initializeClient = async (): Promise<PeraWalletConnect> => {
+  private async initializeClient(): Promise<PeraWalletConnect> {
     console.info('[PeraWallet] Initializing client...')
     const PeraWalletConnect = (await import('@perawallet/connect')).default.PeraWalletConnect
     const client = new PeraWalletConnect(this.options)
@@ -54,7 +54,7 @@ export class PeraWallet extends BaseWallet {
     return client
   }
 
-  public connect = async (): Promise<WalletAccount[]> => {
+  public async connect(): Promise<WalletAccount[]> {
     console.info('[PeraWallet] Connecting...')
     try {
       const client = this.client || (await this.initializeClient())
@@ -92,7 +92,7 @@ export class PeraWallet extends BaseWallet {
     }
   }
 
-  public disconnect = async (): Promise<void> => {
+  public async disconnect(): Promise<void> {
     console.info('[PeraWallet] Disconnecting...')
     try {
       await this.client?.disconnect()
@@ -102,7 +102,7 @@ export class PeraWallet extends BaseWallet {
     }
   }
 
-  public resumeSession = async (): Promise<void> => {
+  public async resumeSession(): Promise<void> {
     try {
       const state = this.store.getState()
       const walletState = state.wallets.get(this.id)
@@ -143,11 +143,11 @@ export class PeraWallet extends BaseWallet {
     }
   }
 
-  public signTransactions = async (
+  public async signTransactions(
     txnGroup: algosdk.Transaction[] | algosdk.Transaction[][] | Uint8Array[] | Uint8Array[][],
     indexesToSign?: number[],
     returnGroup = true
-  ): Promise<Uint8Array[]> => {
+  ): Promise<Uint8Array[]> {
     if (!this.client) {
       throw new Error('[PeraWallet] Client not initialized!')
     }
@@ -193,10 +193,10 @@ export class PeraWallet extends BaseWallet {
     return txnGroupSigned
   }
 
-  public transactionSigner = async (
+  public async transactionSigner(
     txnGroup: algosdk.Transaction[],
     indexesToSign: number[]
-  ): Promise<Uint8Array[]> => {
+  ): Promise<Uint8Array[]> {
     if (!this.client) {
       throw new Error('[PeraWallet] Client not initialized!')
     }

@@ -43,7 +43,7 @@ export class MyAlgoWallet extends BaseWallet {
 
   static defaultMetadata = { name: 'MyAlgo', icon }
 
-  private initializeClient = async (): Promise<MyAlgoConnect> => {
+  private async initializeClient(): Promise<MyAlgoConnect> {
     console.info('[MyAlgoWallet] Initializing client...')
     const MyAlgoConnect = (await import('@randlabs/myalgo-connect')).default
     const client = new MyAlgoConnect(this.options)
@@ -51,7 +51,7 @@ export class MyAlgoWallet extends BaseWallet {
     return client
   }
 
-  public connect = async (): Promise<WalletAccount[]> => {
+  public async connect(): Promise<WalletAccount[]> {
     console.info('[MyAlgoWallet] Connecting...')
     try {
       const client = this.client || (await this.initializeClient())
@@ -84,19 +84,19 @@ export class MyAlgoWallet extends BaseWallet {
     }
   }
 
-  public disconnect = async (): Promise<void> => {
+  public async disconnect(): Promise<void> {
     console.info('[MyAlgoWallet] Disconnecting...')
     this.onDisconnect()
   }
 
-  public resumeSession = (): Promise<void> => {
+  public resumeSession(): Promise<void> {
     return Promise.resolve()
   }
 
-  public transactionSigner = async (
+  public async transactionSigner(
     txnGroup: algosdk.Transaction[],
     indexesToSign: number[]
-  ): Promise<Uint8Array[]> => {
+  ): Promise<Uint8Array[]> {
     if (!this.client) {
       throw new Error('[MyAlgoWallet] Client not initialized!')
     }
@@ -119,11 +119,11 @@ export class MyAlgoWallet extends BaseWallet {
     return signedTxns
   }
 
-  public signTransactions = async (
+  public async signTransactions(
     txnGroup: algosdk.Transaction[] | algosdk.Transaction[][] | Uint8Array[] | Uint8Array[][],
     indexesToSign?: number[],
     returnGroup = true
-  ): Promise<Uint8Array[]> => {
+  ): Promise<Uint8Array[]> {
     if (!this.client) {
       throw new Error('[MyAlgoWallet] Client not initialized!')
     }

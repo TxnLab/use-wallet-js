@@ -44,7 +44,7 @@ export class Network {
     return caipChainId[this.activeNetwork]
   }
 
-  private createAlgodClient = (config: AlgodConfig): algosdk.Algodv2 => {
+  private createAlgodClient(config: AlgodConfig): algosdk.Algodv2 {
     console.info(`[Network] Creating Algodv2 client for ${this.activeNetwork}...`)
     const { token = '', baseServer, port = '', headers = {} } = config
     return new algosdk.Algodv2(token, baseServer, port, headers)

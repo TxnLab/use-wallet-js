@@ -58,9 +58,9 @@ export class WalletManager {
 
   // ---------- Wallets ----------------------------------------------- //
 
-  private initializeWallets = <T extends keyof WalletConfigMap>(
+  private initializeWallets<T extends keyof WalletConfigMap>(
     walletsConfig: Array<T | WalletIdConfig<T>>
-  ) => {
+  ) {
     console.info('[Manager] Initializing wallets...')
 
     for (const walletConfig of walletsConfig) {
@@ -125,14 +125,14 @@ export class WalletManager {
     return [...this._wallets.values()]
   }
 
-  public resumeSessions = async (): Promise<void> => {
+  public async resumeSessions(): Promise<void> {
     const promises = this.wallets.map((wallet) => wallet?.resumeSession())
     await Promise.all(promises)
   }
 
   // ---------- Network ----------------------------------------------- //
 
-  private initializeNetwork = (network: NetworkId, config: NetworkConfig): Network => {
+  private initializeNetwork(network: NetworkId, config: NetworkConfig): Network {
     console.info('[Manager] Initializing network...')
 
     let networkConfig: NetworkConfigMap = defaultNetworkConfigMap
@@ -155,7 +155,7 @@ export class WalletManager {
     })
   }
 
-  public setActiveNetwork = (network: NetworkId): void => {
+  public setActiveNetwork(network: NetworkId): void {
     this.network.setActiveNetwork(network)
   }
 

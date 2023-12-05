@@ -71,7 +71,7 @@ export class ExodusWallet extends BaseWallet {
 
   static defaultMetadata = { name: 'Exodus', icon }
 
-  private initializeClient = async (): Promise<Exodus> => {
+  private async initializeClient(): Promise<Exodus> {
     console.info('[ExodusWallet] Initializing client...')
     if (typeof window == 'undefined' || (window as WindowExtended).algorand === undefined) {
       throw new Error('Exodus is not available.')
@@ -81,7 +81,7 @@ export class ExodusWallet extends BaseWallet {
     return client
   }
 
-  public connect = async (): Promise<WalletAccount[]> => {
+  public async connect(): Promise<WalletAccount[]> {
     console.info('[ExodusWallet] Connecting...')
     try {
       const client = this.client || (await this.initializeClient())
@@ -119,12 +119,12 @@ export class ExodusWallet extends BaseWallet {
     }
   }
 
-  public disconnect = async (): Promise<void> => {
+  public async disconnect(): Promise<void> {
     console.info('[ExodusWallet] Disconnecting...')
     this.onDisconnect()
   }
 
-  public resumeSession = async (): Promise<void> => {
+  public async resumeSession(): Promise<void> {
     const state = this.store.getState()
     const walletState = state.wallets.get(this.id)
 
@@ -143,11 +143,11 @@ export class ExodusWallet extends BaseWallet {
     }
   }
 
-  public signTransactions = async (
+  public async signTransactions(
     txnGroup: algosdk.Transaction[] | algosdk.Transaction[][] | Uint8Array[] | Uint8Array[][],
     indexesToSign?: number[],
     returnGroup = true
-  ): Promise<Uint8Array[]> => {
+  ): Promise<Uint8Array[]> {
     if (!this.client) {
       throw new Error('[ExodusWallet] Client not initialized!')
     }
@@ -201,10 +201,10 @@ export class ExodusWallet extends BaseWallet {
     return txnGroupSigned
   }
 
-  public transactionSigner = async (
+  public async transactionSigner(
     txnGroup: algosdk.Transaction[],
     indexesToSign: number[]
-  ): Promise<Uint8Array[]> => {
+  ): Promise<Uint8Array[]> {
     if (!this.client) {
       throw new Error('[ExodusWallet] Client not initialized!')
     }

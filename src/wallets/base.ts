@@ -42,14 +42,14 @@ export abstract class BaseWallet {
   public abstract disconnect(): Promise<void>
   public abstract resumeSession(): Promise<void>
 
-  public setActive = (): void => {
+  public setActive(): void {
     console.info(`[Wallet] Set active wallet: ${this.id}`)
     this.store.dispatch(StoreActions.SET_ACTIVE_WALLET, { walletId: this.id })
 
     this.notifySubscribers()
   }
 
-  public setActiveAccount = (account: string): void => {
+  public setActiveAccount(account: string): void {
     console.info(`[Wallet] Set active account: ${account}`)
     this.store.dispatch(StoreActions.SET_ACTIVE_ACCOUNT, {
       walletId: this.id,
@@ -110,7 +110,7 @@ export abstract class BaseWallet {
 
   // ---------- Protected Methods ------------------------------------- //
 
-  protected onDisconnect = (): void => {
+  protected onDisconnect(): void {
     this.store.dispatch(StoreActions.REMOVE_WALLET, { walletId: this.id })
     this.notifySubscribers()
   }

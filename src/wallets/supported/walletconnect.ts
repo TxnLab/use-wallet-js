@@ -82,7 +82,7 @@ export class WalletConnect extends BaseWallet {
 
   static defaultMetadata = { name: 'WalletConnect', icon }
 
-  private initializeClient = async (): Promise<SignClient> => {
+  private async initializeClient(): Promise<SignClient> {
     console.info('[WalletConnect] Initializing client...')
     const SignClient = (await import('@walletconnect/sign-client')).SignClient
     const client = await SignClient.init(this.options)
@@ -108,7 +108,7 @@ export class WalletConnect extends BaseWallet {
     return client
   }
 
-  private initializeModal = async (): Promise<WalletConnectModal> => {
+  private async initializeModal(): Promise<WalletConnectModal> {
     console.info('[WalletConnect] Initializing modal...')
     const WalletConnectModal = (await import('@walletconnect/modal')).WalletConnectModal
     const modal = new WalletConnectModal({
@@ -125,7 +125,7 @@ export class WalletConnect extends BaseWallet {
     return modal
   }
 
-  private onSessionConnected = (session: SessionTypes.Struct): WalletAccount[] => {
+  private onSessionConnected(session: SessionTypes.Struct): WalletAccount[] {
     const caipAccounts = session.namespaces.algorand!.accounts
 
     // @todo: Validate format of CAIP-10 accounts
@@ -169,7 +169,7 @@ export class WalletConnect extends BaseWallet {
     return walletAccounts
   }
 
-  public connect = async (): Promise<WalletAccount[]> => {
+  public async connect(): Promise<WalletAccount[]> {
     console.info('[WalletConnect] Connecting...')
     try {
       const client = this.client || (await this.initializeClient())
@@ -203,7 +203,7 @@ export class WalletConnect extends BaseWallet {
     }
   }
 
-  public disconnect = async (): Promise<void> => {
+  public async disconnect(): Promise<void> {
     console.info('[WalletConnect] Disconnecting...')
     if (!this.client) {
       throw new Error('[WalletConnect] Client not initialized')
@@ -222,7 +222,7 @@ export class WalletConnect extends BaseWallet {
     }
   }
 
-  public resumeSession = async (): Promise<void> => {
+  public async resumeSession(): Promise<void> {
     try {
       const state = this.store.getState()
       const walletState = state.wallets.get(this.id)
@@ -247,11 +247,11 @@ export class WalletConnect extends BaseWallet {
     }
   }
 
-  public signTransactions = async (
+  public async signTransactions(
     txnGroup: algosdk.Transaction[] | algosdk.Transaction[][] | Uint8Array[] | Uint8Array[][],
     indexesToSign?: number[],
     returnGroup = true
-  ): Promise<Uint8Array[]> => {
+  ): Promise<Uint8Array[]> {
     if (!this.client) {
       throw new Error('[WalletConnect] Client not initialized!')
     }
@@ -319,10 +319,10 @@ export class WalletConnect extends BaseWallet {
     return txnGroupSigned
   }
 
-  public transactionSigner = async (
+  public async transactionSigner(
     txnGroup: algosdk.Transaction[],
     indexesToSign: number[]
-  ): Promise<Uint8Array[]> => {
+  ): Promise<Uint8Array[]> {
     if (!this.client) {
       throw new Error('[WalletConnect] Client not initialized!')
     }

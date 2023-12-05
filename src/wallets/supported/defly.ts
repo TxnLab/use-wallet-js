@@ -44,7 +44,7 @@ export class DeflyWallet extends BaseWallet {
 
   static defaultMetadata = { name: 'Defly', icon }
 
-  private initializeClient = async (): Promise<DeflyWalletConnect> => {
+  private async initializeClient(): Promise<DeflyWalletConnect> {
     console.info('[DeflyWallet] Initializing client...')
     const DeflyWalletConnect = (await import('@blockshake/defly-connect')).default
       .DeflyWalletConnect
@@ -54,7 +54,7 @@ export class DeflyWallet extends BaseWallet {
     return client
   }
 
-  public connect = async (): Promise<WalletAccount[]> => {
+  public async connect(): Promise<WalletAccount[]> {
     console.info('[DeflyWallet] Connecting...')
     try {
       const client = this.client || (await this.initializeClient())
@@ -92,7 +92,7 @@ export class DeflyWallet extends BaseWallet {
     }
   }
 
-  public disconnect = async (): Promise<void> => {
+  public async disconnect(): Promise<void> {
     console.info('[DeflyWallet] Disconnecting...')
     try {
       await this.client?.disconnect()
@@ -102,7 +102,7 @@ export class DeflyWallet extends BaseWallet {
     }
   }
 
-  public resumeSession = async (): Promise<void> => {
+  public async resumeSession(): Promise<void> {
     try {
       const state = this.store.getState()
       const walletState = state.wallets.get(this.id)
@@ -143,11 +143,11 @@ export class DeflyWallet extends BaseWallet {
     }
   }
 
-  public signTransactions = async (
+  public async signTransactions(
     txnGroup: algosdk.Transaction[] | algosdk.Transaction[][] | Uint8Array[] | Uint8Array[][],
     indexesToSign?: number[],
     returnGroup = true
-  ): Promise<Uint8Array[]> => {
+  ): Promise<Uint8Array[]> {
     if (!this.client) {
       throw new Error('[DeflyWallet] Client not initialized!')
     }
@@ -193,10 +193,10 @@ export class DeflyWallet extends BaseWallet {
     return txnGroupSigned
   }
 
-  public transactionSigner = async (
+  public async transactionSigner(
     txnGroup: algosdk.Transaction[],
     indexesToSign: number[]
-  ): Promise<Uint8Array[]> => {
+  ): Promise<Uint8Array[]> {
     if (!this.client) {
       throw new Error('[DeflyWallet] Client not initialized!')
     }

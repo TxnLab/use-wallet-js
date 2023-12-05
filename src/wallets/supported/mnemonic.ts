@@ -40,7 +40,7 @@ export class MnemonicWallet extends BaseWallet {
   // @todo: Show explicit security warning if persistToStorage is true
   // @todo: Save/load mnemonic from storage if persistToStorage is true
   // @todo: Throw error with link to docs if using mainnet
-  private initializeAccount = (): algosdk.Account => {
+  private initializeAccount(): algosdk.Account {
     const mnemonic = prompt('Enter 25-word mnemonic passphrase:')
     if (!mnemonic) {
       this.account = null
@@ -51,7 +51,7 @@ export class MnemonicWallet extends BaseWallet {
     return account
   }
 
-  public connect = async (): Promise<WalletAccount[]> => {
+  public async connect(): Promise<WalletAccount[]> {
     console.info('[MnemonicWallet] Connecting...')
     try {
       const account = this.initializeAccount()
@@ -78,7 +78,7 @@ export class MnemonicWallet extends BaseWallet {
     }
   }
 
-  public disconnect = async (): Promise<void> => {
+  public async disconnect(): Promise<void> {
     console.info('[MnemonicWallet] Disconnecting...')
     try {
       this.account = null
@@ -88,7 +88,7 @@ export class MnemonicWallet extends BaseWallet {
     }
   }
 
-  public resumeSession = async (): Promise<void> => {
+  public async resumeSession(): Promise<void> {
     const state = this.store.getState()
     const walletState = state.wallets.get(this.id)
 
@@ -103,11 +103,11 @@ export class MnemonicWallet extends BaseWallet {
     }
   }
 
-  public signTransactions = async (
+  public async signTransactions(
     txnGroup: algosdk.Transaction[] | algosdk.Transaction[][] | Uint8Array[] | Uint8Array[][],
     indexesToSign?: number[],
     returnGroup = true
-  ): Promise<Uint8Array[]> => {
+  ): Promise<Uint8Array[]> {
     if (!this.account) {
       throw new Error('[MnemonicWallet] Client not initialized!')
     }
@@ -138,10 +138,10 @@ export class MnemonicWallet extends BaseWallet {
     return Promise.resolve(txnGroupSigned)
   }
 
-  public transactionSigner = async (
+  public async transactionSigner(
     txnGroup: algosdk.Transaction[],
     indexesToSign: number[]
-  ): Promise<Uint8Array[]> => {
+  ): Promise<Uint8Array[]> {
     if (!this.account) {
       throw new Error('[MnemonicWallet] Account not initialized!')
     }
