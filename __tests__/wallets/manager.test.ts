@@ -1,20 +1,16 @@
 import { beforeEach, describe, expect, it, jest, spyOn } from 'bun:test'
 import { NetworkId } from 'src/network/constants'
+import { LOCAL_STORAGE_KEY } from 'src/store/constants'
+import { replacer } from 'src/store/utils'
 import { WalletManager } from 'src/wallets/manager'
 import { WalletId } from 'src/wallets/supported/constants'
 import { DeflyWallet } from 'src/wallets/supported/defly'
 import { PeraWallet } from 'src/wallets/supported/pera'
 
-const deflyResumeSession = spyOn(DeflyWallet.prototype, 'resumeSession').mockImplementation(() =>
-  Promise.resolve()
-)
-const peraResumeSession = spyOn(PeraWallet.prototype, 'resumeSession').mockImplementation(() =>
-  Promise.resolve()
-)
-
 // Suppress console output
 spyOn(console, 'info').mockImplementation(() => {})
 spyOn(console, 'warn').mockImplementation(() => {})
+spyOn(console, 'error').mockImplementation(() => {})
 spyOn(console, 'groupCollapsed').mockImplementation(() => {})
 
 // Mock localStorage
@@ -30,9 +26,16 @@ Object.defineProperty(global, 'localStorage', {
   value: localStorageMock
 })
 
+const deflyResumeSession = spyOn(DeflyWallet.prototype, 'resumeSession').mockImplementation(() =>
+  Promise.resolve()
+)
+const peraResumeSession = spyOn(PeraWallet.prototype, 'resumeSession').mockImplementation(() =>
+  Promise.resolve()
+)
+
 describe('WalletManager', () => {
   beforeEach(() => {
-    localStorageMock.clear()
+    localStorage.clear()
   })
 
   describe('constructor', () => {
@@ -173,36 +176,33 @@ describe('WalletManager', () => {
 
   describe('activeWallet', () => {
     const serializedState = {
-      wallets: {
-        _type: 'Map',
-        data: [
-          [
-            'pera',
-            {
-              accounts: [
-                {
-                  name: 'Pera Wallet 1',
-                  address: '7ZUECA7HFLZTXENRV24SHLU4AVPUTMTTDUFUBNBD64C73F3UHRTHAIOF6Q'
-                },
-                {
-                  name: 'Pera Wallet 2',
-                  address: 'N2C374IRX7HEX2YEQWJBTRSVRHRUV4ZSF76S54WV4COTHRUNYRCI47R3WU'
-                }
-              ],
-              activeAccount: {
+      wallets: new Map([
+        [
+          'pera',
+          {
+            accounts: [
+              {
                 name: 'Pera Wallet 1',
                 address: '7ZUECA7HFLZTXENRV24SHLU4AVPUTMTTDUFUBNBD64C73F3UHRTHAIOF6Q'
+              },
+              {
+                name: 'Pera Wallet 2',
+                address: 'N2C374IRX7HEX2YEQWJBTRSVRHRUV4ZSF76S54WV4COTHRUNYRCI47R3WU'
               }
+            ],
+            activeAccount: {
+              name: 'Pera Wallet 1',
+              address: '7ZUECA7HFLZTXENRV24SHLU4AVPUTMTTDUFUBNBD64C73F3UHRTHAIOF6Q'
             }
-          ]
+          }
         ]
-      },
+      ]),
       activeWallet: 'pera',
       activeNetwork: 'testnet'
     }
 
     beforeEach(() => {
-      localStorageMock.setItem('@txnlab/use-wallet', JSON.stringify(serializedState))
+      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(serializedState, replacer))
     })
 
     it('returns the active wallet', () => {
@@ -213,7 +213,7 @@ describe('WalletManager', () => {
     })
 
     it('returns null if no active wallet', () => {
-      localStorageMock.clear()
+      localStorage.clear()
 
       const manager = new WalletManager({
         wallets: [WalletId.DEFLY, WalletId.PERA]
