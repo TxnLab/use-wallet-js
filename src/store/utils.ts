@@ -1,14 +1,14 @@
-import { NetworkId } from 'src/network'
+import { isValidNetworkId } from 'src/network'
 import { WalletId, type WalletAccount } from 'src/wallets'
 import type { State, WalletState } from './types'
 
 // Type guards
 
-function isValidWalletId(walletId: any): walletId is WalletId {
+export function isValidWalletId(walletId: any): walletId is WalletId {
   return Object.values(WalletId).includes(walletId)
 }
 
-function isValidWalletAccount(account: any): account is WalletAccount {
+export function isValidWalletAccount(account: any): account is WalletAccount {
   return (
     typeof account === 'object' &&
     account !== null &&
@@ -17,7 +17,7 @@ function isValidWalletAccount(account: any): account is WalletAccount {
   )
 }
 
-function isValidWalletState(wallet: any): wallet is WalletState {
+export function isValidWalletState(wallet: any): wallet is WalletState {
   return (
     typeof wallet === 'object' &&
     wallet !== null &&
@@ -25,10 +25,6 @@ function isValidWalletState(wallet: any): wallet is WalletState {
     wallet.accounts.every(isValidWalletAccount) &&
     (wallet.activeAccount === null || isValidWalletAccount(wallet.activeAccount))
   )
-}
-
-function isValidNetworkId(networkId: any): networkId is NetworkId {
-  return Object.values(NetworkId).includes(networkId)
 }
 
 export function isValidState(state: any): state is State {

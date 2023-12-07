@@ -68,7 +68,7 @@ export class Store<TState extends object> {
 
   public dispatch(actionKey: StoreActions, payload: any): boolean {
     if (typeof this.actions[actionKey] !== 'function') {
-      console.error(`[Store] Action "${actionKey}" doesn't exist.`)
+      console.error(`[Store] Action "${actionKey}" doesn't exist`)
       return false
     }
 
@@ -84,7 +84,7 @@ export class Store<TState extends object> {
 
   public commit(mutationKey: StoreMutations, payload: any): boolean {
     if (typeof this.mutations[mutationKey] !== 'function') {
-      console.log(`Mutation "${mutationKey}" doesn't exist`)
+      console.error(`[Store] Mutation "${mutationKey}" doesn't exist`)
       return false
     }
     console.info(`[Store] MUTATION: ${mutationKey}`, payload)
