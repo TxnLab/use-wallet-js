@@ -175,10 +175,10 @@ describe('WalletManager', () => {
   })
 
   describe('activeWallet', () => {
-    const serializedState = {
+    const initialState = {
       wallets: new Map([
         [
-          'pera',
+          WalletId.PERA,
           {
             accounts: [
               {
@@ -197,12 +197,12 @@ describe('WalletManager', () => {
           }
         ]
       ]),
-      activeWallet: 'pera',
-      activeNetwork: 'testnet'
+      activeWallet: WalletId.PERA,
+      activeNetwork: NetworkId.TESTNET
     }
 
     beforeEach(() => {
-      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(serializedState, replacer))
+      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(initialState, replacer))
     })
 
     it('returns the active wallet', () => {
