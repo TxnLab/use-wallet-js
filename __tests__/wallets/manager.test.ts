@@ -22,9 +22,11 @@ const localStorageMock = (() => {
     clear: () => (store = {})
   }
 })()
-Object.defineProperty(global, 'localStorage', {
-  value: localStorageMock
-})
+if (!localStorage) {
+  Object.defineProperty(global, 'localStorage', {
+    value: localStorageMock
+  })
+}
 
 const deflyResumeSession = spyOn(DeflyWallet.prototype, 'resumeSession').mockImplementation(() =>
   Promise.resolve()

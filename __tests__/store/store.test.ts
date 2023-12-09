@@ -1,9 +1,30 @@
-import { Mock, beforeEach, describe, expect, it } from 'bun:test'
+import { Mock, beforeEach, describe, expect, it, spyOn } from 'bun:test'
 import { NetworkId } from 'src/network/constants'
 import { StoreActions, StoreMutations, createStore, defaultState } from 'src/store'
 import { LOCAL_STORAGE_KEY } from 'src/store/constants'
 import { replacer } from 'src/store/utils'
 import { WalletId } from 'src/wallets/supported/constants'
+
+// Suppress console output
+spyOn(console, 'info').mockImplementation(() => {})
+spyOn(console, 'warn').mockImplementation(() => {})
+spyOn(console, 'error').mockImplementation(() => {})
+spyOn(console, 'groupCollapsed').mockImplementation(() => {})
+
+// Mock localStorage
+const localStorageMock = (() => {
+  let store: Record<string, any> = {}
+  return {
+    getItem: (key: string) => store[key] || null,
+    setItem: (key: string, value: any) => (store[key] = value.toString()),
+    clear: () => (store = {})
+  }
+})()
+if (!localStorage) {
+  Object.defineProperty(global, 'localStorage', {
+    value: localStorageMock
+  })
+}
 
 describe('Store', () => {
   beforeEach(() => {
