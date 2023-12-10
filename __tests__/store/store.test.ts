@@ -20,7 +20,7 @@ const localStorageMock = (() => {
     clear: () => (store = {})
   }
 })()
-if (!localStorage) {
+if (typeof localStorage === 'undefined') {
   Object.defineProperty(global, 'localStorage', {
     value: localStorageMock
   })
