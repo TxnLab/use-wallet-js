@@ -312,18 +312,18 @@ describe('DeflyWallet', () => {
       })
 
       it('should correctly process and sign a single algosdk.Transaction', async () => {
-        const mockSignTransactions = jest
+        const mockSignTransaction = jest
           .fn<() => Promise<Uint8Array[]>>()
           .mockImplementation(() => Promise.resolve([mockSignedTxn]))
 
         jest
           .spyOn(DeflyWalletConnect.prototype, 'signTransaction')
-          .mockImplementation(mockSignTransactions)
+          .mockImplementation(mockSignTransaction)
 
         const result = await wallet.signTransactions([txn1])
 
         expect(result).toEqual([mockSignedTxn])
-        expect(mockSignTransactions).toHaveBeenCalledWith([
+        expect(mockSignTransaction).toHaveBeenCalledWith([
           [
             {
               txn: algosdk.decodeUnsignedTransaction(algosdk.encodeUnsignedTransaction(txn1))
@@ -333,19 +333,19 @@ describe('DeflyWallet', () => {
       })
 
       it('should correctly process and sign a single algosdk.Transaction group', async () => {
-        const mockSignTransactions = jest
+        const mockSignTransaction = jest
           .fn<() => Promise<Uint8Array[]>>()
           .mockImplementation(() => Promise.resolve([mockSignedTxn, mockSignedTxn]))
 
         jest
           .spyOn(DeflyWalletConnect.prototype, 'signTransaction')
-          .mockImplementation(mockSignTransactions)
+          .mockImplementation(mockSignTransaction)
 
         const txnGroup = algosdk.assignGroupID([txn1, txn2])
         const result = await wallet.signTransactions(txnGroup)
 
         expect(result).toEqual([mockSignedTxn, mockSignedTxn])
-        expect(mockSignTransactions).toHaveBeenCalledWith([
+        expect(mockSignTransaction).toHaveBeenCalledWith([
           [
             {
               txn: algosdk.decodeUnsignedTransaction(
@@ -362,13 +362,13 @@ describe('DeflyWallet', () => {
       })
 
       it('should correctly process and sign multiple algosdk.Transaction groups', async () => {
-        const mockSignTransactions = jest
+        const mockSignTransaction = jest
           .fn<() => Promise<Uint8Array[]>>()
           .mockImplementation(() => Promise.resolve([mockSignedTxn, mockSignedTxn]))
 
         jest
           .spyOn(DeflyWalletConnect.prototype, 'signTransaction')
-          .mockImplementation(mockSignTransactions)
+          .mockImplementation(mockSignTransaction)
 
         const txnGroup1 = algosdk.assignGroupID([txn1])
         const txnGroup2 = algosdk.assignGroupID([txn2])
@@ -376,7 +376,7 @@ describe('DeflyWallet', () => {
         const result = await wallet.signTransactions([txnGroup1, txnGroup2])
 
         expect(result).toEqual([mockSignedTxn, mockSignedTxn])
-        expect(mockSignTransactions).toHaveBeenCalledWith([
+        expect(mockSignTransaction).toHaveBeenCalledWith([
           [
             {
               txn: algosdk.decodeUnsignedTransaction(
@@ -393,19 +393,19 @@ describe('DeflyWallet', () => {
       })
 
       it('should correctly process and sign a single encoded transaction', async () => {
-        const mockSignTransactions = jest
+        const mockSignTransaction = jest
           .fn<() => Promise<Uint8Array[]>>()
           .mockImplementation(() => Promise.resolve([mockSignedTxn]))
 
         jest
           .spyOn(DeflyWalletConnect.prototype, 'signTransaction')
-          .mockImplementation(mockSignTransactions)
+          .mockImplementation(mockSignTransaction)
 
         const encodedTxn = txn1.toByte()
         const result = await wallet.signTransactions([encodedTxn])
 
         expect(result).toEqual([mockSignedTxn])
-        expect(mockSignTransactions).toHaveBeenCalledWith([
+        expect(mockSignTransaction).toHaveBeenCalledWith([
           [
             {
               txn: algosdk.decodeUnsignedTransaction(encodedTxn)
@@ -415,13 +415,13 @@ describe('DeflyWallet', () => {
       })
 
       it('should correctly process and sign a single encoded transaction group', async () => {
-        const mockSignTransactions = jest
+        const mockSignTransaction = jest
           .fn<() => Promise<Uint8Array[]>>()
           .mockImplementation(() => Promise.resolve([mockSignedTxn, mockSignedTxn]))
 
         jest
           .spyOn(DeflyWalletConnect.prototype, 'signTransaction')
-          .mockImplementation(mockSignTransactions)
+          .mockImplementation(mockSignTransaction)
 
         const txnGroup = algosdk.assignGroupID([txn1, txn2])
         const encodedTxnGroup = txnGroup.map((txn) => txn.toByte())
@@ -429,7 +429,7 @@ describe('DeflyWallet', () => {
         const result = await wallet.signTransactions(encodedTxnGroup)
 
         expect(result).toEqual([mockSignedTxn, mockSignedTxn])
-        expect(mockSignTransactions).toHaveBeenCalledWith([
+        expect(mockSignTransaction).toHaveBeenCalledWith([
           [
             {
               txn: algosdk.decodeUnsignedTransaction(encodedTxnGroup[0]!)
@@ -442,13 +442,13 @@ describe('DeflyWallet', () => {
       })
 
       it('should correctly process and sign multiple encoded transaction groups', async () => {
-        const mockSignTransactions = jest
+        const mockSignTransaction = jest
           .fn<() => Promise<Uint8Array[]>>()
           .mockImplementation(() => Promise.resolve([mockSignedTxn, mockSignedTxn]))
 
         jest
           .spyOn(DeflyWalletConnect.prototype, 'signTransaction')
-          .mockImplementation(mockSignTransactions)
+          .mockImplementation(mockSignTransaction)
 
         const txnGroup1 = algosdk.assignGroupID([txn1])
         const encodedTxnGroup1 = txnGroup1.map((txn) => txn.toByte())
@@ -459,7 +459,7 @@ describe('DeflyWallet', () => {
         const result = await wallet.signTransactions([encodedTxnGroup1, encodedTxnGroup2])
 
         expect(result).toEqual([mockSignedTxn, mockSignedTxn])
-        expect(mockSignTransactions).toHaveBeenCalledWith([
+        expect(mockSignTransaction).toHaveBeenCalledWith([
           [
             {
               txn: algosdk.decodeUnsignedTransaction(encodedTxnGroup1[0]!)
@@ -472,13 +472,13 @@ describe('DeflyWallet', () => {
       })
 
       it('should determine which transactions to sign based on indexesToSign', async () => {
-        const mockSignTransactions = jest
+        const mockSignTransaction = jest
           .fn<() => Promise<Uint8Array[]>>()
           .mockImplementation(() => Promise.resolve([mockSignedTxn]))
 
         jest
           .spyOn(DeflyWalletConnect.prototype, 'signTransaction')
-          .mockImplementation(mockSignTransactions)
+          .mockImplementation(mockSignTransaction)
 
         const txnGroup = algosdk.assignGroupID([txn1, txn2])
         const indexesToSign = [1]
@@ -489,7 +489,7 @@ describe('DeflyWallet', () => {
         const result = await wallet.signTransactions(txnGroup, indexesToSign, returnGroup)
 
         expect(result).toEqual(expectedResult)
-        expect(mockSignTransactions).toHaveBeenCalledWith([
+        expect(mockSignTransaction).toHaveBeenCalledWith([
           [
             {
               txn: algosdk.decodeUnsignedTransaction(
@@ -507,13 +507,13 @@ describe('DeflyWallet', () => {
       })
 
       it('should correctly merge signed transactions back into the original group', async () => {
-        const mockSignTransactions = jest
+        const mockSignTransaction = jest
           .fn<() => Promise<Uint8Array[]>>()
           .mockImplementation(() => Promise.resolve([mockSignedTxn]))
 
         jest
           .spyOn(DeflyWalletConnect.prototype, 'signTransaction')
-          .mockImplementation(mockSignTransactions)
+          .mockImplementation(mockSignTransaction)
 
         const txnGroup = algosdk.assignGroupID([txn1, txn2])
         const returnGroup = true // Merge signed transaction back into original group
@@ -557,13 +557,13 @@ describe('DeflyWallet', () => {
           amount: 3000
         })
 
-        const mockSignTransactions = jest
+        const mockSignTransaction = jest
           .fn<() => Promise<Uint8Array[]>>()
           .mockImplementation(() => Promise.resolve([mockSignedTxn, mockSignedTxn]))
 
         jest
           .spyOn(DeflyWalletConnect.prototype, 'signTransaction')
-          .mockImplementation(mockSignTransactions)
+          .mockImplementation(mockSignTransaction)
 
         // txnGroup[1] can't be signed
         const txnGroup = algosdk.assignGroupID([txnCanSign1, txnCannotSign, txnCanSign2])
@@ -578,7 +578,7 @@ describe('DeflyWallet', () => {
         const result = await wallet.signTransactions(txnGroup)
 
         expect(result).toEqual(expectedResult)
-        expect(mockSignTransactions).toHaveBeenCalledWith([
+        expect(mockSignTransaction).toHaveBeenCalledWith([
           [
             {
               txn: algosdk.decodeUnsignedTransaction(
