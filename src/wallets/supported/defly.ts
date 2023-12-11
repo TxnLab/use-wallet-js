@@ -61,7 +61,7 @@ export class DeflyWallet extends BaseWallet {
       const accounts = await client.connect()
 
       if (accounts.length === 0) {
-        throw new Error('[DeflyWallet] No accounts found!')
+        throw new Error('No accounts found!')
       }
 
       const walletAccounts = accounts.map((address: string, idx: number) => ({
@@ -84,7 +84,7 @@ export class DeflyWallet extends BaseWallet {
       return walletAccounts
     } catch (error: any) {
       if (error?.data?.type !== 'CONNECT_MODAL_CLOSED') {
-        console.error('[DeflyWallet] Error connecting:', error)
+        console.error(`[DeflyWallet] Error connecting: ${error.message}`)
       } else {
         console.info('[DeflyWallet] Connection cancelled.')
       }
