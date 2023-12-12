@@ -78,6 +78,7 @@
     "@walletconnect/modal": "^2.6.2",
     "@walletconnect/sign-client": "^2.10.2",
     "@walletconnect/types": "^2.10.2",
+    "algo-msgpack-with-bigint": "^2.1.1",
     "bun-types": "^1.0.15",
     "eslint": "^8.50.0",
     "eslint-config-prettier": "^9.0.0",

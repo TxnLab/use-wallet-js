@@ -51,7 +51,7 @@ describe('DeflyWallet', () => {
   afterEach(async () => {
     await wallet.disconnect()
     localStorage.clear()
-    jest.resetAllMocks()
+    jest.clearAllMocks()
   })
 
   describe('connect', () => {
