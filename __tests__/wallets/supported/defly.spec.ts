@@ -20,11 +20,9 @@ const localStorageMock = (() => {
     clear: () => (store = {})
   }
 })()
-if (typeof global.localStorage === 'undefined') {
-  Object.defineProperty(global, 'localStorage', {
-    value: localStorageMock
-  })
-}
+Object.defineProperty(global, 'localStorage', {
+  value: localStorageMock
+})
 
 describe('DeflyWallet', () => {
   let wallet: DeflyWallet
@@ -116,6 +114,7 @@ describe('DeflyWallet', () => {
       // Connect first to initialize client
       await wallet.connect()
       expect(wallet.isConnected).toBe(true)
+      expect(store.getState().wallets.get(WalletId.DEFLY)).toBeDefined()
 
       await wallet.disconnect()
       expect(wallet.isConnected).toBe(false)

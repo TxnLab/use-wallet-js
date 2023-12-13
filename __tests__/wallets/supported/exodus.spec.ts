@@ -128,6 +128,7 @@ describe('ExodusWallet', () => {
       // Connect first to initialize client
       await wallet.connect()
       expect(wallet.isConnected).toBe(true)
+      expect(store.getState().wallets.get(WalletId.EXODUS)).toBeDefined()
 
       await wallet.disconnect()
       expect(wallet.isConnected).toBe(false)

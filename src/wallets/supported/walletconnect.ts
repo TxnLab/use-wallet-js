@@ -128,6 +128,10 @@ export class WalletConnect extends BaseWallet {
   private onSessionConnected(session: SessionTypes.Struct): WalletAccount[] {
     const caipAccounts = session.namespaces.algorand!.accounts
 
+    if (!caipAccounts.length) {
+      throw new Error('No accounts found!')
+    }
+
     // @todo: Validate format of CAIP-10 accounts
 
     // Filter duplicate accounts (same address, different chain)
@@ -155,7 +159,7 @@ export class WalletConnect extends BaseWallet {
       const match = compareAccounts(walletAccounts, walletState.accounts)
 
       if (!match) {
-        console.warn(`[WalletConnect] Updating accounts`)
+        console.warn(`[WalletConnect] Session accounts mismatch, updating accounts`)
         this.store.dispatch(StoreActions.SET_ACCOUNTS, {
           walletId: this.id,
           accounts: walletAccounts
@@ -196,7 +200,7 @@ export class WalletConnect extends BaseWallet {
 
       return walletAccounts
     } catch (error: any) {
-      console.error('[WalletConnect] Error connecting:', error)
+      console.error(`[WalletConnect] Error connecting: ${error.message}`)
       return []
     } finally {
       this.modal?.closeModal()
@@ -205,17 +209,13 @@ export class WalletConnect extends BaseWallet {
 
   public async disconnect(): Promise<void> {
     console.info('[WalletConnect] Disconnecting...')
-    if (!this.client) {
-      throw new Error('[WalletConnect] Client not initialized')
-    }
-    if (!this.session) {
-      throw new Error('[WalletConnect] Session is not connected')
-    }
     try {
-      await this.client.disconnect({
-        topic: this.session.topic,
-        reason: getSdkError('USER_DISCONNECTED')
-      })
+      if (this.client && this.session) {
+        await this.client.disconnect({
+          topic: this.session.topic,
+          reason: getSdkError('USER_DISCONNECTED')
+        })
+      }
       this.onDisconnect()
     } catch (error: any) {
       console.error(error)
