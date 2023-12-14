@@ -24,7 +24,6 @@
     "pera",
     "defly",
     "exodus",
-    "myalgo",
     "algosdk",
     "kmd"
   ],
@@ -39,7 +38,6 @@
   "peerDependencies": {
     "@blockshake/defly-connect": "^1.1.6",
     "@perawallet/connect": "^1.3.3",
-    "@randlabs/myalgo-connect": "^1.4.2",
     "@walletconnect/modal": "^2.6.2",
     "@walletconnect/sign-client": "^2.10.2"
   },
@@ -48,9 +46,6 @@
       "optional": true
     },
     "@perawallet/connect": {
-      "optional": true
-    },
-    "@randlabs/myalgo-connect": {
       "optional": true
     },
     "@walletconnect/modal": {
@@ -69,7 +64,6 @@
     "@blockshake/defly-connect": "^1.1.6",
     "@jest/globals": "^29.7.0",
     "@perawallet/connect": "^1.3.3",
-    "@randlabs/myalgo-connect": "^1.4.2",
     "@types/jest": "^29.5.10",
     "@types/node": "^20.6.5",
     "@types/web": "^0.0.125",

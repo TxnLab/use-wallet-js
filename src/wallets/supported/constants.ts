@@ -5,7 +5,6 @@ export enum WalletId {
   EXODUS = 'exodus',
   KMD = 'kmd',
   MNEMONIC = 'mnemonic',
-  MYALGO = 'myalgo',
   PERA = 'pera',
   WALLETCONNECT = 'walletconnect'
 }

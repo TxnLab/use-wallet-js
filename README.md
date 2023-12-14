@@ -55,7 +55,7 @@ npm install @txnlab/use-wallet-js
 Install peer dependencies:
 
 ```bash
-npm install @blockshake/defly-connect @perawallet/connect @randlabs/myalgo-connect @walletconnect/modal @walletconnect/sign-client @walletconnect/types algosdk
+npm install @blockshake/defly-connect @perawallet/connect @walletconnect/modal @walletconnect/sign-client @walletconnect/types algosdk
 ```
 
 ## Configuration
@@ -69,7 +69,6 @@ const walletManager = new WalletManager({
   wallets: [
     WalletId.DEFLY,
     WalletId.EXODUS,
-    WalletId.MYALGO,
     WalletId.PERA,
     {
       id: WalletId.WALLETCONNECT,
@@ -303,7 +302,6 @@ const walletManager = new WalletManager({
   wallets: [
     WalletId.DEFLY,
     WalletId.EXODUS,
-    WalletId.MYALGO,
     WalletId.PERA,
     {
       id: WalletId.WALLETCONNECT,

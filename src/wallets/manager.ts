@@ -125,6 +125,10 @@ export class WalletManager {
     return [...this._wallets.values()]
   }
 
+  public getWallet(walletId: WalletId): BaseWallet | undefined {
+    return this._wallets.get(walletId)
+  }
+
   public async resumeSessions(): Promise<void> {
     const promises = this.wallets.map((wallet) => wallet?.resumeSession())
     await Promise.all(promises)
