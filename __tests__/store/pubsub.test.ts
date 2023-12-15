@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, jest } from 'bun:test'
+import { beforeEach, describe, expect, it, jest } from '@jest/globals'
 import { PubSub } from 'src/store/pubsub'
 
 describe('PubSub', () => {

@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, jest, spyOn } from 'bun:test'
+import { beforeEach, describe, expect, it, jest } from '@jest/globals'
 import { NetworkId } from 'src/network/constants'
 import { LOCAL_STORAGE_KEY } from 'src/store/constants'
 import { replacer } from 'src/store/utils'
@@ -8,10 +8,10 @@ import { DeflyWallet } from 'src/wallets/supported/defly'
 import { PeraWallet } from 'src/wallets/supported/pera'
 
 // Suppress console output
-spyOn(console, 'info').mockImplementation(() => {})
-spyOn(console, 'warn').mockImplementation(() => {})
-spyOn(console, 'error').mockImplementation(() => {})
-spyOn(console, 'groupCollapsed').mockImplementation(() => {})
+jest.spyOn(console, 'info').mockImplementation(() => {})
+jest.spyOn(console, 'warn').mockImplementation(() => {})
+jest.spyOn(console, 'error').mockImplementation(() => {})
+jest.spyOn(console, 'groupCollapsed').mockImplementation(() => {})
 
 // Mock localStorage
 const localStorageMock = (() => {
@@ -22,18 +22,16 @@ const localStorageMock = (() => {
     clear: () => (store = {})
   }
 })()
-if (typeof localStorage === 'undefined') {
-  Object.defineProperty(global, 'localStorage', {
-    value: localStorageMock
-  })
-}
+Object.defineProperty(global, 'localStorage', {
+  value: localStorageMock
+})
 
-const deflyResumeSession = spyOn(DeflyWallet.prototype, 'resumeSession').mockImplementation(() =>
-  Promise.resolve()
-)
-const peraResumeSession = spyOn(PeraWallet.prototype, 'resumeSession').mockImplementation(() =>
-  Promise.resolve()
-)
+const deflyResumeSession = jest
+  .spyOn(DeflyWallet.prototype, 'resumeSession')
+  .mockImplementation(() => Promise.resolve())
+const peraResumeSession = jest
+  .spyOn(PeraWallet.prototype, 'resumeSession')
+  .mockImplementation(() => Promise.resolve())
 
 describe('WalletManager', () => {
   beforeEach(() => {

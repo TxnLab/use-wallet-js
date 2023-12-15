@@ -1,4 +1,4 @@
-import { Mock, beforeEach, describe, expect, it, spyOn } from 'bun:test'
+import { beforeEach, describe, expect, it, jest } from '@jest/globals'
 import { NetworkId } from 'src/network/constants'
 import { StoreActions, StoreMutations, createStore, defaultState } from 'src/store'
 import { LOCAL_STORAGE_KEY } from 'src/store/constants'
@@ -6,10 +6,11 @@ import { replacer } from 'src/store/utils'
 import { WalletId } from 'src/wallets/supported/constants'
 
 // Suppress console output
-spyOn(console, 'info').mockImplementation(() => {})
-spyOn(console, 'warn').mockImplementation(() => {})
-spyOn(console, 'error').mockImplementation(() => {})
-spyOn(console, 'groupCollapsed').mockImplementation(() => {})
+jest.spyOn(console, 'info').mockImplementation(() => {})
+jest.spyOn(console, 'groupCollapsed').mockImplementation(() => {})
+
+// Mock console.error
+const mockConsoleError = jest.spyOn(console, 'error').mockImplementation(() => {})
 
 // Mock localStorage
 const localStorageMock = (() => {
@@ -20,16 +21,14 @@ const localStorageMock = (() => {
     clear: () => (store = {})
   }
 })()
-if (typeof localStorage === 'undefined') {
-  Object.defineProperty(global, 'localStorage', {
-    value: localStorageMock
-  })
-}
+Object.defineProperty(global, 'localStorage', {
+  value: localStorageMock
+})
 
 describe('Store', () => {
   beforeEach(() => {
     localStorage.clear()
-    ;(console.error as Mock<{ (...data: any[]): void }>).mockClear()
+    mockConsoleError.mockClear()
   })
 
   describe('Initialization', () => {

@@ -13,9 +13,7 @@
     "noEmit": true,
     "baseUrl": ".",
     "rootDir": ".",
-    "outDir": "dist",
-    "lib": ["ESNext", "DOM", "DOM.Iterable"],
-    "types": ["web", "bun-types"]
+    "outDir": "dist"
   },
   "exclude": ["node_modules", "dist"]
 }

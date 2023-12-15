@@ -12,7 +12,6 @@ module.exports = {
     ]
   },
   extensionsToTreatAsEsm: ['.ts'],
-  testRegex: '(/__tests__/.*\\.spec\\.ts$|(\\.|/)(spec)\\.ts$)', // Match .spec.ts files only
   moduleNameMapper: {
     // Map TypeScript path aliases
     '^src/(.*)$': '<rootDir>/src/$1',
