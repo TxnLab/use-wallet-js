@@ -1,6 +1,6 @@
 {
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": ["config:base"],
-  "semanticCommits": true,
   "ignoreDeps": [],
   "schedule": "before 3am on the first day of the month",
   "assignees": ["drichar"],
