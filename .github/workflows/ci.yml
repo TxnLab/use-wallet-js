@@ -47,16 +47,16 @@ jobs:
         run: pnpm -r install
 
       - name: Lint
-        run: pnpm -r run lint
+        run: pnpm lint
 
       - name: Prettier
-        run: pnpm -r run prettier
+        run: pnpm prettier
 
       - name: Typecheck
-        run: pnpm -r run typecheck
+        run: pnpm typecheck
 
       - name: Run tests
-        run: pnpm -r run test
+        run: pnpm test
 
       - name: Build
         run: pnpm -r run build

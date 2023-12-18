@@ -1,10 +1,6 @@
 {
   "name": "use-wallet-js",
-  "version": "0.0.0",
   "description": "use-wallet-js monorepo",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
   "keywords": [
     "algorand",
     "wallet",
@@ -17,5 +13,28 @@
     "kmd"
   ],
   "author": "Doug Richar <drichar@gmail.com>",
-  "license": "MIT"
+  "license": "MIT",
+  "workspaces": [
+    "packages/use-wallet-js",
+    "examples/use-wallet-example-vanilla-ts"
+  ],
+  "scripts": {
+    "build": "pnpm -r build",
+    "test": "pnpm -r test",
+    "lint": "pnpm -r lint",
+    "prettier": "pnpm -r prettier",
+    "typecheck": "pnpm -r typecheck"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/txnlab/use-wallet-js.git"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^6.7.2",
+    "@typescript-eslint/parser": "^6.7.2",
+    "eslint": "^8.50.0",
+    "eslint-config-prettier": "^9.0.0",
+    "eslint-plugin-prettier": "^5.0.1",
+    "prettier": "3.1.0"
+  }
 }
