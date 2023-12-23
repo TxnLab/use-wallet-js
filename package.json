@@ -10,17 +10,20 @@
     "exodus",
     "algosdk",
     "algokit",
-    "kmd"
+    "kmd",
+    "react"
   ],
   "author": "Doug Richar <drichar@gmail.com>",
   "license": "MIT",
   "workspaces": [
     "packages/use-wallet-js",
-    "examples/use-wallet-example-vanilla-ts"
+    "packages/use-wallet-react",
+    "examples/use-wallet-example-vanilla-ts",
+    "examples/use-wallet-example-react"
   ],
   "scripts": {
     "build": "pnpm -r build",
-    "test": "pnpm -r test",
+    "test": "pnpm -r --if-present test",
     "lint": "pnpm -r lint",
     "prettier": "pnpm -r prettier",
     "typecheck": "pnpm -r typecheck"

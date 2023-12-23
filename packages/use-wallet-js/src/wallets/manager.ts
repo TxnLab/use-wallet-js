@@ -21,7 +21,7 @@ import type {
   WalletOptions
 } from './types'
 
-interface ManagerConstructor {
+interface WalletManagerConfig {
   wallets: SupportedWallets
   network?: NetworkId
   algod?: NetworkConfig
@@ -33,7 +33,7 @@ export class WalletManager {
   private store: Store<State>
   private subscribers: Array<(state: State) => void> = []
 
-  constructor({ wallets, network = NetworkId.TESTNET, algod = {} }: ManagerConstructor) {
+  constructor({ wallets, network = NetworkId.TESTNET, algod = {} }: WalletManagerConfig) {
     this.store = createStore({
       ...defaultState,
       activeNetwork: network
