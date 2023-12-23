@@ -32,17 +32,17 @@ export class WalletComponent {
       <h4>
         ${this.wallet.metadata.name} ${this.wallet.isActive ? '[active]' : ''}
       </h4>
-      <div>
+      <div class="wallet-buttons">
         <button id="connect-button" type="button" ${this.wallet.isConnected ? 'disabled' : ''}>
-            Connect
+          Connect
         </button>
         <button id="disconnect-button" type="button" ${!this.wallet.isConnected ? 'disabled' : ''}>
-            Disconnect
+          Disconnect
         </button>
         <button id="set-active-button" type="button" ${
           !this.wallet.isConnected || this.wallet.isActive ? 'disabled' : ''
         }>
-            Set Active
+          Set Active
         </button>
       </div>
       ${

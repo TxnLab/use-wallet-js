@@ -28,7 +28,7 @@ appDiv!.innerHTML = `
     <a href="https://www.typescriptlang.org/" target="_blank">
       <img src="${typescriptLogo}" class="logo vanilla" alt="TypeScript logo" />
     </a>
-    <h1>use-wallet-js (Vanilla TS)</h1>
+    <h1>@txnlab/use-wallet-js</h1>
   </div>
 `
 
