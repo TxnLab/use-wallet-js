@@ -21,7 +21,7 @@ import type {
   WalletOptions
 } from './types'
 
-interface WalletManagerConfig {
+export interface WalletManagerConfig {
   wallets: SupportedWallets
   network?: NetworkId
   algod?: NetworkConfig

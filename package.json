@@ -18,8 +18,10 @@
   "workspaces": [
     "packages/use-wallet-js",
     "packages/use-wallet-react",
+    "packages/use-wallet-vue",
     "examples/use-wallet-example-vanilla-ts",
-    "examples/use-wallet-example-react"
+    "examples/use-wallet-example-react",
+    "examples/use-wallet-example-vue"
   ],
   "scripts": {
     "build": "pnpm -r build",

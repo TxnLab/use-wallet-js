@@ -1,12 +1,17 @@
-'use client'
-
+import { type State, WalletManager } from '@txnlab/use-wallet-js'
 import type algosdk from 'algosdk'
-import { useWalletManager } from './WalletProvider'
+import { inject, computed } from 'vue'
 
 export function useWallet() {
-  const { manager, state } = useWalletManager()
+  const manager = inject<WalletManager>('walletManager')
+  const state = inject<State>('walletState')
 
-  const { activeNetwork, activeWallet } = state
+  if (!manager || !state) {
+    throw new Error('WalletManager plugin is not properly installed')
+  }
+
+  const activeNetwork = computed(() => state.activeNetwork)
+  const activeWallet = computed(() => state.activeWallet)
 
   const wallets = manager.wallets
   const algodClient: algosdk.Algodv2 = manager.algodClient
@@ -23,14 +28,14 @@ export function useWallet() {
     indexesToSign?: number[],
     returnGroup?: boolean
   ) => {
-    if (!activeWallet) {
+    if (!activeWallet.value) {
       throw new Error('No active wallet')
     }
     return manager.signTransactions(txnGroup, indexesToSign, returnGroup)
   }
 
   const transactionSigner = (txnGroup: algosdk.Transaction[], indexesToSign: number[]) => {
-    if (!activeWallet) {
+    if (!activeWallet.value) {
       throw new Error('No active wallet')
     }
     return manager.transactionSigner(txnGroup, indexesToSign)
@@ -39,10 +44,10 @@ export function useWallet() {
   return {
     wallets,
     algodClient,
-    activeNetwork,
+    activeNetwork: activeNetwork.value,
     blockExplorer,
     chainId,
-    activeWallet,
+    activeWallet: activeWallet.value,
     activeWalletAccounts,
     activeWalletAddresses,
     activeAccount,
