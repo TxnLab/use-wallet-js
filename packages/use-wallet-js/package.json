@@ -7,7 +7,7 @@
   "scripts": {
     "build": "tsup",
     "start": "tsup src/index.ts --watch",
-    "test": "node --experimental-vm-modules --no-warnings=ExperimentalWarning node_modules/jest/bin/jest.js",
+    "test": "node --experimental-vm-modules --no-warnings=ExperimentalWarning node_modules/jest/bin/jest.js --no-watchman",
     "lint": "eslint -c '../../.eslintrc.json' '**/*.{js,ts}'",
     "prettier": "prettier --check '**/*.{js,ts}'",
     "typecheck": "tsc --noEmit"
