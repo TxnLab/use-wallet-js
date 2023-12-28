@@ -1,7 +1,8 @@
+import { Store } from '@tanstack/store'
 import { DeflyWalletConnect } from '@blockshake/defly-connect'
 import { afterEach, beforeEach, describe, expect, it, jest } from '@jest/globals'
 import algosdk from 'algosdk'
-import { State, Store, createStore, defaultState } from 'src/store'
+import { State, defaultState } from 'src/store'
 import { WalletId } from 'src/wallets/supported/constants'
 import { DeflyWallet } from 'src/wallets/supported/defly'
 
@@ -36,13 +37,12 @@ describe('DeflyWallet', () => {
   )
 
   beforeEach(() => {
-    store = createStore(defaultState)
+    store = new Store<State>(defaultState)
     wallet = new DeflyWallet({
       id: WalletId.DEFLY,
       metadata: {},
       store,
-      subscribe: mockSubscribe,
-      onStateChange: jest.fn()
+      subscribe: mockSubscribe
     })
   })
 
@@ -73,7 +73,7 @@ describe('DeflyWallet', () => {
 
       expect(wallet.isConnected).toBe(true)
       expect(accounts).toEqual([account1, account2])
-      expect(store.getState().wallets.get(WalletId.DEFLY)).toEqual({
+      expect(store.state.wallets.get(WalletId.DEFLY)).toEqual({
         accounts: [account1, account2],
         activeAccount: account1
       })
@@ -93,7 +93,7 @@ describe('DeflyWallet', () => {
         '[DeflyWallet] Error connecting: No accounts found!'
       )
       expect(accounts).toEqual([])
-      expect(store.getState().wallets.get(WalletId.DEFLY)).toBeUndefined()
+      expect(store.state.wallets.get(WalletId.DEFLY)).toBeUndefined()
     })
   })
 
@@ -114,13 +114,13 @@ describe('DeflyWallet', () => {
       // Connect first to initialize client
       await wallet.connect()
       expect(wallet.isConnected).toBe(true)
-      expect(store.getState().wallets.get(WalletId.DEFLY)).toBeDefined()
+      expect(store.state.wallets.get(WalletId.DEFLY)).toBeDefined()
 
       await wallet.disconnect()
       expect(wallet.isConnected).toBe(false)
 
       expect(mockDisconnect).toHaveBeenCalled()
-      expect(store.getState().wallets.get(WalletId.DEFLY)).toBeUndefined()
+      expect(store.state.wallets.get(WalletId.DEFLY)).toBeUndefined()
     })
   })
 
@@ -131,7 +131,7 @@ describe('DeflyWallet', () => {
         address: 'mockAddress1'
       }
 
-      store = createStore({
+      store = new Store<State>({
         ...defaultState,
         wallets: new Map([
           [
@@ -148,8 +148,7 @@ describe('DeflyWallet', () => {
         id: WalletId.DEFLY,
         metadata: {},
         store,
-        subscribe: mockSubscribe,
-        onStateChange: jest.fn()
+        subscribe: mockSubscribe
       })
 
       const mockReconnectSession = jest
@@ -168,14 +167,13 @@ describe('DeflyWallet', () => {
 
     it(`should not call the client's reconnectSession method if Defly wallet data is not found in the store`, async () => {
       // No wallets in store
-      store = createStore(defaultState)
+      store = new Store<State>(defaultState)
 
       wallet = new DeflyWallet({
         id: WalletId.DEFLY,
         metadata: {},
         store,
-        subscribe: mockSubscribe,
-        onStateChange: jest.fn()
+        subscribe: mockSubscribe
       })
 
       // Mock reconnectSession shouldn't be called
@@ -193,7 +191,7 @@ describe('DeflyWallet', () => {
 
     it('should update the store if accounts returned by the client do not match', async () => {
       // Store contains 'mockAddress1' and 'mockAddress2', with 'mockAddress1' as active
-      store = createStore({
+      store = new Store<State>({
         ...defaultState,
         wallets: new Map([
           [
@@ -222,8 +220,7 @@ describe('DeflyWallet', () => {
         id: WalletId.DEFLY,
         metadata: {},
         store,
-        subscribe: mockSubscribe,
-        onStateChange: jest.fn()
+        subscribe: mockSubscribe
       })
 
       // Client only returns 'mockAddress2' on reconnect, 'mockAddress1' is missing
@@ -242,7 +239,7 @@ describe('DeflyWallet', () => {
       )
 
       // Store now only contains 'mockAddress2', which is set as active
-      expect(store.getState().wallets.get(WalletId.DEFLY)).toEqual({
+      expect(store.state.wallets.get(WalletId.DEFLY)).toEqual({
         accounts: [
           {
             name: 'Defly Wallet 1', // auto-generated name

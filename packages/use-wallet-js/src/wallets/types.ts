@@ -1,5 +1,6 @@
+import { Store } from '@tanstack/store'
 import type algosdk from 'algosdk'
-import type { State, Store } from 'src/store'
+import type { State } from 'src/store'
 import type { WalletId, SupportedWallet, WalletOptionsMap } from './supported'
 
 export type WalletConfigMap = {
@@ -32,7 +33,6 @@ export interface BaseWalletConstructor {
   id: WalletId
   metadata: Partial<WalletMetadata> | undefined
   store: Store<State>
-  onStateChange: () => void
   subscribe: (callback: (state: State) => void) => () => void
 }
 

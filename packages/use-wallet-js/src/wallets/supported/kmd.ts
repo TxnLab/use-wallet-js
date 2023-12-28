@@ -1,5 +1,6 @@
+import { Store } from '@tanstack/store'
 import algosdk from 'algosdk'
-import { Store, StoreActions, type State } from 'src/store'
+import { addWallet, type State } from 'src/store'
 import { BaseWallet } from '../base'
 import { WalletId } from './constants'
 import {
@@ -60,17 +61,9 @@ export class KmdWallet extends BaseWallet {
   private password: string = ''
 
   protected store: Store<State>
-  protected notifySubscribers: () => void
 
-  constructor({
-    id,
-    store,
-    subscribe,
-    onStateChange,
-    options,
-    metadata = {}
-  }: WalletConstructor<WalletId.KMD>) {
-    super({ id, metadata, store, subscribe, onStateChange })
+  constructor({ id, store, subscribe, options, metadata = {} }: WalletConstructor<WalletId.KMD>) {
+    super({ id, metadata, store, subscribe })
 
     const {
       token = 'a'.repeat(64),
@@ -83,7 +76,6 @@ export class KmdWallet extends BaseWallet {
     this.walletName = wallet
 
     this.store = store
-    this.notifySubscribers = onStateChange
   }
 
   static defaultMetadata = { name: 'KMD', icon }
@@ -120,15 +112,13 @@ export class KmdWallet extends BaseWallet {
 
       const activeAccount = walletAccounts[0]!
 
-      this.store.dispatch(StoreActions.ADD_WALLET, {
+      addWallet(this.store, {
         walletId: this.id,
         wallet: {
           accounts: walletAccounts,
           activeAccount
         }
       })
-
-      this.notifySubscribers()
 
       await this.releaseToken(token)
 

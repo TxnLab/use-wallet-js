@@ -1,3 +1,4 @@
+import { Store } from '@tanstack/store'
 import algosdk from 'algosdk'
 import {
   defaultNetworkConfigMap,
@@ -7,7 +8,9 @@ import {
   type NetworkConfig,
   type NetworkConfigMap
 } from 'src/network'
-import { createStore, defaultState, Store, StoreActions, type State } from 'src/store'
+import { defaultState, removeWallet, setActiveWallet, type State } from 'src/store'
+import { LOCAL_STORAGE_KEY } from 'src/store/constants'
+import { isValidState, replacer, reviver } from 'src/store/utils'
 import { BaseWallet } from './base'
 import { WalletId, walletMap } from './supported'
 import { deepMerge } from './utils'
@@ -30,30 +33,62 @@ export interface WalletManagerConfig {
 export class WalletManager {
   private _wallets: Map<WalletId, BaseWallet> = new Map()
   private network: Network
-  private store: Store<State>
-  private subscribers: Array<(state: State) => void> = []
+
+  public store: Store<State>
+  public subscribe: (callback: (state: State) => void) => () => void
 
   constructor({ wallets, network = NetworkId.TESTNET, algod = {} }: WalletManagerConfig) {
-    this.store = createStore({
+    const initialState = this.loadPersistedState() || {
       ...defaultState,
       activeNetwork: network
+    }
+
+    this.store = new Store<State>(initialState, {
+      onUpdate: () => this.savePersistedState()
     })
+
+    this.savePersistedState()
+
+    this.subscribe = (callback: (state: State) => void): (() => void) => {
+      const unsubscribe = this.store.subscribe(() => {
+        callback(this.store.state)
+      })
+
+      return unsubscribe
+    }
+
     this.network = this.initializeNetwork(network, algod)
     this.initializeWallets(wallets)
   }
 
-  // ---------- Subscription ------------------------------------------ //
+  // ---------- Store ------------------------------------------------- //
 
-  public subscribe = (callback: (state: State) => void): (() => void) => {
-    this.subscribers.push(callback)
-    return () => {
-      this.subscribers = this.subscribers.filter((sub) => sub !== callback)
+  private loadPersistedState(): State | null {
+    try {
+      const serializedState = localStorage.getItem(LOCAL_STORAGE_KEY)
+      if (serializedState === null) {
+        return null
+      }
+      const parsedState = JSON.parse(serializedState, reviver)
+      if (!isValidState(parsedState)) {
+        console.warn('[Store] Parsed state:', parsedState)
+        throw new Error('Persisted state is invalid')
+      }
+      return parsedState as State
+    } catch (error: any) {
+      console.error(`[Store] Could not load state from local storage: ${error.message}`)
+      return null
     }
   }
 
-  private notifySubscribers = (): void => {
-    const state = this.store.getState()
-    this.subscribers.forEach((sub) => sub(state))
+  private savePersistedState(): void {
+    try {
+      const state = this.store.state
+      const serializedState = JSON.stringify(state, replacer)
+      localStorage.setItem(LOCAL_STORAGE_KEY, serializedState)
+    } catch (error) {
+      console.error('[Store] Could not save state to local storage:', error)
+    }
   }
 
   // ---------- Wallets ----------------------------------------------- //
@@ -91,33 +126,28 @@ export class WalletManager {
         metadata: walletMetadata,
         store: this.store,
         options: walletOptions as any,
-        subscribe: this.subscribe,
-        onStateChange: this.notifySubscribers
+        subscribe: this.subscribe
       })
 
       this._wallets.set(walletId, walletInstance)
       console.info(`[Manager] ✅ Initialized ${walletId}`)
     }
 
-    const state = this.store.getState()
+    const state = this.store.state
 
     // Check if connected wallets are still valid
     const connectedWallets = state.wallets.keys()
     for (const walletId of connectedWallets) {
       if (!this._wallets.has(walletId)) {
         console.warn(`[Manager] Connected wallet not found: ${walletId}`)
-        this.store.dispatch(StoreActions.REMOVE_WALLET, { walletId })
-
-        this.notifySubscribers()
+        removeWallet(this.store, { walletId })
       }
     }
 
     // Check if active wallet is still valid
     if (state.activeWallet && !this._wallets.has(state.activeWallet)) {
       console.warn(`[Manager] Active wallet not found: ${state.activeWallet}`)
-      this.store.dispatch(StoreActions.SET_ACTIVE_WALLET, { walletId: null })
-
-      this.notifySubscribers()
+      setActiveWallet(this.store, { walletId: null })
     }
   }
 
@@ -153,9 +183,7 @@ export class WalletManager {
 
     return new Network({
       config: networkConfig,
-      store: this.store,
-      subscribe: this.subscribe,
-      onStateChange: this.notifySubscribers
+      store: this.store
     })
   }
 
@@ -182,7 +210,7 @@ export class WalletManager {
   // ---------- Active Wallet ----------------------------------------- //
 
   public get activeWallet(): BaseWallet | null {
-    const state = this.store.getState()
+    const state = this.store.state
     const activeWallet = this.wallets.find((wallet) => wallet.id === state.activeWallet)
     if (!activeWallet) {
       return null

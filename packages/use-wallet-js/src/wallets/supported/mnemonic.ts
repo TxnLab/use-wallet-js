@@ -1,5 +1,6 @@
+import { Store } from '@tanstack/store'
 import algosdk from 'algosdk'
-import { Store, StoreActions, type State } from 'src/store'
+import { addWallet, type State } from 'src/store'
 import { BaseWallet } from '../base'
 import { WalletId } from './constants'
 import { isSignedTxnObject, normalizeTxnGroup } from '../utils'
@@ -16,23 +17,20 @@ export class MnemonicWallet extends BaseWallet {
   private options: MnemonicOptions
 
   protected store: Store<State>
-  protected notifySubscribers: () => void
 
   constructor({
     id,
     store,
     subscribe,
-    onStateChange,
     options,
     metadata = {}
   }: WalletConstructor<WalletId.MNEMONIC>) {
-    super({ id, metadata, store, subscribe, onStateChange })
+    super({ id, metadata, store, subscribe })
 
     const { persistToStorage = false } = options || {}
     this.options = { persistToStorage }
 
     this.store = store
-    this.notifySubscribers = onStateChange
   }
 
   static defaultMetadata = { name: 'Mnemonic', icon }
@@ -61,15 +59,13 @@ export class MnemonicWallet extends BaseWallet {
         address: account.addr
       }
 
-      this.store.dispatch(StoreActions.ADD_WALLET, {
+      addWallet(this.store, {
         walletId: this.id,
         wallet: {
           accounts: [walletAccount],
           activeAccount: walletAccount
         }
       })
-
-      this.notifySubscribers()
 
       return [walletAccount]
     } catch (error) {
@@ -89,7 +85,7 @@ export class MnemonicWallet extends BaseWallet {
   }
 
   public async resumeSession(): Promise<void> {
-    const state = this.store.getState()
+    const state = this.store.state
     const walletState = state.wallets.get(this.id)
 
     // Don't resume session, disconnect instead

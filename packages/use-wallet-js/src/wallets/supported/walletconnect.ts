@@ -1,7 +1,8 @@
+import { Store } from '@tanstack/store'
 import { getAppMetadata, getSdkError } from '@walletconnect/utils'
 import algosdk from 'algosdk'
 import { NetworkId, caipChainId } from 'src/network'
-import { Store, StoreActions, type State } from 'src/store'
+import { addWallet, setAccounts, type State } from 'src/store'
 import { BaseWallet } from '../base'
 import { WalletId } from './constants'
 import {
@@ -47,17 +48,15 @@ export class WalletConnect extends BaseWallet {
   private chains: string[]
 
   protected store: Store<State>
-  protected notifySubscribers: () => void
 
   constructor({
     id,
     store,
     subscribe,
-    onStateChange,
     options,
     metadata = {}
   }: WalletConstructor<WalletId.WALLETCONNECT>) {
-    super({ id, metadata, store, subscribe, onStateChange })
+    super({ id, metadata, store, subscribe })
     if (!options) {
       throw new Error('[WalletConnect] Options are required.')
     }
@@ -77,7 +76,6 @@ export class WalletConnect extends BaseWallet {
     this.modalOptions = modalOptions
     this.chains = Object.values(caipChainId)
     this.store = store
-    this.notifySubscribers = onStateChange
   }
 
   static defaultMetadata = { name: 'WalletConnect', icon }
@@ -142,30 +140,26 @@ export class WalletConnect extends BaseWallet {
       address
     }))
 
-    const state = this.store.getState()
+    const state = this.store.state
     const walletState = state.wallets.get(this.id)
 
     if (!walletState) {
-      this.store.dispatch(StoreActions.ADD_WALLET, {
+      addWallet(this.store, {
         walletId: this.id,
         wallet: {
           accounts: walletAccounts,
           activeAccount: walletAccounts[0]!
         }
       })
-
-      this.notifySubscribers()
     } else {
       const match = compareAccounts(walletAccounts, walletState.accounts)
 
       if (!match) {
         console.warn(`[WalletConnect] Session accounts mismatch, updating accounts`)
-        this.store.dispatch(StoreActions.SET_ACCOUNTS, {
+        setAccounts(this.store, {
           walletId: this.id,
           accounts: walletAccounts
         })
-
-        this.notifySubscribers()
       }
     }
 
@@ -224,7 +218,7 @@ export class WalletConnect extends BaseWallet {
 
   public async resumeSession(): Promise<void> {
     try {
-      const state = this.store.getState()
+      const state = this.store.state
       const walletState = state.wallets.get(this.id)
 
       // No session to resume

@@ -1,7 +1,8 @@
 import { beforeEach, describe, expect, it, jest } from '@jest/globals'
 import { NetworkId } from 'src/network/constants'
+import { defaultState } from 'src/store'
 import { LOCAL_STORAGE_KEY } from 'src/store/constants'
-import { replacer } from 'src/store/utils'
+import { replacer, reviver } from 'src/store/utils'
 import { WalletManager } from 'src/wallets/manager'
 import { WalletId } from 'src/wallets/supported/constants'
 import { DeflyWallet } from 'src/wallets/supported/defly'
@@ -9,9 +10,12 @@ import { PeraWallet } from 'src/wallets/supported/pera'
 
 // Suppress console output
 jest.spyOn(console, 'info').mockImplementation(() => {})
-jest.spyOn(console, 'warn').mockImplementation(() => {})
-jest.spyOn(console, 'error').mockImplementation(() => {})
-jest.spyOn(console, 'groupCollapsed').mockImplementation(() => {})
+
+// Mock console.warn
+const mockConsoleWarn = jest.spyOn(console, 'warn').mockImplementation(() => {})
+
+// Mock console.error
+const mockConsoleError = jest.spyOn(console, 'error').mockImplementation(() => {})
 
 // Mock localStorage
 const localStorageMock = (() => {
@@ -36,6 +40,7 @@ const peraResumeSession = jest
 describe('WalletManager', () => {
   beforeEach(() => {
     localStorage.clear()
+    jest.clearAllMocks()
   })
 
   describe('constructor', () => {
@@ -174,6 +179,92 @@ describe('WalletManager', () => {
     })
   })
 
+  describe('loadPersistedState', () => {
+    const initialState = {
+      wallets: new Map([
+        [
+          WalletId.PERA,
+          {
+            accounts: [
+              {
+                name: 'Pera Wallet 1',
+                address: '7ZUECA7HFLZTXENRV24SHLU4AVPUTMTTDUFUBNBD64C73F3UHRTHAIOF6Q'
+              },
+              {
+                name: 'Pera Wallet 2',
+                address: 'N2C374IRX7HEX2YEQWJBTRSVRHRUV4ZSF76S54WV4COTHRUNYRCI47R3WU'
+              }
+            ],
+            activeAccount: {
+              name: 'Pera Wallet 1',
+              address: '7ZUECA7HFLZTXENRV24SHLU4AVPUTMTTDUFUBNBD64C73F3UHRTHAIOF6Q'
+            }
+          }
+        ]
+      ]),
+      activeWallet: WalletId.PERA,
+      activeNetwork: NetworkId.BETANET
+    }
+
+    beforeEach(() => {
+      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(initialState, replacer))
+    })
+
+    it('loads persisted state correctly', () => {
+      const manager = new WalletManager({
+        wallets: [WalletId.DEFLY, WalletId.PERA]
+      })
+      expect(manager.store.state).toEqual(initialState)
+      expect(manager.activeWallet?.id).toBe(WalletId.PERA)
+      expect(manager.activeNetwork).toBe(NetworkId.BETANET)
+    })
+
+    it('returns null if no persisted state', () => {
+      localStorage.clear()
+
+      const manager = new WalletManager({
+        wallets: [WalletId.DEFLY, WalletId.PERA]
+      })
+
+      // Store initializes with default state if null is returned
+      expect(manager.store.state).toEqual(defaultState)
+      expect(manager.activeWallet).toBeNull()
+      expect(manager.activeNetwork).toBe(NetworkId.TESTNET)
+    })
+
+    it('returns null and logs warning and error if persisted state is invalid', () => {
+      const invalidState = { foo: 'bar' }
+      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(invalidState))
+
+      const manager = new WalletManager({
+        wallets: [WalletId.DEFLY, WalletId.PERA]
+      })
+      expect(mockConsoleWarn).toHaveBeenCalledWith('[Store] Parsed state:', invalidState)
+      expect(mockConsoleError).toHaveBeenCalledWith(
+        '[Store] Could not load state from local storage: Persisted state is invalid'
+      )
+      // Store initializes with default state if null is returned
+      expect(manager.store.state).toEqual(defaultState)
+    })
+  })
+
+  describe('savePersistedState', () => {
+    it('saves state to local storage', () => {
+      const manager = new WalletManager({
+        wallets: [WalletId.DEFLY, WalletId.PERA]
+      })
+      manager.setActiveNetwork(NetworkId.MAINNET)
+
+      const serializedState = localStorage.getItem(LOCAL_STORAGE_KEY)
+      expect(serializedState).toBeDefined()
+      expect(JSON.parse(serializedState!, reviver)).toEqual({
+        wallets: new Map(),
+        activeWallet: null,
+        activeNetwork: NetworkId.MAINNET
+      })
+    })
+  })
+
   describe('activeWallet', () => {
     const initialState = {
       wallets: new Map([
@@ -198,7 +289,7 @@ describe('WalletManager', () => {
         ]
       ]),
       activeWallet: WalletId.PERA,
-      activeNetwork: NetworkId.TESTNET
+      activeNetwork: NetworkId.BETANET
     }
 
     beforeEach(() => {

@@ -1,6 +1,7 @@
+import { Store } from '@tanstack/store'
 import algosdk from 'algosdk'
 import { NetworkId } from './constants'
-import type { State, Store } from 'src/store'
+import type { State } from 'src/store'
 
 export type NetworkLabelMap = Record<NetworkId, string>
 export type BlockExplorerMap = Record<NetworkId, string>
@@ -21,6 +22,4 @@ export type NetworkConfig = Partial<AlgodConfig> | Partial<Record<NetworkId, Par
 export interface NetworkConstructor {
   config: NetworkConfigMap
   store: Store<State>
-  onStateChange: () => void
-  subscribe: (callback: (state: State) => void) => () => void
 }

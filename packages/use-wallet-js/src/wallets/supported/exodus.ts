@@ -1,5 +1,6 @@
+import { Store } from '@tanstack/store'
 import algosdk from 'algosdk'
-import { Store, StoreActions, type State } from 'src/store'
+import { addWallet, type State } from 'src/store'
 import { BaseWallet } from '../base'
 import { WalletId } from './constants'
 import {
@@ -53,20 +54,17 @@ export class ExodusWallet extends BaseWallet {
   private options: ExodusOptions
 
   protected store: Store<State>
-  protected notifySubscribers: () => void
 
   constructor({
     id,
     store,
     subscribe,
-    onStateChange,
     options = {},
     metadata = {}
   }: WalletConstructor<WalletId.EXODUS>) {
-    super({ id, metadata, store, subscribe, onStateChange })
+    super({ id, metadata, store, subscribe })
     this.options = options
     this.store = store
-    this.notifySubscribers = onStateChange
   }
 
   static defaultMetadata = { name: 'Exodus', icon }
@@ -98,15 +96,13 @@ export class ExodusWallet extends BaseWallet {
 
       const activeAccount = walletAccounts[0]!
 
-      this.store.dispatch(StoreActions.ADD_WALLET, {
+      addWallet(this.store, {
         walletId: this.id,
         wallet: {
           accounts: walletAccounts,
           activeAccount
         }
       })
-
-      this.notifySubscribers()
 
       return walletAccounts
     } catch (error: any) {
@@ -125,7 +121,7 @@ export class ExodusWallet extends BaseWallet {
   }
 
   public async resumeSession(): Promise<void> {
-    const state = this.store.getState()
+    const state = this.store.state
     const walletState = state.wallets.get(this.id)
 
     if (!walletState) {

@@ -1,7 +1,8 @@
+import { Store } from '@tanstack/store'
 import { afterEach, beforeEach, describe, expect, it, jest } from '@jest/globals'
 import { PeraWalletConnect } from '@perawallet/connect'
 import algosdk from 'algosdk'
-import { State, Store, createStore, defaultState } from 'src/store'
+import { State, defaultState } from 'src/store'
 import { WalletId } from 'src/wallets/supported/constants'
 import { PeraWallet } from 'src/wallets/supported/pera'
 
@@ -36,13 +37,12 @@ describe('PeraWallet', () => {
   )
 
   beforeEach(() => {
-    store = createStore(defaultState)
+    store = new Store<State>(defaultState)
     wallet = new PeraWallet({
       id: WalletId.PERA,
       metadata: {},
       store,
-      subscribe: mockSubscribe,
-      onStateChange: jest.fn()
+      subscribe: mockSubscribe
     })
   })
 
@@ -73,7 +73,7 @@ describe('PeraWallet', () => {
 
       expect(wallet.isConnected).toBe(true)
       expect(accounts).toEqual([account1, account2])
-      expect(store.getState().wallets.get(WalletId.PERA)).toEqual({
+      expect(store.state.wallets.get(WalletId.PERA)).toEqual({
         accounts: [account1, account2],
         activeAccount: account1
       })
@@ -93,7 +93,7 @@ describe('PeraWallet', () => {
         '[PeraWallet] Error connecting: No accounts found!'
       )
       expect(accounts).toEqual([])
-      expect(store.getState().wallets.get(WalletId.PERA)).toBeUndefined()
+      expect(store.state.wallets.get(WalletId.PERA)).toBeUndefined()
     })
   })
 
@@ -114,13 +114,13 @@ describe('PeraWallet', () => {
       // Connect first to initialize client
       await wallet.connect()
       expect(wallet.isConnected).toBe(true)
-      expect(store.getState().wallets.get(WalletId.PERA)).toBeDefined()
+      expect(store.state.wallets.get(WalletId.PERA)).toBeDefined()
 
       await wallet.disconnect()
       expect(wallet.isConnected).toBe(false)
 
       expect(mockDisconnect).toHaveBeenCalled()
-      expect(store.getState().wallets.get(WalletId.PERA)).toBeUndefined()
+      expect(store.state.wallets.get(WalletId.PERA)).toBeUndefined()
     })
   })
 
@@ -131,7 +131,7 @@ describe('PeraWallet', () => {
         address: 'mockAddress1'
       }
 
-      store = createStore({
+      store = new Store<State>({
         ...defaultState,
         wallets: new Map([
           [
@@ -148,8 +148,7 @@ describe('PeraWallet', () => {
         id: WalletId.PERA,
         metadata: {},
         store,
-        subscribe: mockSubscribe,
-        onStateChange: jest.fn()
+        subscribe: mockSubscribe
       })
 
       const mockReconnectSession = jest
@@ -168,14 +167,13 @@ describe('PeraWallet', () => {
 
     it(`should not call the client's reconnectSession method if Pera wallet data is not found in the store`, async () => {
       // No wallets in store
-      store = createStore(defaultState)
+      store = new Store<State>(defaultState)
 
       wallet = new PeraWallet({
         id: WalletId.PERA,
         metadata: {},
         store,
-        subscribe: mockSubscribe,
-        onStateChange: jest.fn()
+        subscribe: mockSubscribe
       })
 
       // Mock reconnectSession shouldn't be called
@@ -193,7 +191,7 @@ describe('PeraWallet', () => {
 
     it('should update the store if accounts returned by the client do not match', async () => {
       // Store contains 'mockAddress1' and 'mockAddress2', with 'mockAddress1' as active
-      store = createStore({
+      store = new Store<State>({
         ...defaultState,
         wallets: new Map([
           [
@@ -222,8 +220,7 @@ describe('PeraWallet', () => {
         id: WalletId.PERA,
         metadata: {},
         store,
-        subscribe: mockSubscribe,
-        onStateChange: jest.fn()
+        subscribe: mockSubscribe
       })
 
       // Client only returns 'mockAddress2' on reconnect, 'mockAddress1' is missing
@@ -242,7 +239,7 @@ describe('PeraWallet', () => {
       )
 
       // Store now only contains 'mockAddress2', which is set as active
-      expect(store.getState().wallets.get(WalletId.PERA)).toEqual({
+      expect(store.state.wallets.get(WalletId.PERA)).toEqual({
         accounts: [
           {
             name: 'Pera Wallet 1', // auto-generated name

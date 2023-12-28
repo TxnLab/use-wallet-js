@@ -1,6 +1,7 @@
+import { Store } from '@tanstack/store'
 import algosdk from 'algosdk'
 import { NetworkId } from 'src/network'
-import { Store, StoreActions, type State } from 'src/store'
+import { type State, setActiveWallet, setActiveAccount, removeWallet } from 'src/store'
 import { WalletId } from './supported'
 import type { WalletAccount, WalletConstructor, WalletMetadata } from './types'
 
@@ -14,21 +15,13 @@ export abstract class BaseWallet {
   readonly metadata: WalletMetadata
 
   protected store: Store<State>
-  protected notifySubscribers: () => void
 
   public subscribe: (callback: (state: State) => void) => () => void
 
-  protected constructor({
-    id,
-    metadata,
-    store,
-    subscribe,
-    onStateChange
-  }: WalletConstructor<WalletId>) {
+  protected constructor({ id, metadata, store, subscribe }: WalletConstructor<WalletId>) {
     this.id = id
     this.store = store
     this.subscribe = subscribe
-    this.notifySubscribers = onStateChange
 
     const ctor = this.constructor as WalletConstructorType
     this.metadata = { ...ctor.defaultMetadata, ...metadata }
@@ -44,19 +37,15 @@ export abstract class BaseWallet {
 
   public setActive(): void {
     console.info(`[Wallet] Set active wallet: ${this.id}`)
-    this.store.dispatch(StoreActions.SET_ACTIVE_WALLET, { walletId: this.id })
-
-    this.notifySubscribers()
+    setActiveWallet(this.store, { walletId: this.id })
   }
 
   public setActiveAccount(account: string): void {
     console.info(`[Wallet] Set active account: ${account}`)
-    this.store.dispatch(StoreActions.SET_ACTIVE_ACCOUNT, {
+    setActiveAccount(this.store, {
       walletId: this.id,
       address: account
     })
-
-    this.notifySubscribers()
   }
 
   public abstract signTransactions(
@@ -73,7 +62,7 @@ export abstract class BaseWallet {
   // ---------- Derived Properties ------------------------------------ //
 
   public get accounts(): WalletAccount[] {
-    const state = this.store.getState()
+    const state = this.store.state
     const walletState = state.wallets.get(this.id)
     return walletState ? walletState.accounts : []
   }
@@ -83,7 +72,7 @@ export abstract class BaseWallet {
   }
 
   public get activeAccount(): WalletAccount | null {
-    const state = this.store.getState()
+    const state = this.store.state
     const walletState = state.wallets.get(this.id)
     return walletState ? walletState.activeAccount : null
   }
@@ -93,25 +82,24 @@ export abstract class BaseWallet {
   }
 
   public get activeNetwork(): NetworkId {
-    const state = this.store.getState()
+    const state = this.store.state
     return state.activeNetwork
   }
 
   public get isConnected(): boolean {
-    const state = this.store.getState()
+    const state = this.store.state
     const walletState = state.wallets.get(this.id)
     return walletState ? walletState.accounts.length > 0 : false
   }
 
   public get isActive(): boolean {
-    const state = this.store.getState()
+    const state = this.store.state
     return state.activeWallet === this.id
   }
 
   // ---------- Protected Methods ------------------------------------- //
 
   protected onDisconnect(): void {
-    this.store.dispatch(StoreActions.REMOVE_WALLET, { walletId: this.id })
-    this.notifySubscribers()
+    removeWallet(this.store, { walletId: this.id })
   }
 }

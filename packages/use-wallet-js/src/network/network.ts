@@ -1,34 +1,28 @@
+import { Store } from '@tanstack/store'
 import algosdk from 'algosdk'
 import { NetworkId, blockExplorer, caipChainId } from './constants'
-import { Store, StoreActions, type State } from 'src/store'
+import { setActiveNetwork, type State } from 'src/store'
 import type { AlgodConfig, NetworkConfigMap, NetworkConstructor } from './types'
 
 export class Network {
   private config: NetworkConfigMap
   private _algodClient: algosdk.Algodv2
   protected store: Store<State>
-  protected notifySubscribers: () => void
 
-  public subscribe: (callback: (state: State) => void) => () => void
-
-  constructor({ config, store, subscribe, onStateChange }: NetworkConstructor) {
+  constructor({ config, store }: NetworkConstructor) {
     this.config = config
     this.store = store
-    this.subscribe = subscribe
-    this.notifySubscribers = onStateChange
     this._algodClient = this.createAlgodClient(config[this.activeNetwork])
   }
 
   public setActiveNetwork(id: NetworkId): void {
     console.info(`[Network] Set active network: ${id}`)
-    this.store.dispatch(StoreActions.SET_ACTIVE_NETWORK, { networkId: id })
+    setActiveNetwork(this.store, { networkId: id })
     this._algodClient = this.createAlgodClient(this.config[id])
-
-    this.notifySubscribers()
   }
 
   public get activeNetwork(): NetworkId {
-    const state = this.store.getState()
+    const state = this.store.state
     return state.activeNetwork
   }
 

@@ -1,9 +1,10 @@
+import { Store } from '@tanstack/store'
 import { afterEach, beforeEach, describe, expect, it, jest } from '@jest/globals'
 import { ModalCtrl } from '@walletconnect/modal-core'
 import { EngineTypes, SessionTypes } from '@walletconnect/types'
 import * as msgpack from 'algo-msgpack-with-bigint'
 import algosdk from 'algosdk'
-import { State, Store, createStore, defaultState } from 'src/store'
+import { State, defaultState } from 'src/store'
 import { WalletId } from 'src/wallets/supported/constants'
 import { WalletConnect } from 'src/wallets/supported/walletconnect'
 import { WalletTransaction } from 'src/wallets/types'
@@ -125,7 +126,7 @@ describe('WalletConnect', () => {
   )
 
   beforeEach(() => {
-    store = createStore(defaultState)
+    store = new Store<State>(defaultState)
     wallet = new WalletConnect({
       id: WalletId.WALLETCONNECT,
       options: {
@@ -133,8 +134,7 @@ describe('WalletConnect', () => {
       },
       metadata: {},
       store,
-      subscribe: mockSubscribe,
-      onStateChange: jest.fn()
+      subscribe: mockSubscribe
     })
   })
 
@@ -177,7 +177,7 @@ describe('WalletConnect', () => {
 
       expect(wallet.isConnected).toBe(true)
       expect(accounts).toEqual([account1, account2])
-      expect(store.getState().wallets.get(WalletId.WALLETCONNECT)).toEqual({
+      expect(store.state.wallets.get(WalletId.WALLETCONNECT)).toEqual({
         accounts: [account1, account2],
         activeAccount: account1
       })
@@ -198,7 +198,7 @@ describe('WalletConnect', () => {
         '[WalletConnect] Error connecting: No accounts found!'
       )
       expect(accounts).toEqual([])
-      expect(store.getState().wallets.get(WalletId.WALLETCONNECT)).toBeUndefined()
+      expect(store.state.wallets.get(WalletId.WALLETCONNECT)).toBeUndefined()
     })
   })
 
@@ -225,13 +225,13 @@ describe('WalletConnect', () => {
       // Connect first to initialize client
       await wallet.connect()
       expect(wallet.isConnected).toBe(true)
-      expect(store.getState().wallets.get(WalletId.WALLETCONNECT)).toBeDefined()
+      expect(store.state.wallets.get(WalletId.WALLETCONNECT)).toBeDefined()
 
       await wallet.disconnect()
       expect(wallet.isConnected).toBe(false)
 
       expect(mockSignClient.disconnect).toHaveBeenCalled()
-      expect(store.getState().wallets.get(WalletId.WALLETCONNECT)).toBeUndefined()
+      expect(store.state.wallets.get(WalletId.WALLETCONNECT)).toBeUndefined()
     })
   })
 
@@ -242,7 +242,7 @@ describe('WalletConnect', () => {
         address: '7ZUECA7HFLZTXENRV24SHLU4AVPUTMTTDUFUBNBD64C73F3UHRTHAIOF6Q'
       }
 
-      store = createStore({
+      store = new Store<State>({
         ...defaultState,
         wallets: new Map([
           [
@@ -262,8 +262,7 @@ describe('WalletConnect', () => {
         },
         metadata: {},
         store,
-        subscribe: mockSubscribe,
-        onStateChange: jest.fn()
+        subscribe: mockSubscribe
       })
 
       const mockSession = createMockSessionStruct({
@@ -287,7 +286,7 @@ describe('WalletConnect', () => {
       await wallet.resumeSession()
 
       expect(wallet.isConnected).toBe(true)
-      expect(store.getState().wallets.get(WalletId.WALLETCONNECT)).toBeDefined()
+      expect(store.state.wallets.get(WalletId.WALLETCONNECT)).toBeDefined()
     })
 
     it('should not automatically connect if WalletConnect wallet data is not found in the store', async () => {
@@ -295,12 +294,12 @@ describe('WalletConnect', () => {
       await wallet.resumeSession()
 
       expect(wallet.isConnected).toBe(false)
-      expect(store.getState().wallets.get(WalletId.WALLETCONNECT)).toBeUndefined()
+      expect(store.state.wallets.get(WalletId.WALLETCONNECT)).toBeUndefined()
     })
 
     it('should update the store if accounts returned by the client do not match', async () => {
       // Store contains '7ZUECA' and 'GD64YI', with '7ZUECA' as active
-      store = createStore({
+      store = new Store<State>({
         ...defaultState,
         wallets: new Map([
           [
@@ -332,8 +331,7 @@ describe('WalletConnect', () => {
         },
         metadata: {},
         store,
-        subscribe: mockSubscribe,
-        onStateChange: jest.fn()
+        subscribe: mockSubscribe
       })
 
       // Client only returns 'GD64YI' on reconnect, '7ZUECA' is missing
@@ -358,7 +356,7 @@ describe('WalletConnect', () => {
       )
 
       // Store now only contains 'GD64YI', which is set as active
-      expect(store.getState().wallets.get(WalletId.WALLETCONNECT)).toEqual({
+      expect(store.state.wallets.get(WalletId.WALLETCONNECT)).toEqual({
         accounts: [
           {
             name: 'WalletConnect 1', // auto-generated name

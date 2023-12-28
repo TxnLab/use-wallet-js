@@ -1,5 +1,6 @@
+import { Store } from '@tanstack/store'
 import algosdk from 'algosdk'
-import { Store, StoreActions, type State } from 'src/store'
+import { addWallet, setAccounts, type State } from 'src/store'
 import { BaseWallet } from '../base'
 import { WalletId } from './constants'
 import {
@@ -27,20 +28,17 @@ export class PeraWallet extends BaseWallet {
   private options: PeraWalletConnectOptions
 
   protected store: Store<State>
-  protected notifySubscribers: () => void
 
   constructor({
     id,
     store,
     subscribe,
-    onStateChange,
     options = {},
     metadata = {}
   }: WalletConstructor<WalletId.PERA>) {
-    super({ id, metadata, store, subscribe, onStateChange })
+    super({ id, metadata, store, subscribe })
     this.options = options
     this.store = store
-    this.notifySubscribers = onStateChange
   }
 
   static defaultMetadata = { name: 'Pera', icon }
@@ -75,15 +73,13 @@ export class PeraWallet extends BaseWallet {
 
       const activeAccount = walletAccounts[0]!
 
-      this.store.dispatch(StoreActions.ADD_WALLET, {
+      addWallet(this.store, {
         walletId: this.id,
         wallet: {
           accounts: walletAccounts,
           activeAccount
         }
       })
-
-      this.notifySubscribers()
 
       return walletAccounts
     } catch (error: any) {
@@ -108,7 +104,7 @@ export class PeraWallet extends BaseWallet {
 
   public async resumeSession(): Promise<void> {
     try {
-      const state = this.store.getState()
+      const state = this.store.state
       const walletState = state.wallets.get(this.id)
 
       // No session to resume
@@ -134,12 +130,10 @@ export class PeraWallet extends BaseWallet {
 
       if (!match) {
         console.warn(`[PeraWallet] Session accounts mismatch, updating accounts`)
-        this.store.dispatch(StoreActions.SET_ACCOUNTS, {
+        setAccounts(this.store, {
           walletId: this.id,
           accounts: walletAccounts
         })
-
-        this.notifySubscribers()
       }
     } catch (error: any) {
       console.error(error)

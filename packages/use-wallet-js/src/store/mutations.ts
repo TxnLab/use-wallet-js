@@ -1,27 +1,13 @@
+import { Store } from '@tanstack/store'
 import { NetworkId } from 'src/network'
 import { WalletId, type WalletAccount } from 'src/wallets'
 import type { State, WalletState } from './types'
 
-export enum StoreMutations {
-  ADD_WALLET = 'addWallet',
-  REMOVE_WALLET = 'removeWallet',
-  SET_ACTIVE_WALLET = 'setActiveWallet',
-  SET_ACTIVE_ACCOUNT = 'setActiveAccount',
-  SET_ACCOUNTS = 'setAccounts',
-  SET_ACTIVE_NETWORK = 'setActiveNetwork'
-}
-
-export interface Mutations<TState extends object> {
-  addWallet: (state: TState, payload: { walletId: WalletId; wallet: WalletState }) => TState
-  removeWallet: (state: TState, payload: { walletId: WalletId }) => TState
-  setActiveWallet: (state: TState, payload: { walletId: WalletId | null }) => TState
-  setActiveAccount: (state: TState, payload: { walletId: WalletId; address: string }) => TState
-  setAccounts: (state: TState, payload: { walletId: WalletId; accounts: WalletAccount[] }) => TState
-  setActiveNetwork: (state: TState, payload: { networkId: NetworkId }) => TState
-}
-
-export const mutations: Mutations<State> = {
-  addWallet(state: State, { walletId, wallet }: { walletId: WalletId; wallet: WalletState }) {
+export function addWallet(
+  store: Store<State>,
+  { walletId, wallet }: { walletId: WalletId; wallet: WalletState }
+) {
+  store.setState((state) => {
     const newWallets = new Map(state.wallets.entries())
     newWallets.set(walletId, wallet)
 
@@ -30,8 +16,11 @@ export const mutations: Mutations<State> = {
       wallets: newWallets,
       activeWallet: walletId
     }
-  },
-  removeWallet(state: State, { walletId }: { walletId: WalletId }) {
+  })
+}
+
+export function removeWallet(store: Store<State>, { walletId }: { walletId: WalletId }) {
+  store.setState((state) => {
     const newWallets = new Map(state.wallets.entries())
     newWallets.delete(walletId)
 
@@ -40,14 +29,23 @@ export const mutations: Mutations<State> = {
       wallets: newWallets,
       activeWallet: state.activeWallet === walletId ? null : state.activeWallet
     }
-  },
-  setActiveWallet(state: State, { walletId }: { walletId: WalletId | null }) {
+  })
+}
+
+export function setActiveWallet(store: Store<State>, { walletId }: { walletId: WalletId | null }) {
+  store.setState((state) => {
     return {
       ...state,
       activeWallet: walletId
     }
-  },
-  setActiveAccount(state: State, { walletId, address }: { walletId: WalletId; address: string }) {
+  })
+}
+
+export function setActiveAccount(
+  store: Store<State>,
+  { walletId, address }: { walletId: WalletId; address: string }
+) {
+  store.setState((state) => {
     const wallet = state.wallets.get(walletId)
     if (!wallet) {
       return state
@@ -67,11 +65,14 @@ export const mutations: Mutations<State> = {
       ...state,
       wallets: newWallets
     }
-  },
-  setAccounts(
-    state: State,
-    { walletId, accounts }: { walletId: WalletId; accounts: WalletAccount[] }
-  ) {
+  })
+}
+
+export function setAccounts(
+  store: Store<State>,
+  { walletId, accounts }: { walletId: WalletId; accounts: WalletAccount[] }
+) {
+  store.setState((state) => {
     const wallet = state.wallets.get(walletId)
     if (!wallet) {
       return state
@@ -98,11 +99,14 @@ export const mutations: Mutations<State> = {
       ...state,
       wallets: newWallets
     }
-  },
-  setActiveNetwork(state: State, { networkId }: { networkId: NetworkId }) {
+  })
+}
+
+export function setActiveNetwork(store: Store<State>, { networkId }: { networkId: NetworkId }) {
+  store.setState((state) => {
     return {
       ...state,
       activeNetwork: networkId
     }
-  }
+  })
 }
