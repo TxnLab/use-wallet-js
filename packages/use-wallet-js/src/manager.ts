@@ -19,18 +19,18 @@ import {
   setActiveWallet,
   type State
 } from 'src/store'
-import { BaseWallet } from './base'
-import { WalletId, walletMap } from './supported'
-import { deepMerge } from './utils'
+import { createWalletMap, deepMerge } from 'src/utils'
+import type { BaseWallet } from 'src/wallets/base'
 import type {
   SupportedWallets,
   TransactionSignerAccount,
   WalletAccount,
   WalletConfigMap,
+  WalletId,
   WalletIdConfig,
   WalletMetadata,
   WalletOptions
-} from './types'
+} from 'src/wallets/types'
 
 export interface WalletManagerConfig {
   wallets: SupportedWallets
@@ -126,6 +126,7 @@ export class WalletManager {
       }
 
       // Get wallet class
+      const walletMap = createWalletMap()
       const WalletClass = walletMap[walletId]
       if (!WalletClass) {
         console.error(`[Manager] Wallet not found: ${walletId}`)

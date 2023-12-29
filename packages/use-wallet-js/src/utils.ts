@@ -1,5 +1,22 @@
 import algosdk from 'algosdk'
-import type { JsonRpcRequest, WalletAccount } from './types'
+import { WalletId, type JsonRpcRequest, type WalletAccount, type WalletMap } from './wallets/types'
+import { DeflyWallet } from './wallets/defly'
+import { ExodusWallet } from './wallets/exodus'
+import { KmdWallet } from './wallets/kmd'
+import { MnemonicWallet } from './wallets/mnemonic'
+import { PeraWallet } from './wallets/pera'
+import { WalletConnect } from './wallets/walletconnect'
+
+export function createWalletMap(): WalletMap {
+  return {
+    [WalletId.DEFLY]: DeflyWallet,
+    [WalletId.EXODUS]: ExodusWallet,
+    [WalletId.KMD]: KmdWallet,
+    [WalletId.MNEMONIC]: MnemonicWallet,
+    [WalletId.PERA]: PeraWallet,
+    [WalletId.WALLETCONNECT]: WalletConnect
+  }
+}
 
 export function compareAccounts(accounts: WalletAccount[], compareTo: WalletAccount[]): boolean {
   const addresses = new Set(accounts.map((account) => account.address))

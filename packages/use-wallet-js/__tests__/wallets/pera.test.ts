@@ -1,10 +1,10 @@
 import { Store } from '@tanstack/store'
-import { DeflyWalletConnect } from '@blockshake/defly-connect'
 import { afterEach, beforeEach, describe, expect, it, jest } from '@jest/globals'
+import { PeraWalletConnect } from '@perawallet/connect'
 import algosdk from 'algosdk'
 import { State, defaultState } from 'src/store'
-import { WalletId } from 'src/wallets/supported/constants'
-import { DeflyWallet } from 'src/wallets/supported/defly'
+import { PeraWallet } from 'src/wallets/pera'
+import { WalletId } from 'src/wallets/types'
 
 // Spy/suppress console output
 jest.spyOn(console, 'info').mockImplementation(() => {})
@@ -25,8 +25,8 @@ Object.defineProperty(global, 'localStorage', {
   value: localStorageMock
 })
 
-describe('DeflyWallet', () => {
-  let wallet: DeflyWallet
+describe('PeraWallet', () => {
+  let wallet: PeraWallet
   let store: Store<State>
 
   const mockSubscribe: (callback: (state: State) => void) => () => void = jest.fn(
@@ -38,8 +38,8 @@ describe('DeflyWallet', () => {
 
   beforeEach(() => {
     store = new Store<State>(defaultState)
-    wallet = new DeflyWallet({
-      id: WalletId.DEFLY,
+    wallet = new PeraWallet({
+      id: WalletId.PERA,
       metadata: {},
       store,
       subscribe: mockSubscribe
@@ -55,11 +55,11 @@ describe('DeflyWallet', () => {
   describe('connect', () => {
     it('should initialize client, return account objects, and update store', async () => {
       const account1 = {
-        name: 'Defly Wallet 1',
+        name: 'Pera Wallet 1',
         address: 'mockAddress1'
       }
       const account2 = {
-        name: 'Defly Wallet 2',
+        name: 'Pera Wallet 2',
         address: 'mockAddress2'
       }
 
@@ -67,13 +67,13 @@ describe('DeflyWallet', () => {
         .fn<() => Promise<string[]>>()
         .mockImplementation(() => Promise.resolve([account1.address, account2.address]))
 
-      jest.spyOn(DeflyWalletConnect.prototype, 'connect').mockImplementation(mockConnect)
+      jest.spyOn(PeraWalletConnect.prototype, 'connect').mockImplementation(mockConnect)
 
       const accounts = await wallet.connect()
 
       expect(wallet.isConnected).toBe(true)
       expect(accounts).toEqual([account1, account2])
-      expect(store.state.wallets.get(WalletId.DEFLY)).toEqual({
+      expect(store.state.wallets.get(WalletId.PERA)).toEqual({
         accounts: [account1, account2],
         activeAccount: account1
       })
@@ -84,16 +84,16 @@ describe('DeflyWallet', () => {
         .fn<() => Promise<string[]>>()
         .mockImplementation(() => Promise.resolve([]))
 
-      jest.spyOn(DeflyWalletConnect.prototype, 'connect').mockImplementation(mockConnect)
+      jest.spyOn(PeraWalletConnect.prototype, 'connect').mockImplementation(mockConnect)
 
       const accounts = await wallet.connect()
 
       expect(wallet.isConnected).toBe(false)
       expect(console.error).toHaveBeenCalledWith(
-        '[DeflyWallet] Error connecting: No accounts found!'
+        '[PeraWallet] Error connecting: No accounts found!'
       )
       expect(accounts).toEqual([])
-      expect(store.state.wallets.get(WalletId.DEFLY)).toBeUndefined()
+      expect(store.state.wallets.get(WalletId.PERA)).toBeUndefined()
     })
   })
 
@@ -103,31 +103,31 @@ describe('DeflyWallet', () => {
         .fn<() => Promise<string[]>>()
         .mockImplementation(() => Promise.resolve(['mockAddress1']))
 
-      jest.spyOn(DeflyWalletConnect.prototype, 'connect').mockImplementation(mockConnect)
+      jest.spyOn(PeraWalletConnect.prototype, 'connect').mockImplementation(mockConnect)
 
       const mockDisconnect = jest
         .fn<() => Promise<void>>()
         .mockImplementation(() => Promise.resolve())
 
-      jest.spyOn(DeflyWalletConnect.prototype, 'disconnect').mockImplementation(mockDisconnect)
+      jest.spyOn(PeraWalletConnect.prototype, 'disconnect').mockImplementation(mockDisconnect)
 
       // Connect first to initialize client
       await wallet.connect()
       expect(wallet.isConnected).toBe(true)
-      expect(store.state.wallets.get(WalletId.DEFLY)).toBeDefined()
+      expect(store.state.wallets.get(WalletId.PERA)).toBeDefined()
 
       await wallet.disconnect()
       expect(wallet.isConnected).toBe(false)
 
       expect(mockDisconnect).toHaveBeenCalled()
-      expect(store.state.wallets.get(WalletId.DEFLY)).toBeUndefined()
+      expect(store.state.wallets.get(WalletId.PERA)).toBeUndefined()
     })
   })
 
   describe('resumeSession', () => {
-    it(`should call the client's reconnectSession method if Defly wallet data is found in the store`, async () => {
+    it(`should call the client's reconnectSession method if Pera wallet data is found in the store`, async () => {
       const account = {
-        name: 'Defly Wallet 1',
+        name: 'Pera Wallet 1',
         address: 'mockAddress1'
       }
 
@@ -135,7 +135,7 @@ describe('DeflyWallet', () => {
         ...defaultState,
         wallets: new Map([
           [
-            WalletId.DEFLY,
+            WalletId.PERA,
             {
               accounts: [account],
               activeAccount: account
@@ -144,8 +144,8 @@ describe('DeflyWallet', () => {
         ])
       })
 
-      wallet = new DeflyWallet({
-        id: WalletId.DEFLY,
+      wallet = new PeraWallet({
+        id: WalletId.PERA,
         metadata: {},
         store,
         subscribe: mockSubscribe
@@ -156,7 +156,7 @@ describe('DeflyWallet', () => {
         .mockImplementation(() => Promise.resolve([account.address]))
 
       jest
-        .spyOn(DeflyWalletConnect.prototype, 'reconnectSession')
+        .spyOn(PeraWalletConnect.prototype, 'reconnectSession')
         .mockImplementation(mockReconnectSession)
 
       await wallet.resumeSession()
@@ -165,12 +165,12 @@ describe('DeflyWallet', () => {
       expect(mockReconnectSession).toHaveBeenCalled()
     })
 
-    it(`should not call the client's reconnectSession method if Defly wallet data is not found in the store`, async () => {
+    it(`should not call the client's reconnectSession method if Pera wallet data is not found in the store`, async () => {
       // No wallets in store
       store = new Store<State>(defaultState)
 
-      wallet = new DeflyWallet({
-        id: WalletId.DEFLY,
+      wallet = new PeraWallet({
+        id: WalletId.PERA,
         metadata: {},
         store,
         subscribe: mockSubscribe
@@ -180,7 +180,7 @@ describe('DeflyWallet', () => {
       const mockReconnectSession = jest.fn<() => Promise<string[]>>()
 
       jest
-        .spyOn(DeflyWalletConnect.prototype, 'reconnectSession')
+        .spyOn(PeraWalletConnect.prototype, 'reconnectSession')
         .mockImplementation(mockReconnectSession)
 
       await wallet.resumeSession()
@@ -195,20 +195,20 @@ describe('DeflyWallet', () => {
         ...defaultState,
         wallets: new Map([
           [
-            WalletId.DEFLY,
+            WalletId.PERA,
             {
               accounts: [
                 {
-                  name: 'Defly Wallet 1',
+                  name: 'Pera Wallet 1',
                   address: 'mockAddress1'
                 },
                 {
-                  name: 'Defly Wallet 2',
+                  name: 'Pera Wallet 2',
                   address: 'mockAddress2'
                 }
               ],
               activeAccount: {
-                name: 'Defly Wallet 1',
+                name: 'Pera Wallet 1',
                 address: 'mockAddress1'
               }
             }
@@ -216,8 +216,8 @@ describe('DeflyWallet', () => {
         ])
       })
 
-      wallet = new DeflyWallet({
-        id: WalletId.DEFLY,
+      wallet = new PeraWallet({
+        id: WalletId.PERA,
         metadata: {},
         store,
         subscribe: mockSubscribe
@@ -229,25 +229,25 @@ describe('DeflyWallet', () => {
         .mockImplementation(() => Promise.resolve(['mockAddress2']))
 
       jest
-        .spyOn(DeflyWalletConnect.prototype, 'reconnectSession')
+        .spyOn(PeraWalletConnect.prototype, 'reconnectSession')
         .mockImplementation(mockReconnectSession)
 
       await wallet.resumeSession()
 
       expect(console.warn).toHaveBeenCalledWith(
-        '[DeflyWallet] Session accounts mismatch, updating accounts'
+        '[PeraWallet] Session accounts mismatch, updating accounts'
       )
 
       // Store now only contains 'mockAddress2', which is set as active
-      expect(store.state.wallets.get(WalletId.DEFLY)).toEqual({
+      expect(store.state.wallets.get(WalletId.PERA)).toEqual({
         accounts: [
           {
-            name: 'Defly Wallet 1', // auto-generated name
+            name: 'Pera Wallet 1', // auto-generated name
             address: 'mockAddress2'
           }
         ],
         activeAccount: {
-          name: 'Defly Wallet 1',
+          name: 'Pera Wallet 1',
           address: 'mockAddress2'
         }
       })
@@ -258,7 +258,7 @@ describe('DeflyWallet', () => {
     describe('when the client is not initialized', () => {
       it('should throw an error', async () => {
         await expect(wallet.signTransactions([])).rejects.toThrowError(
-          '[DeflyWallet] Client not initialized!'
+          '[PeraWallet] Client not initialized!'
         )
       })
     })
@@ -300,7 +300,7 @@ describe('DeflyWallet', () => {
             ])
           )
 
-        jest.spyOn(DeflyWalletConnect.prototype, 'connect').mockImplementation(mockConnect)
+        jest.spyOn(PeraWalletConnect.prototype, 'connect').mockImplementation(mockConnect)
 
         await wallet.connect()
       })
@@ -311,7 +311,7 @@ describe('DeflyWallet', () => {
           .mockImplementation(() => Promise.resolve([mockSignedTxn]))
 
         jest
-          .spyOn(DeflyWalletConnect.prototype, 'signTransaction')
+          .spyOn(PeraWalletConnect.prototype, 'signTransaction')
           .mockImplementation(mockSignTransaction)
 
         const result = await wallet.signTransactions([txn1])
@@ -332,7 +332,7 @@ describe('DeflyWallet', () => {
           .mockImplementation(() => Promise.resolve([mockSignedTxn, mockSignedTxn]))
 
         jest
-          .spyOn(DeflyWalletConnect.prototype, 'signTransaction')
+          .spyOn(PeraWalletConnect.prototype, 'signTransaction')
           .mockImplementation(mockSignTransaction)
 
         const txnGroup = algosdk.assignGroupID([txn1, txn2])
@@ -361,7 +361,7 @@ describe('DeflyWallet', () => {
           .mockImplementation(() => Promise.resolve([mockSignedTxn, mockSignedTxn]))
 
         jest
-          .spyOn(DeflyWalletConnect.prototype, 'signTransaction')
+          .spyOn(PeraWalletConnect.prototype, 'signTransaction')
           .mockImplementation(mockSignTransaction)
 
         const txnGroup1 = algosdk.assignGroupID([txn1])
@@ -392,7 +392,7 @@ describe('DeflyWallet', () => {
           .mockImplementation(() => Promise.resolve([mockSignedTxn]))
 
         jest
-          .spyOn(DeflyWalletConnect.prototype, 'signTransaction')
+          .spyOn(PeraWalletConnect.prototype, 'signTransaction')
           .mockImplementation(mockSignTransaction)
 
         const encodedTxn = txn1.toByte()
@@ -414,7 +414,7 @@ describe('DeflyWallet', () => {
           .mockImplementation(() => Promise.resolve([mockSignedTxn, mockSignedTxn]))
 
         jest
-          .spyOn(DeflyWalletConnect.prototype, 'signTransaction')
+          .spyOn(PeraWalletConnect.prototype, 'signTransaction')
           .mockImplementation(mockSignTransaction)
 
         const txnGroup = algosdk.assignGroupID([txn1, txn2])
@@ -441,7 +441,7 @@ describe('DeflyWallet', () => {
           .mockImplementation(() => Promise.resolve([mockSignedTxn, mockSignedTxn]))
 
         jest
-          .spyOn(DeflyWalletConnect.prototype, 'signTransaction')
+          .spyOn(PeraWalletConnect.prototype, 'signTransaction')
           .mockImplementation(mockSignTransaction)
 
         const txnGroup1 = algosdk.assignGroupID([txn1])
@@ -471,7 +471,7 @@ describe('DeflyWallet', () => {
           .mockImplementation(() => Promise.resolve([mockSignedTxn]))
 
         jest
-          .spyOn(DeflyWalletConnect.prototype, 'signTransaction')
+          .spyOn(PeraWalletConnect.prototype, 'signTransaction')
           .mockImplementation(mockSignTransaction)
 
         const txnGroup = algosdk.assignGroupID([txn1, txn2])
@@ -506,7 +506,7 @@ describe('DeflyWallet', () => {
           .mockImplementation(() => Promise.resolve([mockSignedTxn]))
 
         jest
-          .spyOn(DeflyWalletConnect.prototype, 'signTransaction')
+          .spyOn(PeraWalletConnect.prototype, 'signTransaction')
           .mockImplementation(mockSignTransaction)
 
         const txnGroup = algosdk.assignGroupID([txn1, txn2])
@@ -556,7 +556,7 @@ describe('DeflyWallet', () => {
           .mockImplementation(() => Promise.resolve([mockSignedTxn, mockSignedTxn]))
 
         jest
-          .spyOn(DeflyWalletConnect.prototype, 'signTransaction')
+          .spyOn(PeraWalletConnect.prototype, 'signTransaction')
           .mockImplementation(mockSignTransaction)
 
         // txnGroup[1] can't be signed

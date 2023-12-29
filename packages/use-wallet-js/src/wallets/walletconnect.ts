@@ -1,10 +1,7 @@
-import { Store } from '@tanstack/store'
 import { getAppMetadata, getSdkError } from '@walletconnect/utils'
 import algosdk from 'algosdk'
 import { NetworkId, caipChainId } from 'src/network'
 import { addWallet, setAccounts, type State } from 'src/store'
-import { BaseWallet } from '../base'
-import { WalletId } from './constants'
 import {
   compareAccounts,
   formatJsonRpcRequest,
@@ -12,11 +9,13 @@ import {
   mergeSignedTxnsWithGroup,
   normalizeTxnGroup,
   shouldSignTxnObject
-} from '../utils'
+} from 'src/utils'
+import { BaseWallet } from './base'
+import type { Store } from '@tanstack/store'
 import type { WalletConnectModal, WalletConnectModalConfig } from '@walletconnect/modal'
 import type SignClient from '@walletconnect/sign-client'
 import type { SessionTypes, SignClientTypes } from '@walletconnect/types'
-import type { WalletAccount, WalletConstructor, WalletTransaction } from '../types'
+import type { WalletAccount, WalletConstructor, WalletId, WalletTransaction } from './types'
 
 interface SignClientOptions {
   projectId: string

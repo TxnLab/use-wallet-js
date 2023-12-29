@@ -2,10 +2,10 @@ import { beforeEach, describe, expect, it, jest } from '@jest/globals'
 import { NetworkId } from 'src/network'
 import { defaultState } from 'src/store'
 import { LOCAL_STORAGE_KEY, replacer, reviver } from 'src/store'
-import { WalletManager } from 'src/wallets/manager'
-import { WalletId } from 'src/wallets/supported/constants'
-import { DeflyWallet } from 'src/wallets/supported/defly'
-import { PeraWallet } from 'src/wallets/supported/pera'
+import { WalletManager } from 'src/manager'
+import { DeflyWallet } from 'src/wallets/defly'
+import { PeraWallet } from 'src/wallets/pera'
+import { WalletId } from 'src/wallets/types'
 
 // Suppress console output
 jest.spyOn(console, 'info').mockImplementation(() => {})

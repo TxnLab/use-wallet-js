@@ -16,7 +16,7 @@ import {
   replacer,
   reviver
 } from 'src/store'
-import { WalletId } from 'src/wallets/supported/constants'
+import { WalletId } from 'src/wallets/types'
 
 describe('Mutations', () => {
   let store: Store<State>

@@ -3,9 +3,8 @@ import { afterEach, beforeEach, describe, expect, it, jest } from '@jest/globals
 import * as msgpack from 'algo-msgpack-with-bigint'
 import algosdk from 'algosdk'
 import { State, defaultState } from 'src/store'
-import { WalletId } from 'src/wallets/supported/constants'
-import { EnableResult, Exodus, ExodusWallet, SignTxnsResult } from 'src/wallets/supported/exodus'
-import { WalletTransaction } from 'src/wallets/types'
+import { EnableResult, Exodus, ExodusWallet, SignTxnsResult } from 'src/wallets/exodus'
+import { WalletId, WalletTransaction } from 'src/wallets/types'
 
 // Spy/suppress console output
 jest.spyOn(console, 'info').mockImplementation(() => {})

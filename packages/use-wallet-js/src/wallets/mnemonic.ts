@@ -1,10 +1,9 @@
-import { Store } from '@tanstack/store'
 import algosdk from 'algosdk'
 import { addWallet, type State } from 'src/store'
-import { BaseWallet } from '../base'
-import { WalletId } from './constants'
-import { isSignedTxnObject, normalizeTxnGroup } from '../utils'
-import type { WalletAccount, WalletConstructor } from '../types'
+import { isSignedTxnObject, normalizeTxnGroup } from 'src/utils'
+import { BaseWallet } from './base'
+import type { Store } from '@tanstack/store'
+import type { WalletAccount, WalletConstructor, WalletId } from './types'
 
 export type MnemonicOptions = {
   persistToStorage?: boolean

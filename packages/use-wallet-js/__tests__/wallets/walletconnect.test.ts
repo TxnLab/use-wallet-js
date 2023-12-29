@@ -5,9 +5,8 @@ import { EngineTypes, SessionTypes } from '@walletconnect/types'
 import * as msgpack from 'algo-msgpack-with-bigint'
 import algosdk from 'algosdk'
 import { State, defaultState } from 'src/store'
-import { WalletId } from 'src/wallets/supported/constants'
-import { WalletConnect } from 'src/wallets/supported/walletconnect'
-import { WalletTransaction } from 'src/wallets/types'
+import { WalletConnect } from 'src/wallets/walletconnect'
+import { WalletId, WalletTransaction } from 'src/wallets/types'
 
 // Spy/suppress console output
 jest.spyOn(console, 'info').mockImplementation(() => {})

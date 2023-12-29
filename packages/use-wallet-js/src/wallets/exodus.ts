@@ -1,15 +1,14 @@
-import { Store } from '@tanstack/store'
 import algosdk from 'algosdk'
 import { addWallet, type State } from 'src/store'
-import { BaseWallet } from '../base'
-import { WalletId } from './constants'
 import {
   isSignedTxnObject,
   mergeSignedTxnsWithGroup,
   normalizeTxnGroup,
   shouldSignTxnObject
-} from '../utils'
-import type { WalletAccount, WalletConstructor, WalletTransaction } from '../types'
+} from 'src/utils'
+import { BaseWallet } from './base'
+import type { Store } from '@tanstack/store'
+import type { WalletAccount, WalletConstructor, WalletId, WalletTransaction } from './types'
 
 /** @see https://docs.exodus.com/api-reference/algorand-provider-arc-api/ */
 

@@ -1,17 +1,16 @@
-import { Store } from '@tanstack/store'
 import algosdk from 'algosdk'
 import { addWallet, setAccounts, type State } from 'src/store'
-import { BaseWallet } from '../base'
-import { WalletId } from './constants'
 import {
   compareAccounts,
   isSignedTxnObject,
   mergeSignedTxnsWithGroup,
   normalizeTxnGroup,
   shouldSignTxnObject
-} from '../utils'
+} from 'src/utils'
+import { BaseWallet } from './base'
 import type { DeflyWalletConnect } from '@blockshake/defly-connect'
-import type { SignerTransaction, WalletAccount, WalletConstructor } from '../types'
+import type { Store } from '@tanstack/store'
+import type { SignerTransaction, WalletAccount, WalletConstructor, WalletId } from './types'
 
 export interface DeflyWalletConnectOptions {
   bridge?: string

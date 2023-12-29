@@ -1,9 +1,8 @@
-import { Store } from '@tanstack/store'
-import algosdk from 'algosdk'
-import { NetworkId } from 'src/network'
-import { type State, setActiveWallet, setActiveAccount, removeWallet } from 'src/store'
-import { WalletId } from './supported'
-import type { WalletAccount, WalletConstructor, WalletMetadata } from './types'
+import { setActiveWallet, setActiveAccount, removeWallet, type State } from 'src/store'
+import type { Store } from '@tanstack/store'
+import type algosdk from 'algosdk'
+import type { NetworkId } from 'src/network'
+import type { WalletAccount, WalletConstructor, WalletId, WalletMetadata } from './types'
 
 interface WalletConstructorType {
   new (...args: any[]): BaseWallet

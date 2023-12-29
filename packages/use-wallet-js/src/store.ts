@@ -1,6 +1,6 @@
-import { Store } from '@tanstack/store'
 import { NetworkId, isValidNetworkId } from 'src/network'
 import { WalletId, type WalletAccount } from 'src/wallets'
+import type { Store } from '@tanstack/store'
 
 export type WalletState = {
   accounts: WalletAccount[]

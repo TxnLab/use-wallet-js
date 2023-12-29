@@ -9,7 +9,7 @@ import {
   mergeSignedTxnsWithGroup,
   normalizeTxnGroup,
   shouldSignTxnObject
-} from 'src/wallets/utils'
+} from 'src/utils'
 
 describe('compareAccounts', () => {
   it('should return true if both account lists have the same wallet accounts', () => {
