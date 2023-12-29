@@ -10,13 +10,15 @@ import {
 } from 'src/network'
 import {
   defaultState,
+  isValidState,
+  LOCAL_STORAGE_KEY,
   removeWallet,
+  replacer,
+  reviver,
   setActiveNetwork,
   setActiveWallet,
   type State
 } from 'src/store'
-import { LOCAL_STORAGE_KEY } from 'src/store/constants'
-import { isValidState, replacer, reviver } from 'src/store/utils'
 import { BaseWallet } from './base'
 import { WalletId, walletMap } from './supported'
 import { deepMerge } from './utils'
