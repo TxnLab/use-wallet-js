@@ -15,7 +15,8 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/txnlab/use-wallet-js.git"
+    "url": "git+https://github.com/txnlab/use-wallet-js.git",
+    "directory": "packages/use-wallet-js"
   },
   "keywords": [
     "algorand",

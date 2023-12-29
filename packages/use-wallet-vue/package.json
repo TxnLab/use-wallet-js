@@ -11,6 +11,11 @@
     "prettier": "prettier --check '**/*.{js,ts}'",
     "typecheck": "tsc --noEmit"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/txnlab/use-wallet-js.git",
+    "directory": "packages/use-wallet-vue"
+  },
   "keywords": [
     "algorand",
     "wallet",
