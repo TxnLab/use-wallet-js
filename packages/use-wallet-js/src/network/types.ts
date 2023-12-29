@@ -1,7 +1,5 @@
-import { Store } from '@tanstack/store'
 import algosdk from 'algosdk'
 import { NetworkId } from './constants'
-import type { State } from 'src/store'
 
 export type NetworkLabelMap = Record<NetworkId, string>
 export type BlockExplorerMap = Record<NetworkId, string>
@@ -18,8 +16,3 @@ export interface AlgodConfig {
 export type NetworkConfigMap = Record<NetworkId, AlgodConfig>
 
 export type NetworkConfig = Partial<AlgodConfig> | Partial<Record<NetworkId, Partial<AlgodConfig>>>
-
-export interface NetworkConstructor {
-  config: NetworkConfigMap
-  store: Store<State>
-}

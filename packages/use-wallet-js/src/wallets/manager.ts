@@ -3,12 +3,20 @@ import algosdk from 'algosdk'
 import {
   defaultNetworkConfigMap,
   isNetworkConfigMap,
-  Network,
   NetworkId,
+  blockExplorer,
   type NetworkConfig,
-  type NetworkConfigMap
+  type NetworkConfigMap,
+  AlgodConfig,
+  caipChainId
 } from 'src/network'
-import { defaultState, removeWallet, setActiveWallet, type State } from 'src/store'
+import {
+  defaultState,
+  removeWallet,
+  setActiveNetwork,
+  setActiveWallet,
+  type State
+} from 'src/store'
 import { LOCAL_STORAGE_KEY } from 'src/store/constants'
 import { isValidState, replacer, reviver } from 'src/store/utils'
 import { BaseWallet } from './base'
@@ -32,7 +40,9 @@ export interface WalletManagerConfig {
 
 export class WalletManager {
   private _wallets: Map<WalletId, BaseWallet> = new Map()
-  private network: Network
+
+  private networkConfig: NetworkConfigMap
+  public algodClient: algosdk.Algodv2
 
   public store: Store<State>
   public subscribe: (callback: (state: State) => void) => () => void
@@ -57,7 +67,9 @@ export class WalletManager {
       return unsubscribe
     }
 
-    this.network = this.initializeNetwork(network, algod)
+    this.networkConfig = this.initNetworkConfig(network, algod)
+    this.algodClient = this.createAlgodClient(this.networkConfig[network])
+
     this.initializeWallets(wallets)
   }
 
@@ -166,7 +178,7 @@ export class WalletManager {
 
   // ---------- Network ----------------------------------------------- //
 
-  private initializeNetwork(network: NetworkId, config: NetworkConfig): Network {
+  private initNetworkConfig(network: NetworkId, config: NetworkConfig): NetworkConfigMap {
     console.info('[Manager] Initializing network...')
 
     let networkConfig: NetworkConfigMap = defaultNetworkConfigMap
@@ -181,30 +193,30 @@ export class WalletManager {
 
     console.info('[Manager] Algodv2 config:', networkConfig)
 
-    return new Network({
-      config: networkConfig,
-      store: this.store
-    })
+    return networkConfig
   }
 
-  public setActiveNetwork(network: NetworkId): void {
-    this.network.setActiveNetwork(network)
+  private createAlgodClient(config: AlgodConfig): algosdk.Algodv2 {
+    console.info(`[Manager] Creating Algodv2 client for ${this.activeNetwork}...`)
+    const { token = '', baseServer, port = '', headers = {} } = config
+    return new algosdk.Algodv2(token, baseServer, port, headers)
+  }
+
+  public setActiveNetwork(networkId: NetworkId): void {
+    setActiveNetwork(this.store, { networkId })
+    this.algodClient = this.createAlgodClient(this.networkConfig[networkId])
   }
 
   public get activeNetwork(): NetworkId {
-    return this.network.activeNetwork
-  }
-
-  public get algodClient(): algosdk.Algodv2 {
-    return this.network.algodClient
+    return this.store.state.activeNetwork
   }
 
   public get blockExplorer(): string {
-    return this.network.blockExplorer
+    return blockExplorer[this.activeNetwork]
   }
 
   public get chainId(): string | undefined {
-    return this.network.chainId
+    return caipChainId[this.activeNetwork]
   }
 
   // ---------- Active Wallet ----------------------------------------- //
