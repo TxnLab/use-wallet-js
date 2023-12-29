@@ -10,8 +10,6 @@ export function useWallet() {
 
   const wallets = manager.wallets
   const algodClient: algosdk.Algodv2 = manager.algodClient
-  const blockExplorer = manager.blockExplorer
-  const chainId = manager.chainId
   const activeWalletAccounts = manager.activeWalletAccounts
   const activeWalletAddresses = manager.activeWalletAddresses
   const activeAccount = manager.activeAccount
@@ -40,8 +38,6 @@ export function useWallet() {
     wallets,
     algodClient,
     activeNetwork,
-    blockExplorer,
-    chainId,
     activeWallet,
     activeWalletAccounts,
     activeWalletAddresses,
