@@ -14,13 +14,12 @@ This version of UseWallet generally follows the same design principles as the Re
 
 2. **Efficient:** The core library has been optimized for speed and simplicity:
 
-   - Only dependent on `algosdk`
    - Framework-independent
    - Implements on-demand loading for wallet SDKs
 
 3. **Dynamic SDK Initialization:** Instead of initializing all wallet SDKs upfront, `use-wallet-js` dynamically imports the relevant SDK only when a "Connect" action has been triggered.
 
-4. **Network Manager**: The library lets you configure and set the network(s) your application uses, exposing an algod client instance for the current active network. This pattern was inspired by [solid-algo-wallets](https://github.com/SilentRhetoric/solid-algo-wallets) and allows for easy switching between public/local networks.
+4. **Switching Networks**: The library lets you configure and set the network(s) your application uses, exposing an algod client instance for the current active network. This pattern was inspired by [solid-algo-wallets](https://github.com/SilentRhetoric/solid-algo-wallets) and allows for easy switching between public/local networks.
 
 5. **State Updates**: Each of the exported classes exposes a `subscribe` method for subscribing to state updates. In the absense of React, this provides a way for UI elements to re-render when the state changes.
 
@@ -29,8 +28,6 @@ This version of UseWallet generally follows the same design principles as the Re
 At a high level, `use-wallet-js` retains a familiar structure and API for users of v2.x, principally through the `WalletManager` class. This class echoes the `useWallet` hook API from the previous version, aiming to make transitions between versions as seamless as possible.
 
 While the library in its current form exports only classes, future updates will include framework-specific wrappers for **React**, **Vue**, **Svelte**, and **Solid**. These wrappers will be built on top of the core library, and will be published as separate packages _[TBD]_.
-
-The React wrapper in particular will be as close as possible to a drop-in replacement for the v2.x `useWallet` hook, with a similar API.
 
 ## Development Strategy
 
@@ -186,14 +183,6 @@ class WalletManager {
 
 - Returns the Algod client for the active network.
 
-##### `blockExplorer: string`
-
-- Returns the block explorer URL for the active network.
-
-##### `chainId: string | undefined`
-
-- Returns the [CAIP-2](https://github.com/ChainAgnostic/namespaces/blob/main/algorand/caip2.md) chain ID for the active network.
-
 ##### `activeWallet: BaseWallet | null`
 
 - Returns the currently active wallet instance.
@@ -251,199 +240,7 @@ interface TransactionSignerAccount {
 
 ## Example UI
 
-In the following example, we'll create a simple UI for connecting, disconnecting, and switching between accounts for each of the supported wallets.
-
-### Create a new Vite project
-
-```bash
-# npm 6.x
-npm create vite@latest use-wallet-js-demo --template vanilla-ts
-
-# npm 7+, extra double-dash is needed:
-npm create vite@latest use-wallet-js-demo -- --template vanilla-ts
-
-# yarn
-yarn create vite use-wallet-js-demo --template vanilla-ts
-
-# pnpm
-pnpm create vite use-wallet-js-demo --template vanilla-ts
-```
-
-📖 Docs: https://vitejs.dev/guide/#scaffolding-your-first-vite-project
-
-### index.html
-
-```html
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>UseWallet v3 Demo</title>
-  </head>
-  <body>
-    <div id="app"></div>
-    <script>
-      global = globalThis
-    </script>
-    <script type="module" src="/src/main.ts"></script>
-  </body>
-</html>
-```
-
-### main.ts
-
-```ts
-import './style.css'
-import { NetworkId, WalletId, WalletManager } from '@txnlab/use-wallet-js'
-import { WalletComponent } from './WalletComponent'
-
-const walletManager = new WalletManager({
-  wallets: [
-    WalletId.DEFLY,
-    WalletId.EXODUS,
-    WalletId.PERA,
-    {
-      id: WalletId.WALLETCONNECT,
-      options: { projectId: '<YOUR_PROJECT_ID>' }
-    }
-  ]
-})
-
-document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
-  <div>
-    <h1>UseWallet v3 Demo</h1>
-  </div>
-`
-
-const appDiv = document.querySelector('#app')
-
-const walletComponents = walletManager.wallets.map((wallet) => new WalletComponent(wallet))
-
-walletComponents.forEach((walletComponent) => {
-  appDiv?.appendChild(walletComponent.element)
-})
-
-document.addEventListener('DOMContentLoaded', async () => {
-  try {
-    await walletManager.resumeSessions()
-  } catch (error) {
-    console.error('Error resuming sessions:', error)
-  }
-})
-
-// Cleanup
-window.addEventListener('beforeunload', () => {
-  walletComponents.forEach((walletComponent) => walletComponent.destroy())
-})
-```
-
-### WalletComponent.ts
-
-```ts
-import { BaseWallet } from '@txnlab/use-wallet-js'
-
-export class WalletComponent {
-  wallet: BaseWallet
-  element: HTMLElement
-  private unsubscribe?: () => void
-
-  constructor(wallet: BaseWallet) {
-    this.wallet = wallet
-    this.element = document.createElement('div')
-
-    this.unsubscribe = wallet.subscribe((state) => {
-      console.log('State change:', state)
-      this.render()
-    })
-
-    this.render()
-    this.addEventListeners()
-  }
-
-  connect = () => this.wallet.connect()
-  disconnect = () => this.wallet.disconnect()
-  setActive = () => this.wallet.setActive()
-
-  setActiveAccount = (event: Event) => {
-    const target = event.target as HTMLSelectElement
-    this.wallet.setActiveAccount(target.value)
-  }
-
-  render() {
-    this.element.innerHTML = `
-      <h4>
-        ${this.wallet.metadata.name} ${this.wallet.isActive ? '[active]' : ''}
-      </h4>
-      <div>
-        <button id="connect-button" type="button" ${this.wallet.isConnected ? 'disabled' : ''}>
-            Connect
-        </button>
-        <button id="disconnect-button" type="button" ${!this.wallet.isConnected ? 'disabled' : ''}>
-            Disconnect
-        </button>
-        <button id="set-active-button" type="button" ${
-          !this.wallet.isConnected || this.wallet.isActive ? 'disabled' : ''
-        }>
-            Set Active
-        </button>
-      </div>
-      ${
-        this.wallet.isActive && this.wallet.accounts.length
-          ? `
-        <div>
-          <select>
-            ${this.wallet.accounts
-              .map(
-                (account) => `
-              <option value="${account.address}" ${
-                account.address === this.wallet.activeAccount?.address ? 'selected' : ''
-              }>
-                ${account.address}
-              </option>
-            `
-              )
-              .join('')}
-          </select>
-        </div>
-      `
-          : ''
-      }
-    `
-  }
-
-  addEventListeners() {
-    // Connect, disconnect, and set active wallet
-    this.element.addEventListener('click', (e: Event) => {
-      const target = e.target as HTMLElement
-      if (target.id === 'connect-button') {
-        this.connect()
-      } else if (target.id === 'disconnect-button') {
-        this.disconnect()
-      } else if (target.id === 'set-active-button') {
-        this.setActive()
-      }
-    })
-
-    // Change active account
-    this.element.addEventListener('change', (e: Event) => {
-      const target = e.target as HTMLElement
-      if (target.tagName.toLowerCase() === 'select') {
-        this.setActiveAccount(e)
-      }
-    })
-  }
-
-  destroy() {
-    // Disconnect the listener on unmount to prevent memory leaks
-    if (this.unsubscribe) {
-      this.unsubscribe()
-    }
-    this.element.removeEventListener('click', this.addEventListeners)
-    this.element.removeEventListener('change', this.addEventListeners)
-  }
-}
-```
+See the [examples/vanilla-ts](https://github.com/TxnLab/use-wallet-js/tree/main/examples/vanilla-ts) directory for a simple Vite app that demonstrates the library's functionality.
 
 ## Switching Networks
 
