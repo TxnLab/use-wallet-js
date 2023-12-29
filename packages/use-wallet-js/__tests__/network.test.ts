@@ -1,8 +1,7 @@
 import { describe, expect, it } from '@jest/globals'
-import { NetworkId } from 'src/network/constants'
-import { isAlgodConfig, isNetworkConfigMap, isValidNetworkId } from 'src/network/utils'
+import { isAlgodConfig, isNetworkConfigMap, isValidNetworkId, NetworkId } from 'src/network'
 
-describe('Type Guards', () => {
+describe('Network Type Guards', () => {
   describe('isValidNetworkId', () => {
     it('returns true for a valid NetworkId', () => {
       expect(isValidNetworkId(NetworkId.TESTNET)).toBe(true)

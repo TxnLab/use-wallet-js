@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, jest } from '@jest/globals'
-import { NetworkId } from 'src/network/constants'
+import { NetworkId } from 'src/network'
 import { defaultState } from 'src/store'
 import { LOCAL_STORAGE_KEY } from 'src/store/constants'
 import { replacer, reviver } from 'src/store/utils'

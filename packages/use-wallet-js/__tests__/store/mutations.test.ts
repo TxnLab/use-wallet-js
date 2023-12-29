@@ -1,5 +1,5 @@
 import { Store } from '@tanstack/store'
-import { NetworkId } from 'src/network/constants'
+import { NetworkId } from 'src/network'
 import {
   State,
   addWallet,

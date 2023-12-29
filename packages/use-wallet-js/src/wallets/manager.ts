@@ -1,14 +1,12 @@
 import { Store } from '@tanstack/store'
 import algosdk from 'algosdk'
 import {
-  defaultNetworkConfigMap,
+  createDefaultNetworkConfig,
   isNetworkConfigMap,
   NetworkId,
-  blockExplorer,
+  type AlgodConfig,
   type NetworkConfig,
-  type NetworkConfigMap,
-  AlgodConfig,
-  caipChainId
+  type NetworkConfigMap
 } from 'src/network'
 import {
   defaultState,
@@ -181,7 +179,7 @@ export class WalletManager {
   private initNetworkConfig(network: NetworkId, config: NetworkConfig): NetworkConfigMap {
     console.info('[Manager] Initializing network...')
 
-    let networkConfig: NetworkConfigMap = defaultNetworkConfigMap
+    let networkConfig = createDefaultNetworkConfig()
 
     if (isNetworkConfigMap(config)) {
       // Config for multiple networks
@@ -209,14 +207,6 @@ export class WalletManager {
 
   public get activeNetwork(): NetworkId {
     return this.store.state.activeNetwork
-  }
-
-  public get blockExplorer(): string {
-    return blockExplorer[this.activeNetwork]
-  }
-
-  public get chainId(): string | undefined {
-    return caipChainId[this.activeNetwork]
   }
 
   // ---------- Active Wallet ----------------------------------------- //

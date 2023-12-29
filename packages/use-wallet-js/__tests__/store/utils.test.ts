@@ -1,5 +1,5 @@
 import { describe, expect, it } from '@jest/globals'
-import { NetworkId } from 'src/network/constants'
+import { NetworkId } from 'src/network'
 import {
   isValidState,
   isValidWalletAccount,
