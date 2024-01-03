@@ -1,18 +1,29 @@
 import { Store } from '@tanstack/react-store'
 import { renderHook, act } from '@testing-library/react'
 import {
-  WalletManager,
-  WalletAccount,
-  WalletId,
-  State,
-  NetworkId,
-  defaultState,
   BaseWallet,
-  DeflyWallet
+  DeflyWallet,
+  NetworkId,
+  WalletManager,
+  WalletId,
+  defaultState,
+  type State,
+  type WalletAccount
 } from '@txnlab/use-wallet-js'
 import React from 'react'
-import { useWallet } from '../useWallet'
+import { Wallet, useWallet } from '../useWallet'
 import { WalletProvider } from '../WalletProvider'
+
+vi.mock('@tanstack/react-store', async (importOriginal) => {
+  const mod = await importOriginal<typeof import('@tanstack/react-store')>()
+  return {
+    ...mod,
+    useStore: vi.fn().mockImplementation((store, selector) => {
+      const state = defaultState
+      return selector(state)
+    })
+  }
+})
 
 const {
   mockConnect,
@@ -61,29 +72,33 @@ const mockDeflyWallet = new DeflyWallet({
 })
 
 describe('useWallet', () => {
-  const mockWalletManager = new WalletManager()
+  let mockWalletManager: WalletManager
+  let mockWallets: Wallet[]
+  let wrapper: React.FC<{ children: React.ReactNode }>
 
-  const mockWallets = [
-    {
-      id: WalletId.DEFLY,
-      metadata: { name: 'Defly', icon: 'icon' },
-      accounts: [],
-      activeAccount: null,
-      isConnected: false,
-      isActive: false,
-      connect: expect.any(Function),
-      disconnect: expect.any(Function),
-      setActive: expect.any(Function),
-      setActiveAccount: expect.any(Function)
-    }
-  ]
+  beforeEach(() => {
+    mockWalletManager = new WalletManager()
+    mockWallets = [
+      {
+        id: WalletId.DEFLY,
+        metadata: { name: 'Defly', icon: 'icon' },
+        accounts: [],
+        activeAccount: null,
+        isConnected: false,
+        isActive: false,
+        connect: expect.any(Function),
+        disconnect: expect.any(Function),
+        setActive: expect.any(Function),
+        setActiveAccount: expect.any(Function)
+      }
+    ]
+    mockWalletManager._clients = new Map<WalletId, BaseWallet>([[WalletId.DEFLY, mockDeflyWallet]])
+    mockWalletManager.store = mockStore
 
-  mockWalletManager._clients = new Map<WalletId, BaseWallet>([[WalletId.DEFLY, mockDeflyWallet]])
-  mockWalletManager.store = mockStore
-
-  const wrapper = ({ children }: { children: React.ReactNode }) => (
-    <WalletProvider manager={mockWalletManager}>{children}</WalletProvider>
-  )
+    wrapper = ({ children }: { children: React.ReactNode }) => (
+      <WalletProvider manager={mockWalletManager}>{children}</WalletProvider>
+    )
+  })
 
   it('initializes wallets and active wallet correctly', async () => {
     const { result } = renderHook(() => useWallet(), { wrapper })
