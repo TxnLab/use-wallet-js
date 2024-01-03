@@ -1,19 +1,66 @@
 'use client'
 
-import type algosdk from 'algosdk'
+import { useStore } from '@tanstack/react-store'
+import * as React from 'react'
 import { useWalletManager } from './WalletProvider'
+import type { WalletAccount, WalletMetadata } from '@txnlab/use-wallet-js'
+import type algosdk from 'algosdk'
+
+export interface Wallet {
+  id: string
+  metadata: WalletMetadata
+  accounts: WalletAccount[]
+  activeAccount: WalletAccount | null
+  isConnected: boolean
+  isActive: boolean
+  connect: () => Promise<WalletAccount[]>
+  disconnect: () => Promise<void>
+  setActive: () => void
+  setActiveAccount: (address: string) => void
+}
 
 export function useWallet() {
-  const { manager, state } = useWalletManager()
+  const manager = useWalletManager()
 
-  const { activeNetwork, activeWallet } = state
-
-  const wallets = manager.wallets
   const algodClient: algosdk.Algodv2 = manager.algodClient
-  const activeWalletAccounts = manager.activeWalletAccounts
-  const activeWalletAddresses = manager.activeWalletAddresses
-  const activeAccount = manager.activeAccount
-  const activeAddress = manager.activeAddress
+
+  const walletStateMap = useStore(manager.store, (state) => state.wallets)
+  const activeWalletId = useStore(manager.store, (state) => state.activeWallet)
+
+  const walletsArray = React.useMemo(() => [...manager.wallets.values()], [manager])
+
+  const [wallets, setWallets] = React.useState<Wallet[]>([])
+
+  React.useEffect(() => {
+    setWallets(
+      walletsArray.map((wallet): Wallet => {
+        const walletState = walletStateMap[wallet.id]
+
+        return {
+          id: wallet.id,
+          metadata: wallet.metadata,
+          accounts: walletState?.accounts ?? [],
+          activeAccount: walletState?.activeAccount ?? null,
+          isConnected: !!walletState,
+          isActive: wallet.id === activeWalletId,
+          connect: () => wallet.connect(),
+          disconnect: () => wallet.disconnect(),
+          setActive: () => wallet.setActive(),
+          setActiveAccount: (addr) => wallet.setActiveAccount(addr)
+        }
+      })
+    )
+  }, [walletsArray, walletStateMap, activeWalletId])
+
+  const activeWallet = activeWalletId ? manager.getWallet(activeWalletId) || null : null
+  const activeWalletState = activeWalletId ? walletStateMap[activeWalletId] || null : null
+
+  const activeWalletAccounts = activeWalletState?.accounts ?? null
+  const activeWalletAddresses = activeWalletAccounts?.map((account) => account.address) ?? null
+  const activeAccount = activeWalletState?.activeAccount ?? null
+  const activeAddress = activeAccount?.address ?? null
+
+  const activeNetwork = useStore(manager.store, (state) => state.activeNetwork)
   const setActiveNetwork = manager.setActiveNetwork
 
   const signTransactions = (
@@ -24,14 +71,14 @@ export function useWallet() {
     if (!activeWallet) {
       throw new Error('No active wallet')
     }
-    return manager.signTransactions(txnGroup, indexesToSign, returnGroup)
+    return activeWallet.signTransactions(txnGroup, indexesToSign, returnGroup)
   }
 
   const transactionSigner = (txnGroup: algosdk.Transaction[], indexesToSign: number[]) => {
     if (!activeWallet) {
       throw new Error('No active wallet')
     }
-    return manager.transactionSigner(txnGroup, indexesToSign)
+    return activeWallet.transactionSigner(txnGroup, indexesToSign)
   }
 
   return {

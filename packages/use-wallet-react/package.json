@@ -7,6 +7,8 @@
   "scripts": {
     "build": "tsup",
     "start": "tsup src/index.ts --watch",
+    "test": "vitest",
+    "test:watch": "vitest --watch",
     "lint": "eslint -c '../../.eslintrc.json' '**/*.{js,ts}'",
     "prettier": "prettier --check '**/*.{js,ts}'",
     "typecheck": "tsc --noEmit"
@@ -59,11 +61,13 @@
     }
   },
   "dependencies": {
+    "@tanstack/react-store": "^0.2.1",
     "@txnlab/use-wallet-js": "workspace:*"
   },
   "devDependencies": {
     "@types/react": "^18.2.45",
     "algosdk": "^2.6.0",
+    "jsdom": "^23.0.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "tsup": "^8.0.0",

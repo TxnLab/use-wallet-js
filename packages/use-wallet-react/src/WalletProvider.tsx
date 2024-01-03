@@ -1,39 +1,27 @@
 'use client'
 
+import { WalletManager } from '@txnlab/use-wallet-js'
 import * as React from 'react'
 
-import { WalletManager, State, defaultState } from '@txnlab/use-wallet-js'
+const WalletContext = React.createContext<WalletManager | undefined>(undefined)
 
-interface IContext {
-  manager: WalletManager
-  state: State
-}
+export const useWalletManager = () => {
+  const manager = React.useContext(WalletContext)
 
-const WalletContext = React.createContext<IContext>({} as IContext)
-
-export const useWalletManager = (): IContext => {
-  const context = React.useContext(WalletContext)
-
-  if (!context) {
+  if (!manager) {
     throw new Error('useWallet must be used within the WalletProvider')
   }
 
-  return context
+  return manager
 }
 
-interface IWalletProvider {
+interface WalletProviderProps {
   manager: WalletManager
-  children?: React.ReactNode
+  children: React.ReactNode
 }
 
-export const WalletProvider = ({ manager, children }: IWalletProvider): JSX.Element => {
-  const [state, setState] = React.useState<State>(defaultState)
-
+export const WalletProvider = ({ manager, children }: WalletProviderProps): JSX.Element => {
   React.useEffect(() => {
-    const unsubscribe = manager.subscribe((state) => {
-      setState(state)
-    })
-
     const resumeSessions = async () => {
       try {
         await manager.resumeSessions()
@@ -43,9 +31,7 @@ export const WalletProvider = ({ manager, children }: IWalletProvider): JSX.Elem
     }
 
     resumeSessions()
-
-    return () => unsubscribe()
   }, [manager])
 
-  return <WalletContext.Provider value={{ manager, state }}>{children}</WalletContext.Provider>
+  return <WalletContext.Provider value={manager}>{children}</WalletContext.Provider>
 }
