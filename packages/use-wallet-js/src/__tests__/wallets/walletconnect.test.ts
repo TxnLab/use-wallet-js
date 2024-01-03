@@ -1,7 +1,5 @@
 import { Store } from '@tanstack/store'
-import { afterEach, beforeEach, describe, expect, it, jest } from '@jest/globals'
 import { ModalCtrl } from '@walletconnect/modal-core'
-import { EngineTypes, SessionTypes } from '@walletconnect/types'
 import * as msgpack from 'algo-msgpack-with-bigint'
 import algosdk from 'algosdk'
 import { State, defaultState } from 'src/store'
@@ -9,10 +7,10 @@ import { WalletConnect } from 'src/wallets/walletconnect'
 import { WalletId, WalletTransaction } from 'src/wallets/types'
 
 // Spy/suppress console output
-jest.spyOn(console, 'info').mockImplementation(() => {})
-jest.spyOn(console, 'warn').mockImplementation(() => {})
-jest.spyOn(console, 'error').mockImplementation(() => {})
-jest.spyOn(console, 'groupCollapsed').mockImplementation(() => {})
+vi.spyOn(console, 'info').mockImplementation(() => {})
+vi.spyOn(console, 'warn').mockImplementation(() => {})
+vi.spyOn(console, 'error').mockImplementation(() => {})
+vi.spyOn(console, 'groupCollapsed').mockImplementation(() => {})
 
 // Mock localStorage
 const localStorageMock = (() => {
@@ -28,36 +26,29 @@ Object.defineProperty(global, 'localStorage', {
 })
 
 const mockSignClient = {
-  on: jest.fn(),
-  connect: jest.fn<
-    () => Promise<{
-      uri?: string
-      approval: () => Promise<SessionTypes.Struct>
-    }>
-  >(),
-  disconnect: jest.fn(),
-  request: jest.fn<(params: EngineTypes.RequestParams) => Promise<(string | null)[]>>(),
+  on: vi.fn(),
+  connect: vi.fn(),
+  disconnect: vi.fn(),
+  request: vi.fn(),
   session: {
-    get: jest.fn<(key: string) => SessionTypes.Struct>(),
+    get: vi.fn(),
     keys: [''],
     length: 0
   }
 }
 
-jest.mock('@walletconnect/sign-client', () => {
+vi.mock('@walletconnect/sign-client', () => {
   return {
     SignClient: class {
-      static init = jest.fn<() => Promise<typeof mockSignClient>>(() =>
-        Promise.resolve(mockSignClient)
-      )
+      static init = vi.fn(() => Promise.resolve(mockSignClient))
     }
   }
 })
 
-jest.spyOn(ModalCtrl, 'open').mockImplementation(() => Promise.resolve())
-jest.spyOn(ModalCtrl, 'close').mockImplementation(() => {})
+vi.spyOn(ModalCtrl, 'open').mockImplementation(() => Promise.resolve())
+vi.spyOn(ModalCtrl, 'close').mockImplementation(() => {})
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-jest.spyOn(ModalCtrl, 'subscribe').mockImplementation((callback: (state: any) => void) => {
+vi.spyOn(ModalCtrl, 'subscribe').mockImplementation((callback: (state: any) => void) => {
   return () => console.log('unsubscribe')
 })
 
@@ -117,7 +108,7 @@ describe('WalletConnect', () => {
   let wallet: WalletConnect
   let store: Store<State>
 
-  const mockSubscribe: (callback: (state: State) => void) => () => void = jest.fn(
+  const mockSubscribe: (callback: (state: State) => void) => () => void = vi.fn(
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     (callback: (state: State) => void) => {
       return () => console.log('unsubscribe')
@@ -140,7 +131,7 @@ describe('WalletConnect', () => {
   afterEach(async () => {
     await wallet.disconnect()
     localStorage.clear()
-    jest.clearAllMocks()
+    vi.clearAllMocks()
   })
 
   describe('connect', () => {
@@ -169,7 +160,7 @@ describe('WalletConnect', () => {
 
       mockSignClient.connect.mockResolvedValue({
         uri: 'mock-uri',
-        approval: jest.fn<() => Promise<SessionTypes.Struct>>().mockResolvedValue(mockSession)
+        approval: vi.fn().mockResolvedValue(mockSession)
       })
 
       const accounts = await wallet.connect()
@@ -187,7 +178,7 @@ describe('WalletConnect', () => {
 
       mockSignClient.connect.mockResolvedValue({
         uri: 'mock-uri',
-        approval: jest.fn<() => Promise<SessionTypes.Struct>>().mockResolvedValue(mockSession)
+        approval: vi.fn().mockResolvedValue(mockSession)
       })
 
       const accounts = await wallet.connect()
@@ -218,7 +209,7 @@ describe('WalletConnect', () => {
 
       mockSignClient.connect.mockResolvedValue({
         uri: 'mock-uri',
-        approval: jest.fn<() => Promise<SessionTypes.Struct>>().mockResolvedValue(mockSession)
+        approval: vi.fn().mockResolvedValue(mockSession)
       })
 
       // Connect first to initialize client
@@ -454,7 +445,7 @@ describe('WalletConnect', () => {
 
         mockSignClient.connect.mockResolvedValue({
           uri: 'mock-uri',
-          approval: jest.fn<() => Promise<SessionTypes.Struct>>().mockResolvedValue(mockSession)
+          approval: vi.fn().mockResolvedValue(mockSession)
         })
 
         await wallet.connect()

@@ -14,7 +14,8 @@
     "noEmit": true,
     "baseUrl": ".",
     "rootDir": ".",
-    "outDir": "dist"
+    "outDir": "dist",
+    "types": ["vitest/globals"]
   },
   "exclude": ["node_modules", "dist"]
 }

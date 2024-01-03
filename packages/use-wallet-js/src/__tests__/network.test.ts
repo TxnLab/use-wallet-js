@@ -1,4 +1,3 @@
-import { describe, expect, it } from '@jest/globals'
 import { isAlgodConfig, isNetworkConfigMap, isValidNetworkId, NetworkId } from 'src/network'
 
 describe('Network Type Guards', () => {

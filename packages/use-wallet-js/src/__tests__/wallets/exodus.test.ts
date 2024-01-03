@@ -1,16 +1,15 @@
 import { Store } from '@tanstack/store'
-import { afterEach, beforeEach, describe, expect, it, jest } from '@jest/globals'
 import * as msgpack from 'algo-msgpack-with-bigint'
 import algosdk from 'algosdk'
 import { State, defaultState } from 'src/store'
-import { EnableResult, Exodus, ExodusWallet, SignTxnsResult } from 'src/wallets/exodus'
-import { WalletId, WalletTransaction } from 'src/wallets/types'
+import { Exodus, ExodusWallet } from 'src/wallets/exodus'
+import { WalletId } from 'src/wallets/types'
 
 // Spy/suppress console output
-jest.spyOn(console, 'info').mockImplementation(() => {})
-jest.spyOn(console, 'warn').mockImplementation(() => {})
-jest.spyOn(console, 'error').mockImplementation(() => {})
-jest.spyOn(console, 'groupCollapsed').mockImplementation(() => {})
+vi.spyOn(console, 'info').mockImplementation(() => {})
+vi.spyOn(console, 'warn').mockImplementation(() => {})
+vi.spyOn(console, 'error').mockImplementation(() => {})
+vi.spyOn(console, 'groupCollapsed').mockImplementation(() => {})
 
 // Mock localStorage
 const localStorageMock = (() => {
@@ -22,7 +21,7 @@ const localStorageMock = (() => {
   }
 })()
 
-const mockEnableFn = jest.fn<() => Promise<EnableResult>>().mockImplementation(() => {
+const mockEnableFn = vi.fn().mockImplementation(() => {
   return Promise.resolve({
     genesisID: 'mainnet-v1.0',
     genesisHash: 'wGHE2Pwdvd7S12BL5FaOP20EGYesN73ktiC1qzkkit8=',
@@ -33,9 +32,7 @@ const mockEnableFn = jest.fn<() => Promise<EnableResult>>().mockImplementation((
   })
 })
 
-const mockSignTxns = jest
-  .fn<(transactions: WalletTransaction[]) => Promise<SignTxnsResult>>()
-  .mockResolvedValue(['mockBase64SignedTxn'])
+const mockSignTxns = vi.fn().mockResolvedValue(['mockBase64SignedTxn'])
 
 // Mock Exodus extension
 const mockExodus: Exodus = {
@@ -60,7 +57,7 @@ describe('ExodusWallet', () => {
   let wallet: ExodusWallet
   let store: Store<State>
 
-  const mockSubscribe: (callback: (state: State) => void) => () => void = jest.fn(
+  const mockSubscribe: (callback: (state: State) => void) => () => void = vi.fn(
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     (callback: (state: State) => void) => {
       return () => console.log('unsubscribe')
@@ -80,7 +77,7 @@ describe('ExodusWallet', () => {
   afterEach(async () => {
     await wallet.disconnect()
     localStorage.clear()
-    jest.clearAllMocks()
+    vi.clearAllMocks()
   })
 
   describe('connect', () => {
