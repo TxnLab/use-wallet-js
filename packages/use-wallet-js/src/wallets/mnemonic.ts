@@ -85,7 +85,7 @@ export class MnemonicWallet extends BaseWallet {
 
   public async resumeSession(): Promise<void> {
     const state = this.store.state
-    const walletState = state.wallets.get(this.id)
+    const walletState = state.wallets[this.id]
 
     // Don't resume session, disconnect instead
     if (walletState) {

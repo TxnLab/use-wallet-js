@@ -62,7 +62,7 @@ export abstract class BaseWallet {
 
   public get accounts(): WalletAccount[] {
     const state = this.store.state
-    const walletState = state.wallets.get(this.id)
+    const walletState = state.wallets[this.id]
     return walletState ? walletState.accounts : []
   }
 
@@ -72,7 +72,7 @@ export abstract class BaseWallet {
 
   public get activeAccount(): WalletAccount | null {
     const state = this.store.state
-    const walletState = state.wallets.get(this.id)
+    const walletState = state.wallets[this.id]
     return walletState ? walletState.activeAccount : null
   }
 
@@ -87,7 +87,7 @@ export abstract class BaseWallet {
 
   public get isConnected(): boolean {
     const state = this.store.state
-    const walletState = state.wallets.get(this.id)
+    const walletState = state.wallets[this.id]
     return walletState ? walletState.accounts.length > 0 : false
   }
 

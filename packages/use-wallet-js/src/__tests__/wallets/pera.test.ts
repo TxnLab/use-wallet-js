@@ -72,7 +72,7 @@ describe('PeraWallet', () => {
 
       expect(wallet.isConnected).toBe(true)
       expect(accounts).toEqual([account1, account2])
-      expect(store.state.wallets.get(WalletId.PERA)).toEqual({
+      expect(store.state.wallets[WalletId.PERA]).toEqual({
         accounts: [account1, account2],
         activeAccount: account1
       })
@@ -90,7 +90,7 @@ describe('PeraWallet', () => {
         '[PeraWallet] Error connecting: No accounts found!'
       )
       expect(accounts).toEqual([])
-      expect(store.state.wallets.get(WalletId.PERA)).toBeUndefined()
+      expect(store.state.wallets[WalletId.PERA]).toBeUndefined()
     })
   })
 
@@ -107,13 +107,13 @@ describe('PeraWallet', () => {
       // Connect first to initialize client
       await wallet.connect()
       expect(wallet.isConnected).toBe(true)
-      expect(store.state.wallets.get(WalletId.PERA)).toBeDefined()
+      expect(store.state.wallets[WalletId.PERA]).toBeDefined()
 
       await wallet.disconnect()
       expect(wallet.isConnected).toBe(false)
 
       expect(mockDisconnect).toHaveBeenCalled()
-      expect(store.state.wallets.get(WalletId.PERA)).toBeUndefined()
+      expect(store.state.wallets[WalletId.PERA]).toBeUndefined()
     })
   })
 
@@ -126,15 +126,12 @@ describe('PeraWallet', () => {
 
       store = new Store<State>({
         ...defaultState,
-        wallets: new Map([
-          [
-            WalletId.PERA,
-            {
-              accounts: [account],
-              activeAccount: account
-            }
-          ]
-        ])
+        wallets: {
+          [WalletId.PERA]: {
+            accounts: [account],
+            activeAccount: account
+          }
+        }
       })
 
       wallet = new PeraWallet({
@@ -186,27 +183,24 @@ describe('PeraWallet', () => {
       // Store contains 'mockAddress1' and 'mockAddress2', with 'mockAddress1' as active
       store = new Store<State>({
         ...defaultState,
-        wallets: new Map([
-          [
-            WalletId.PERA,
-            {
-              accounts: [
-                {
-                  name: 'Pera Wallet 1',
-                  address: 'mockAddress1'
-                },
-                {
-                  name: 'Pera Wallet 2',
-                  address: 'mockAddress2'
-                }
-              ],
-              activeAccount: {
+        wallets: {
+          [WalletId.PERA]: {
+            accounts: [
+              {
                 name: 'Pera Wallet 1',
                 address: 'mockAddress1'
+              },
+              {
+                name: 'Pera Wallet 2',
+                address: 'mockAddress2'
               }
+            ],
+            activeAccount: {
+              name: 'Pera Wallet 1',
+              address: 'mockAddress1'
             }
-          ]
-        ])
+          }
+        }
       })
 
       wallet = new PeraWallet({
@@ -232,7 +226,7 @@ describe('PeraWallet', () => {
       )
 
       // Store now only contains 'mockAddress2', which is set as active
-      expect(store.state.wallets.get(WalletId.PERA)).toEqual({
+      expect(store.state.wallets[WalletId.PERA]).toEqual({
         accounts: [
           {
             name: 'Pera Wallet 1', // auto-generated name

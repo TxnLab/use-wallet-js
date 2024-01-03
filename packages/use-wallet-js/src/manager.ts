@@ -13,8 +13,6 @@ import {
   isValidState,
   LOCAL_STORAGE_KEY,
   removeWallet,
-  replacer,
-  reviver,
   setActiveNetwork,
   setActiveWallet,
   type State
@@ -22,7 +20,7 @@ import {
 import { createWalletMap, deepMerge } from 'src/utils'
 import type { BaseWallet } from 'src/wallets/base'
 import type {
-  SupportedWallets,
+  SupportedWallet,
   TransactionSignerAccount,
   WalletAccount,
   WalletConfigMap,
@@ -33,21 +31,21 @@ import type {
 } from 'src/wallets/types'
 
 export interface WalletManagerConfig {
-  wallets: SupportedWallets
+  wallets?: SupportedWallet[]
   network?: NetworkId
   algod?: NetworkConfig
 }
 
 export class WalletManager {
-  private _wallets: Map<WalletId, BaseWallet> = new Map()
+  public _clients: Map<WalletId, BaseWallet> = new Map()
 
-  private networkConfig: NetworkConfigMap
+  public networkConfig: NetworkConfigMap
   public algodClient: algosdk.Algodv2
 
   public store: Store<State>
   public subscribe: (callback: (state: State) => void) => () => void
 
-  constructor({ wallets, network = NetworkId.TESTNET, algod = {} }: WalletManagerConfig) {
+  constructor({ wallets = [], network = NetworkId.TESTNET, algod = {} }: WalletManagerConfig = {}) {
     const initialState = this.loadPersistedState() || {
       ...defaultState,
       activeNetwork: network
@@ -81,7 +79,7 @@ export class WalletManager {
       if (serializedState === null) {
         return null
       }
-      const parsedState = JSON.parse(serializedState, reviver)
+      const parsedState = JSON.parse(serializedState)
       if (!isValidState(parsedState)) {
         console.warn('[Store] Parsed state:', parsedState)
         throw new Error('Persisted state is invalid')
@@ -96,7 +94,7 @@ export class WalletManager {
   private savePersistedState(): void {
     try {
       const state = this.store.state
-      const serializedState = JSON.stringify(state, replacer)
+      const serializedState = JSON.stringify(state)
       localStorage.setItem(LOCAL_STORAGE_KEY, serializedState)
     } catch (error) {
       console.error('[Store] Could not save state to local storage:', error)
@@ -142,34 +140,34 @@ export class WalletManager {
         subscribe: this.subscribe
       })
 
-      this._wallets.set(walletId, walletInstance)
+      this._clients.set(walletId, walletInstance)
       console.info(`[Manager] ✅ Initialized ${walletId}`)
     }
 
     const state = this.store.state
 
     // Check if connected wallets are still valid
-    const connectedWallets = state.wallets.keys()
+    const connectedWallets = Object.keys(state.wallets) as WalletId[]
     for (const walletId of connectedWallets) {
-      if (!this._wallets.has(walletId)) {
+      if (!this._clients.has(walletId)) {
         console.warn(`[Manager] Connected wallet not found: ${walletId}`)
         removeWallet(this.store, { walletId })
       }
     }
 
     // Check if active wallet is still valid
-    if (state.activeWallet && !this._wallets.has(state.activeWallet)) {
+    if (state.activeWallet && !this._clients.has(state.activeWallet)) {
       console.warn(`[Manager] Active wallet not found: ${state.activeWallet}`)
       setActiveWallet(this.store, { walletId: null })
     }
   }
 
   public get wallets(): BaseWallet[] {
-    return [...this._wallets.values()]
+    return [...this._clients.values()]
   }
 
   public getWallet(walletId: WalletId): BaseWallet | undefined {
-    return this._wallets.get(walletId)
+    return this._clients.get(walletId)
   }
 
   public async resumeSessions(): Promise<void> {

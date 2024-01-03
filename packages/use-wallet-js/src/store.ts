@@ -7,14 +7,16 @@ export type WalletState = {
   activeAccount: WalletAccount | null
 }
 
+export type WalletStateMap = Partial<Record<WalletId, WalletState>>
+
 export interface State {
-  wallets: Map<WalletId, WalletState>
+  wallets: WalletStateMap
   activeWallet: WalletId | null
   activeNetwork: NetworkId
 }
 
 export const defaultState: State = {
-  wallets: new Map(),
+  wallets: {},
   activeWallet: null,
   activeNetwork: NetworkId.TESTNET
 }
@@ -28,8 +30,10 @@ export function addWallet(
   { walletId, wallet }: { walletId: WalletId; wallet: WalletState }
 ) {
   store.setState((state) => {
-    const newWallets = new Map(state.wallets.entries())
-    newWallets.set(walletId, wallet)
+    const newWallets = {
+      ...state.wallets,
+      [walletId]: wallet
+    }
 
     return {
       ...state,
@@ -41,8 +45,8 @@ export function addWallet(
 
 export function removeWallet(store: Store<State>, { walletId }: { walletId: WalletId }) {
   store.setState((state) => {
-    const newWallets = new Map(state.wallets.entries())
-    newWallets.delete(walletId)
+    const newWallets = { ...state.wallets }
+    delete newWallets[walletId]
 
     return {
       ...state,
@@ -66,7 +70,7 @@ export function setActiveAccount(
   { walletId, address }: { walletId: WalletId; address: string }
 ) {
   store.setState((state) => {
-    const wallet = state.wallets.get(walletId)
+    const wallet = state.wallets[walletId]
     if (!wallet) {
       return state
     }
@@ -75,11 +79,13 @@ export function setActiveAccount(
       return state
     }
 
-    const newWallets = new Map(state.wallets.entries())
-    newWallets.set(walletId, {
-      ...wallet,
-      activeAccount: activeAccount
-    })
+    const newWallets = {
+      ...state.wallets,
+      [walletId]: {
+        ...wallet,
+        activeAccount
+      }
+    }
 
     return {
       ...state,
@@ -93,7 +99,7 @@ export function setAccounts(
   { walletId, accounts }: { walletId: WalletId; accounts: WalletAccount[] }
 ) {
   store.setState((state) => {
-    const wallet = state.wallets.get(walletId)
+    const wallet = state.wallets[walletId]
     if (!wallet) {
       return state
     }
@@ -111,9 +117,11 @@ export function setAccounts(
       activeAccount
     }
 
-    // Create a new Map with the updated wallet
-    const newWallets = new Map(state.wallets.entries())
-    newWallets.set(walletId, newWallet)
+    // Create a new map with the updated wallet
+    const newWallets = {
+      ...state.wallets,
+      [walletId]: newWallet
+    }
 
     return {
       ...state,
@@ -158,30 +166,12 @@ export function isValidWalletState(wallet: any): wallet is WalletState {
 
 export function isValidState(state: any): state is State {
   if (!state || typeof state !== 'object') return false
-  if (!(state.wallets instanceof Map)) return false
-  for (const [walletId, wallet] of state.wallets.entries()) {
+  if (typeof state.wallets !== 'object') return false
+  for (const [walletId, wallet] of Object.entries(state.wallets)) {
     if (!isValidWalletId(walletId) || !isValidWalletState(wallet)) return false
   }
   if (state.activeWallet !== null && !isValidWalletId(state.activeWallet)) return false
   if (!isValidNetworkId(state.activeNetwork)) return false
 
   return true
-}
-
-// Serialize/deserialize persisted state (handle Map type)
-
-// JSON.stringify(state, replacer)
-export function replacer(key: string, value: any): any {
-  if (value instanceof Map) {
-    return { _type: 'Map', data: Array.from(value.entries()) }
-  }
-  return value
-}
-
-// JSON.parse(state, reviver)
-export function reviver(key: string, value: any): any {
-  if (typeof value === 'object' && value !== null && value._type === 'Map') {
-    return new Map(value.data)
-  }
-  return value
 }

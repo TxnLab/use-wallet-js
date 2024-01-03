@@ -121,7 +121,7 @@ export class ExodusWallet extends BaseWallet {
 
   public async resumeSession(): Promise<void> {
     const state = this.store.state
-    const walletState = state.wallets.get(this.id)
+    const walletState = state.wallets[this.id]
 
     if (!walletState) {
       // No persisted state, abort

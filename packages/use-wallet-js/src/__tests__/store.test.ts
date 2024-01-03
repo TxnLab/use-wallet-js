@@ -12,9 +12,7 @@ import {
   isValidState,
   isValidWalletAccount,
   isValidWalletId,
-  isValidWalletState,
-  replacer,
-  reviver
+  isValidWalletState
 } from 'src/store'
 import { WalletId } from 'src/wallets/types'
 
@@ -40,7 +38,7 @@ describe('Mutations', () => {
       addWallet(store, { walletId, wallet: walletState })
 
       const state = store.state
-      expect(state.wallets.get(walletId)).toEqual(walletState)
+      expect(state.wallets[walletId]).toEqual(walletState)
       expect(state.activeWallet).toBe(walletId)
     })
   })
@@ -49,38 +47,32 @@ describe('Mutations', () => {
     beforeEach(() => {
       store = new Store<State>({
         ...defaultState,
-        wallets: new Map([
-          [
-            WalletId.DEFLY,
-            {
-              accounts: [
-                {
-                  name: 'Defly Wallet 1',
-                  address: 'address'
-                }
-              ],
-              activeAccount: {
+        wallets: {
+          [WalletId.DEFLY]: {
+            accounts: [
+              {
                 name: 'Defly Wallet 1',
                 address: 'address'
               }
+            ],
+            activeAccount: {
+              name: 'Defly Wallet 1',
+              address: 'address'
             }
-          ],
-          [
-            WalletId.PERA,
-            {
-              accounts: [
-                {
-                  name: 'Pera Wallet 1',
-                  address: 'address'
-                }
-              ],
-              activeAccount: {
+          },
+          [WalletId.PERA]: {
+            accounts: [
+              {
                 name: 'Pera Wallet 1',
                 address: 'address'
               }
+            ],
+            activeAccount: {
+              name: 'Pera Wallet 1',
+              address: 'address'
             }
-          ]
-        ]),
+          }
+        },
         activeWallet: WalletId.DEFLY
       })
     })
@@ -88,11 +80,11 @@ describe('Mutations', () => {
     it('should remove an active wallet', () => {
       const walletId = WalletId.DEFLY
 
-      expect(store.state.wallets.get(walletId)).toBeDefined()
+      expect(store.state.wallets[walletId]).toBeDefined()
       expect(store.state.activeWallet).toBe(walletId)
 
       removeWallet(store, { walletId })
-      expect(store.state.wallets.get(walletId)).toBeUndefined()
+      expect(store.state.wallets[walletId]).toBeUndefined()
 
       // Active wallet should be null
       expect(store.state.activeWallet).toBeNull()
@@ -102,10 +94,10 @@ describe('Mutations', () => {
       const walletId = WalletId.PERA
       const activeWallet = store.state.activeWallet
 
-      expect(store.state.wallets.get(walletId)).toBeDefined()
+      expect(store.state.wallets[walletId]).toBeDefined()
 
       removeWallet(store, { walletId })
-      expect(store.state.wallets.get(walletId)).toBeUndefined()
+      expect(store.state.wallets[walletId]).toBeUndefined()
 
       // Active wallet should not change
       expect(store.state.activeWallet).toBe(activeWallet)
@@ -115,14 +107,14 @@ describe('Mutations', () => {
       const walletId = WalletId.EXODUS
       const activeWallet = store.state.activeWallet
 
-      expect(store.state.wallets.size).toBe(2)
-      expect(store.state.wallets.get(walletId)).toBeUndefined()
+      expect(Object.keys(store.state.wallets).length).toBe(2)
+      expect(store.state.wallets[walletId]).toBeUndefined()
 
       removeWallet(store, { walletId })
-      expect(store.state.wallets.get(walletId)).toBeUndefined()
+      expect(store.state.wallets[walletId]).toBeUndefined()
 
       // Wallets map should not change
-      expect(store.state.wallets.size).toBe(2)
+      expect(Object.keys(store.state.wallets).length).toBe(2)
 
       // Active wallet should not change
       expect(store.state.activeWallet).toBe(activeWallet)
@@ -176,10 +168,10 @@ describe('Mutations', () => {
       }
 
       addWallet(store, { walletId, wallet: walletState })
-      expect(store.state.wallets.get(walletId)?.activeAccount).toEqual(account1)
+      expect(store.state.wallets[walletId]?.activeAccount).toEqual(account1)
 
       setActiveAccount(store, { walletId, address: account2.address })
-      expect(store.state.wallets.get(walletId)?.activeAccount).toEqual(account2)
+      expect(store.state.wallets[walletId]?.activeAccount).toEqual(account2)
     })
 
     it('should do nothing if walletId is not in wallets map', () => {
@@ -198,10 +190,10 @@ describe('Mutations', () => {
       }
 
       addWallet(store, { walletId, wallet: walletState })
-      expect(store.state.wallets.get(walletId)?.activeAccount).toEqual(account1)
+      expect(store.state.wallets[walletId]?.activeAccount).toEqual(account1)
 
       setActiveAccount(store, { walletId: WalletId.EXODUS, address: 'exodusAddress' })
-      expect(store.state.wallets.get(walletId)?.activeAccount).toEqual(account1)
+      expect(store.state.wallets[walletId]?.activeAccount).toEqual(account1)
     })
 
     it('should do nothing if provided account is not found in wallet state', () => {
@@ -220,10 +212,10 @@ describe('Mutations', () => {
       }
 
       addWallet(store, { walletId, wallet: walletState })
-      expect(store.state.wallets.get(walletId)?.activeAccount).toEqual(account1)
+      expect(store.state.wallets[walletId]?.activeAccount).toEqual(account1)
 
       setActiveAccount(store, { walletId: WalletId.DEFLY, address: 'foo' })
-      expect(store.state.wallets.get(walletId)?.activeAccount).toEqual(account1)
+      expect(store.state.wallets[walletId]?.activeAccount).toEqual(account1)
     })
   })
 
@@ -244,11 +236,11 @@ describe('Mutations', () => {
       }
 
       addWallet(store, { walletId, wallet: walletState })
-      expect(store.state.wallets.get(walletId)?.accounts).toEqual([account1])
+      expect(store.state.wallets[walletId]?.accounts).toEqual([account1])
 
       const newAccounts = [account1, account2]
       setAccounts(store, { walletId, accounts: newAccounts })
-      expect(store.state.wallets.get(walletId)?.accounts).toEqual(newAccounts)
+      expect(store.state.wallets[walletId]?.accounts).toEqual(newAccounts)
     })
 
     it('should set the active account if previous active account is not in new accounts list', () => {
@@ -271,14 +263,14 @@ describe('Mutations', () => {
       }
 
       addWallet(store, { walletId, wallet: walletState })
-      expect(store.state.wallets.get(walletId)?.activeAccount).toEqual(account1)
+      expect(store.state.wallets[walletId]?.activeAccount).toEqual(account1)
 
       // New accounts list does not include active account (account1)
       const newAccounts = [account2, account3]
       setAccounts(store, { walletId, accounts: newAccounts })
 
       // Active account should be set to first account in new accounts list (account2)
-      expect(store.state.wallets.get(walletId)?.activeAccount).toEqual(account2)
+      expect(store.state.wallets[walletId]?.activeAccount).toEqual(account2)
     })
   })
 
@@ -413,50 +405,44 @@ describe('Type Guards', () => {
 
   describe('isValidState', () => {
     it('returns true for a valid state', () => {
-      const defaultState = {
-        wallets: new Map(),
+      const defaultState: State = {
+        wallets: {},
         activeWallet: null,
         activeNetwork: NetworkId.TESTNET
       }
       expect(isValidState(defaultState)).toBe(true)
 
-      const state = {
-        wallets: new Map([
-          [
-            WalletId.DEFLY,
-            {
-              accounts: [
-                {
-                  name: 'Defly Wallet 1',
-                  address: 'address'
-                },
-                {
-                  name: 'Defly Wallet 2',
-                  address: 'address'
-                }
-              ],
-              activeAccount: {
+      const state: State = {
+        wallets: {
+          [WalletId.DEFLY]: {
+            accounts: [
+              {
                 name: 'Defly Wallet 1',
                 address: 'address'
+              },
+              {
+                name: 'Defly Wallet 2',
+                address: 'address'
               }
+            ],
+            activeAccount: {
+              name: 'Defly Wallet 1',
+              address: 'address'
             }
-          ],
-          [
-            WalletId.PERA,
-            {
-              accounts: [
-                {
-                  name: 'Pera Wallet 1',
-                  address: 'address'
-                }
-              ],
-              activeAccount: {
+          },
+          [WalletId.PERA]: {
+            accounts: [
+              {
                 name: 'Pera Wallet 1',
                 address: 'address'
               }
+            ],
+            activeAccount: {
+              name: 'Pera Wallet 1',
+              address: 'address'
             }
-          ]
-        ]),
+          }
+        },
         activeWallet: WalletId.DEFLY,
         activeNetwork: NetworkId.TESTNET
       }
@@ -476,30 +462,17 @@ describe('Type Guards', () => {
 
       expect(
         isValidState({
-          wallets: new Map(),
+          wallets: {},
           activeNetwork: NetworkId.TESTNET
         })
       ).toBe(false)
 
       expect(
         isValidState({
-          wallets: new Map(),
+          wallets: {},
           activeWallet: WalletId.DEFLY
         })
       ).toBe(false)
     })
-  })
-})
-
-describe('Serialization and Deserialization', () => {
-  it('correctly serializes and deserializes a state with Map', () => {
-    const originalState = {
-      wallets: new Map([[WalletId.DEFLY, { accounts: [], activeAccount: null }]])
-    }
-    const serializedState = JSON.stringify(originalState, replacer)
-    const deserializedState = JSON.parse(serializedState, reviver)
-
-    expect(deserializedState).toEqual(originalState)
-    expect(deserializedState.wallets instanceof Map).toBe(true)
   })
 })

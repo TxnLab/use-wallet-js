@@ -167,7 +167,7 @@ describe('WalletConnect', () => {
 
       expect(wallet.isConnected).toBe(true)
       expect(accounts).toEqual([account1, account2])
-      expect(store.state.wallets.get(WalletId.WALLETCONNECT)).toEqual({
+      expect(store.state.wallets[WalletId.WALLETCONNECT]).toEqual({
         accounts: [account1, account2],
         activeAccount: account1
       })
@@ -188,7 +188,7 @@ describe('WalletConnect', () => {
         '[WalletConnect] Error connecting: No accounts found!'
       )
       expect(accounts).toEqual([])
-      expect(store.state.wallets.get(WalletId.WALLETCONNECT)).toBeUndefined()
+      expect(store.state.wallets[WalletId.WALLETCONNECT]).toBeUndefined()
     })
   })
 
@@ -215,13 +215,13 @@ describe('WalletConnect', () => {
       // Connect first to initialize client
       await wallet.connect()
       expect(wallet.isConnected).toBe(true)
-      expect(store.state.wallets.get(WalletId.WALLETCONNECT)).toBeDefined()
+      expect(store.state.wallets[WalletId.WALLETCONNECT]).toBeDefined()
 
       await wallet.disconnect()
       expect(wallet.isConnected).toBe(false)
 
       expect(mockSignClient.disconnect).toHaveBeenCalled()
-      expect(store.state.wallets.get(WalletId.WALLETCONNECT)).toBeUndefined()
+      expect(store.state.wallets[WalletId.WALLETCONNECT]).toBeUndefined()
     })
   })
 
@@ -234,15 +234,12 @@ describe('WalletConnect', () => {
 
       store = new Store<State>({
         ...defaultState,
-        wallets: new Map([
-          [
-            WalletId.WALLETCONNECT,
-            {
-              accounts: [account],
-              activeAccount: account
-            }
-          ]
-        ])
+        wallets: {
+          [WalletId.WALLETCONNECT]: {
+            accounts: [account],
+            activeAccount: account
+          }
+        }
       })
 
       wallet = new WalletConnect({
@@ -276,7 +273,7 @@ describe('WalletConnect', () => {
       await wallet.resumeSession()
 
       expect(wallet.isConnected).toBe(true)
-      expect(store.state.wallets.get(WalletId.WALLETCONNECT)).toBeDefined()
+      expect(store.state.wallets[WalletId.WALLETCONNECT]).toBeDefined()
     })
 
     it('should not automatically connect if WalletConnect wallet data is not found in the store', async () => {
@@ -284,34 +281,31 @@ describe('WalletConnect', () => {
       await wallet.resumeSession()
 
       expect(wallet.isConnected).toBe(false)
-      expect(store.state.wallets.get(WalletId.WALLETCONNECT)).toBeUndefined()
+      expect(store.state.wallets[WalletId.WALLETCONNECT]).toBeUndefined()
     })
 
     it('should update the store if accounts returned by the client do not match', async () => {
       // Store contains '7ZUECA' and 'GD64YI', with '7ZUECA' as active
       store = new Store<State>({
         ...defaultState,
-        wallets: new Map([
-          [
-            WalletId.WALLETCONNECT,
-            {
-              accounts: [
-                {
-                  name: 'WalletConnect 1',
-                  address: '7ZUECA7HFLZTXENRV24SHLU4AVPUTMTTDUFUBNBD64C73F3UHRTHAIOF6Q'
-                },
-                {
-                  name: 'WalletConnect 2',
-                  address: 'GD64YIY3TWGDMCNPP553DZPPR6LDUSFQOIJVFDPPXWEG3FVOJCCDBBHU5A'
-                }
-              ],
-              activeAccount: {
+        wallets: {
+          [WalletId.WALLETCONNECT]: {
+            accounts: [
+              {
                 name: 'WalletConnect 1',
                 address: '7ZUECA7HFLZTXENRV24SHLU4AVPUTMTTDUFUBNBD64C73F3UHRTHAIOF6Q'
+              },
+              {
+                name: 'WalletConnect 2',
+                address: 'GD64YIY3TWGDMCNPP553DZPPR6LDUSFQOIJVFDPPXWEG3FVOJCCDBBHU5A'
               }
+            ],
+            activeAccount: {
+              name: 'WalletConnect 1',
+              address: '7ZUECA7HFLZTXENRV24SHLU4AVPUTMTTDUFUBNBD64C73F3UHRTHAIOF6Q'
             }
-          ]
-        ])
+          }
+        }
       })
 
       wallet = new WalletConnect({
@@ -346,7 +340,7 @@ describe('WalletConnect', () => {
       )
 
       // Store now only contains 'GD64YI', which is set as active
-      expect(store.state.wallets.get(WalletId.WALLETCONNECT)).toEqual({
+      expect(store.state.wallets[WalletId.WALLETCONNECT]).toEqual({
         accounts: [
           {
             name: 'WalletConnect 1', // auto-generated name

@@ -140,7 +140,7 @@ export class WalletConnect extends BaseWallet {
     }))
 
     const state = this.store.state
-    const walletState = state.wallets.get(this.id)
+    const walletState = state.wallets[this.id]
 
     if (!walletState) {
       addWallet(this.store, {
@@ -218,7 +218,7 @@ export class WalletConnect extends BaseWallet {
   public async resumeSession(): Promise<void> {
     try {
       const state = this.store.state
-      const walletState = state.wallets.get(this.id)
+      const walletState = state.wallets[this.id]
 
       // No session to resume
       if (!walletState) {

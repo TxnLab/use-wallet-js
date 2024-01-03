@@ -1,6 +1,5 @@
 import { NetworkId } from 'src/network'
-import { defaultState } from 'src/store'
-import { LOCAL_STORAGE_KEY, replacer, reviver } from 'src/store'
+import { LOCAL_STORAGE_KEY, State, defaultState } from 'src/store'
 import { WalletManager } from 'src/manager'
 // import { DeflyWallet } from 'src/wallets/defly'
 // import { PeraWallet } from 'src/wallets/pera'
@@ -178,34 +177,31 @@ describe('WalletManager', () => {
   })
 
   describe('loadPersistedState', () => {
-    const initialState = {
-      wallets: new Map([
-        [
-          WalletId.PERA,
-          {
-            accounts: [
-              {
-                name: 'Pera Wallet 1',
-                address: '7ZUECA7HFLZTXENRV24SHLU4AVPUTMTTDUFUBNBD64C73F3UHRTHAIOF6Q'
-              },
-              {
-                name: 'Pera Wallet 2',
-                address: 'N2C374IRX7HEX2YEQWJBTRSVRHRUV4ZSF76S54WV4COTHRUNYRCI47R3WU'
-              }
-            ],
-            activeAccount: {
+    const initialState: State = {
+      wallets: {
+        [WalletId.PERA]: {
+          accounts: [
+            {
               name: 'Pera Wallet 1',
               address: '7ZUECA7HFLZTXENRV24SHLU4AVPUTMTTDUFUBNBD64C73F3UHRTHAIOF6Q'
+            },
+            {
+              name: 'Pera Wallet 2',
+              address: 'N2C374IRX7HEX2YEQWJBTRSVRHRUV4ZSF76S54WV4COTHRUNYRCI47R3WU'
             }
+          ],
+          activeAccount: {
+            name: 'Pera Wallet 1',
+            address: '7ZUECA7HFLZTXENRV24SHLU4AVPUTMTTDUFUBNBD64C73F3UHRTHAIOF6Q'
           }
-        ]
-      ]),
+        }
+      },
       activeWallet: WalletId.PERA,
       activeNetwork: NetworkId.BETANET
     }
 
     beforeEach(() => {
-      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(initialState, replacer))
+      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(initialState))
     })
 
     it('loads persisted state correctly', () => {
@@ -255,8 +251,8 @@ describe('WalletManager', () => {
 
       const serializedState = localStorage.getItem(LOCAL_STORAGE_KEY)
       expect(serializedState).toBeDefined()
-      expect(JSON.parse(serializedState!, reviver)).toEqual({
-        wallets: new Map(),
+      expect(JSON.parse(serializedState!)).toEqual({
+        wallets: {},
         activeWallet: null,
         activeNetwork: NetworkId.MAINNET
       })
@@ -264,40 +260,38 @@ describe('WalletManager', () => {
   })
 
   describe('activeWallet', () => {
-    const initialState = {
-      wallets: new Map([
-        [
-          WalletId.PERA,
-          {
-            accounts: [
-              {
-                name: 'Pera Wallet 1',
-                address: '7ZUECA7HFLZTXENRV24SHLU4AVPUTMTTDUFUBNBD64C73F3UHRTHAIOF6Q'
-              },
-              {
-                name: 'Pera Wallet 2',
-                address: 'N2C374IRX7HEX2YEQWJBTRSVRHRUV4ZSF76S54WV4COTHRUNYRCI47R3WU'
-              }
-            ],
-            activeAccount: {
+    const initialState: State = {
+      wallets: {
+        [WalletId.PERA]: {
+          accounts: [
+            {
               name: 'Pera Wallet 1',
               address: '7ZUECA7HFLZTXENRV24SHLU4AVPUTMTTDUFUBNBD64C73F3UHRTHAIOF6Q'
+            },
+            {
+              name: 'Pera Wallet 2',
+              address: 'N2C374IRX7HEX2YEQWJBTRSVRHRUV4ZSF76S54WV4COTHRUNYRCI47R3WU'
             }
+          ],
+          activeAccount: {
+            name: 'Pera Wallet 1',
+            address: '7ZUECA7HFLZTXENRV24SHLU4AVPUTMTTDUFUBNBD64C73F3UHRTHAIOF6Q'
           }
-        ]
-      ]),
+        }
+      },
       activeWallet: WalletId.PERA,
       activeNetwork: NetworkId.BETANET
     }
 
     beforeEach(() => {
-      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(initialState, replacer))
+      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(initialState))
     })
 
     it('returns the active wallet', () => {
       const manager = new WalletManager({
         wallets: [WalletId.DEFLY, WalletId.PERA]
       })
+      console.log('state', manager.store.state)
       expect(manager.activeWallet?.id).toBe(WalletId.PERA)
     })
 

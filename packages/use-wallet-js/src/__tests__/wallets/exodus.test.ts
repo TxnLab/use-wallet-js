@@ -95,7 +95,7 @@ describe('ExodusWallet', () => {
 
       expect(wallet.isConnected).toBe(true)
       expect(accounts).toEqual([account1, account2])
-      expect(store.state.wallets.get(WalletId.EXODUS)).toEqual({
+      expect(store.state.wallets[WalletId.EXODUS]).toEqual({
         accounts: [account1, account2],
         activeAccount: account1
       })
@@ -115,7 +115,7 @@ describe('ExodusWallet', () => {
         '[ExodusWallet] Error connecting: No accounts found!'
       )
       expect(accounts).toEqual([])
-      expect(store.state.wallets.get(WalletId.EXODUS)).toBeUndefined()
+      expect(store.state.wallets[WalletId.EXODUS]).toBeUndefined()
     })
   })
 
@@ -124,12 +124,12 @@ describe('ExodusWallet', () => {
       // Connect first to initialize client
       await wallet.connect()
       expect(wallet.isConnected).toBe(true)
-      expect(store.state.wallets.get(WalletId.EXODUS)).toBeDefined()
+      expect(store.state.wallets[WalletId.EXODUS]).toBeDefined()
 
       await wallet.disconnect()
       expect(wallet.isConnected).toBe(false)
 
-      expect(store.state.wallets.get(WalletId.EXODUS)).toBeUndefined()
+      expect(store.state.wallets[WalletId.EXODUS]).toBeUndefined()
     })
   })
 
@@ -147,15 +147,12 @@ describe('ExodusWallet', () => {
 
         store = new Store<State>({
           ...defaultState,
-          wallets: new Map([
-            [
-              WalletId.EXODUS,
-              {
-                accounts: [account1, account2],
-                activeAccount: account1
-              }
-            ]
-          ])
+          wallets: {
+            [WalletId.EXODUS]: {
+              accounts: [account1, account2],
+              activeAccount: account1
+            }
+          }
         })
 
         wallet = new ExodusWallet({
@@ -168,9 +165,9 @@ describe('ExodusWallet', () => {
 
       describe('when the Exodus extension is connected', () => {
         it('should be a no-op', async () => {
-          expect(store.state.wallets.get(WalletId.EXODUS)).toBeDefined()
+          expect(store.state.wallets[WalletId.EXODUS]).toBeDefined()
           await wallet.resumeSession()
-          expect(store.state.wallets.get(WalletId.EXODUS)).toBeDefined()
+          expect(store.state.wallets[WalletId.EXODUS]).toBeDefined()
         })
       })
 
@@ -181,9 +178,9 @@ describe('ExodusWallet', () => {
         })
 
         it('should remove the wallet from the store if the extension is not found', async () => {
-          expect(store.state.wallets.get(WalletId.EXODUS)).toBeDefined()
+          expect(store.state.wallets[WalletId.EXODUS]).toBeDefined()
           await wallet.resumeSession()
-          expect(store.state.wallets.get(WalletId.EXODUS)).toBeUndefined()
+          expect(store.state.wallets[WalletId.EXODUS]).toBeUndefined()
         })
 
         afterEach(() => {
@@ -195,9 +192,9 @@ describe('ExodusWallet', () => {
 
     describe('when there is no Exodus wallet data in the store', () => {
       it('should be a no-op', async () => {
-        expect(store.state.wallets.get(WalletId.EXODUS)).toBeUndefined()
+        expect(store.state.wallets[WalletId.EXODUS]).toBeUndefined()
         await wallet.resumeSession()
-        expect(store.state.wallets.get(WalletId.EXODUS)).toBeUndefined()
+        expect(store.state.wallets[WalletId.EXODUS]).toBeUndefined()
       })
     })
   })

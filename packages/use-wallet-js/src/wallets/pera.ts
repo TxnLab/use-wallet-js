@@ -104,7 +104,7 @@ export class PeraWallet extends BaseWallet {
   public async resumeSession(): Promise<void> {
     try {
       const state = this.store.state
-      const walletState = state.wallets.get(this.id)
+      const walletState = state.wallets[this.id]
 
       // No session to resume
       if (!walletState) {

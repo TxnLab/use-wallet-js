@@ -72,7 +72,7 @@ describe('DeflyWallet', () => {
 
       expect(wallet.isConnected).toBe(true)
       expect(accounts).toEqual([account1, account2])
-      expect(store.state.wallets.get(WalletId.DEFLY)).toEqual({
+      expect(store.state.wallets[WalletId.DEFLY]).toEqual({
         accounts: [account1, account2],
         activeAccount: account1
       })
@@ -90,7 +90,7 @@ describe('DeflyWallet', () => {
         '[DeflyWallet] Error connecting: No accounts found!'
       )
       expect(accounts).toEqual([])
-      expect(store.state.wallets.get(WalletId.DEFLY)).toBeUndefined()
+      expect(store.state.wallets[WalletId.DEFLY]).toBeUndefined()
     })
   })
 
@@ -107,13 +107,13 @@ describe('DeflyWallet', () => {
       // Connect first to initialize client
       await wallet.connect()
       expect(wallet.isConnected).toBe(true)
-      expect(store.state.wallets.get(WalletId.DEFLY)).toBeDefined()
+      expect(store.state.wallets[WalletId.DEFLY]).toBeDefined()
 
       await wallet.disconnect()
       expect(wallet.isConnected).toBe(false)
 
       expect(mockDisconnect).toHaveBeenCalled()
-      expect(store.state.wallets.get(WalletId.DEFLY)).toBeUndefined()
+      expect(store.state.wallets[WalletId.DEFLY]).toBeUndefined()
     })
   })
 
@@ -126,15 +126,12 @@ describe('DeflyWallet', () => {
 
       store = new Store<State>({
         ...defaultState,
-        wallets: new Map([
-          [
-            WalletId.DEFLY,
-            {
-              accounts: [account],
-              activeAccount: account
-            }
-          ]
-        ])
+        wallets: {
+          [WalletId.DEFLY]: {
+            accounts: [account],
+            activeAccount: account
+          }
+        }
       })
 
       wallet = new DeflyWallet({
@@ -186,27 +183,24 @@ describe('DeflyWallet', () => {
       // Store contains 'mockAddress1' and 'mockAddress2', with 'mockAddress1' as active
       store = new Store<State>({
         ...defaultState,
-        wallets: new Map([
-          [
-            WalletId.DEFLY,
-            {
-              accounts: [
-                {
-                  name: 'Defly Wallet 1',
-                  address: 'mockAddress1'
-                },
-                {
-                  name: 'Defly Wallet 2',
-                  address: 'mockAddress2'
-                }
-              ],
-              activeAccount: {
+        wallets: {
+          [WalletId.DEFLY]: {
+            accounts: [
+              {
                 name: 'Defly Wallet 1',
                 address: 'mockAddress1'
+              },
+              {
+                name: 'Defly Wallet 2',
+                address: 'mockAddress2'
               }
+            ],
+            activeAccount: {
+              name: 'Defly Wallet 1',
+              address: 'mockAddress1'
             }
-          ]
-        ])
+          }
+        }
       })
 
       wallet = new DeflyWallet({
@@ -232,7 +226,7 @@ describe('DeflyWallet', () => {
       )
 
       // Store now only contains 'mockAddress2', which is set as active
-      expect(store.state.wallets.get(WalletId.DEFLY)).toEqual({
+      expect(store.state.wallets[WalletId.DEFLY]).toEqual({
         accounts: [
           {
             name: 'Defly Wallet 1', // auto-generated name
