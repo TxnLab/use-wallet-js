@@ -15,6 +15,5 @@
     "outDir": "dist",
     "types": ["vitest/globals"]
   },
-  "include": ["src", "test/vitest.setup.ts"],
   "exclude": ["node_modules", "dist"]
 }

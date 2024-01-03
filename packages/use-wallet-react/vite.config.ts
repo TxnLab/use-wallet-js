@@ -8,7 +8,7 @@ export default defineConfig({
     dir: './src',
     watch: false,
     environment: 'jsdom',
-    setupFiles: ['test/vitest.setup.ts'],
+    setupFiles: ['./vitest.setup.ts'],
     globals: true
   }
 })
