@@ -98,11 +98,11 @@ export class MnemonicWallet extends BaseWallet {
     }
   }
 
-  public async signTransactions(
+  public signTransactions = async (
     txnGroup: algosdk.Transaction[] | algosdk.Transaction[][] | Uint8Array[] | Uint8Array[][],
     indexesToSign?: number[],
     returnGroup = true
-  ): Promise<Uint8Array[]> {
+  ): Promise<Uint8Array[]> => {
     if (!this.account) {
       throw new Error('[MnemonicWallet] Client not initialized!')
     }
@@ -133,10 +133,10 @@ export class MnemonicWallet extends BaseWallet {
     return Promise.resolve(txnGroupSigned)
   }
 
-  public async transactionSigner(
+  public transactionSigner = async (
     txnGroup: algosdk.Transaction[],
     indexesToSign: number[]
-  ): Promise<Uint8Array[]> {
+  ): Promise<Uint8Array[]> => {
     if (!this.account) {
       throw new Error('[MnemonicWallet] Account not initialized!')
     }

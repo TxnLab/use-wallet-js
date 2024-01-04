@@ -240,11 +240,11 @@ export class WalletConnect extends BaseWallet {
     }
   }
 
-  public async signTransactions(
+  public signTransactions = async (
     txnGroup: algosdk.Transaction[] | algosdk.Transaction[][] | Uint8Array[] | Uint8Array[][],
     indexesToSign?: number[],
     returnGroup = true
-  ): Promise<Uint8Array[]> {
+  ): Promise<Uint8Array[]> => {
     if (!this.client) {
       throw new Error('[WalletConnect] Client not initialized!')
     }
@@ -312,10 +312,10 @@ export class WalletConnect extends BaseWallet {
     return txnGroupSigned
   }
 
-  public async transactionSigner(
+  public transactionSigner = async (
     txnGroup: algosdk.Transaction[],
     indexesToSign: number[]
-  ): Promise<Uint8Array[]> {
+  ): Promise<Uint8Array[]> => {
     if (!this.client) {
       throw new Error('[WalletConnect] Client not initialized!')
     }
