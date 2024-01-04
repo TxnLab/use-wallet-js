@@ -29,27 +29,23 @@ export function useWallet() {
 
   const walletsArray = React.useMemo(() => [...manager.wallets.values()], [manager])
 
-  const [wallets, setWallets] = React.useState<Wallet[]>([])
+  const wallets = React.useMemo(() => {
+    return walletsArray.map((wallet): Wallet => {
+      const walletState = walletStateMap[wallet.id]
 
-  React.useEffect(() => {
-    setWallets(
-      walletsArray.map((wallet): Wallet => {
-        const walletState = walletStateMap[wallet.id]
-
-        return {
-          id: wallet.id,
-          metadata: wallet.metadata,
-          accounts: walletState?.accounts ?? [],
-          activeAccount: walletState?.activeAccount ?? null,
-          isConnected: !!walletState,
-          isActive: wallet.id === activeWalletId,
-          connect: () => wallet.connect(),
-          disconnect: () => wallet.disconnect(),
-          setActive: () => wallet.setActive(),
-          setActiveAccount: (addr) => wallet.setActiveAccount(addr)
-        }
-      })
-    )
+      return {
+        id: wallet.id,
+        metadata: wallet.metadata,
+        accounts: walletState?.accounts ?? [],
+        activeAccount: walletState?.activeAccount ?? null,
+        isConnected: !!walletState,
+        isActive: wallet.id === activeWalletId,
+        connect: () => wallet.connect(),
+        disconnect: () => wallet.disconnect(),
+        setActive: () => wallet.setActive(),
+        setActiveAccount: (addr) => wallet.setActiveAccount(addr)
+      }
+    })
   }, [walletsArray, walletStateMap, activeWalletId])
 
   const activeWallet = activeWalletId ? manager.getWallet(activeWalletId) || null : null
