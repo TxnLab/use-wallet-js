@@ -27,10 +27,8 @@ export function useWallet() {
   const walletStateMap = useStore(manager.store, (state) => state.wallets)
   const activeWalletId = useStore(manager.store, (state) => state.activeWallet)
 
-  const walletsArray = React.useMemo(() => [...manager.wallets.values()], [manager])
-
   const wallets = React.useMemo(() => {
-    return walletsArray.map((wallet): Wallet => {
+    return [...manager.wallets.values()].map((wallet): Wallet => {
       const walletState = walletStateMap[wallet.id]
 
       return {
@@ -46,7 +44,7 @@ export function useWallet() {
         setActiveAccount: (addr) => wallet.setActiveAccount(addr)
       }
     })
-  }, [walletsArray, walletStateMap, activeWalletId])
+  }, [manager, walletStateMap, activeWalletId])
 
   const activeWallet = activeWalletId ? manager.getWallet(activeWalletId) || null : null
   const activeWalletState = activeWalletId ? walletStateMap[activeWalletId] || null : null
