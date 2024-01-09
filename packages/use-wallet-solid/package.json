@@ -1,0 +1,99 @@
+{
+  "name": "@txnlab/use-wallet-solid",
+  "version": "3.0.0-alpha.1",
+  "description": "Solid.js library for integrating Algorand wallets into decentralized applications",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "scripts": {
+    "build": "tsup",
+    "start": "tsup src/index.ts --watch",
+    "test": "vitest",
+    "test:watch": "vitest --watch",
+    "lint": "eslint -c '../../.eslintrc.json' '**/*.{js,ts}'",
+    "prettier": "prettier --check '**/*.{js,ts}'",
+    "typecheck": "tsc --noEmit"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/txnlab/use-wallet-js.git",
+    "directory": "packages/use-wallet-solid"
+  },
+  "keywords": [
+    "algorand",
+    "wallet",
+    "walletconnect",
+    "pera",
+    "defly",
+    "exodus",
+    "algosdk",
+    "algokit",
+    "kmd",
+    "solid.js"
+  ],
+  "author": "Doug Richar <drichar@gmail.com>",
+  "license": "MIT",
+  "files": [
+    "dist"
+  ],
+  "type": "module",
+  "exports": {
+    "solid": {
+      "development": "./dist/dev.jsx",
+      "import": "./dist/index.jsx"
+    },
+    "development": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/dev.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/dev.cjs"
+      }
+    },
+    "import": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "require": {
+      "types": "./dist/index.d.cts",
+      "default": "./dist/index.cjs"
+    }
+  },
+  "types": "./dist/index.d.ts",
+  "peerDependencies": {
+    "@blockshake/defly-connect": "^1.1.6",
+    "@perawallet/connect": "^1.3.3",
+    "@walletconnect/modal": "^2.6.2",
+    "@walletconnect/sign-client": "^2.10.2",
+    "algosdk": "^2.6.0"
+  },
+  "peerDependenciesMeta": {
+    "@blockshake/defly-connect": {
+      "optional": true
+    },
+    "@perawallet/connect": {
+      "optional": true
+    },
+    "@walletconnect/modal": {
+      "optional": true
+    },
+    "@walletconnect/sign-client": {
+      "optional": true
+    }
+  },
+  "dependencies": {
+    "@tanstack/solid-store": "^0.2.1",
+    "@txnlab/use-wallet-js": "workspace:*"
+  },
+  "devDependencies": {
+    "@solidjs/testing-library": "^0.8.5",
+    "algosdk": "^2.6.0",
+    "solid-js": "^1.8.8",
+    "tsup": "^8.0.0",
+    "tsup-preset-solid": "^2.2.0",
+    "typescript": "^5.2.2"
+  },
+  "browser": {},
+  "typesVersions": {}
+}
