@@ -252,4 +252,4 @@ See the [examples/vanilla-ts](https://github.com/TxnLab/use-wallet-js/tree/main/
 
 ## License
 
-MIT ©2023 [TxnLab, Inc.](https://txnlab.dev)
+MIT ©2024 [TxnLab, Inc.](https://txnlab.dev)
