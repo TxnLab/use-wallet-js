@@ -139,7 +139,7 @@ importers:
         specifier: ^2.10.2
         version: 2.11.0
       algosdk:
-        specifier: ^2.6.0
+        specifier: ^2.7.0
         version: 2.7.0
       solid-js:
         specifier: ^1.8.7
