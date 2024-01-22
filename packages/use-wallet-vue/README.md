@@ -4,4 +4,4 @@ Vue wrapper for [@txnlab/use-wallet-js](https://github.com/TxnLab/use-wallet-js/
 
 ## License
 
-MIT ©2023 [TxnLab, Inc.](https://txnlab.dev)
+MIT ©2024 [TxnLab, Inc.](https://txnlab.dev)

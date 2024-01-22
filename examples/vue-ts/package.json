@@ -6,7 +6,6 @@
     "preview": "vite preview",
     "build": "vue-tsc && vite build",
     "lint": "eslint -c '../../.eslintrc.json' '**/*.{js,ts}'",
-    "prettier": "prettier --check '**/*.{js,ts}'",
     "typecheck": "vue-tsc --noEmit"
   },
   "dependencies": {
