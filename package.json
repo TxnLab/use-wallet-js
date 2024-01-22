@@ -28,7 +28,7 @@
     "build": "pnpm -r build",
     "test": "pnpm -r --if-present test",
     "lint": "pnpm -r lint",
-    "prettier": "pnpm -r prettier",
+    "prettier": "prettier --check .",
     "typecheck": "pnpm -r typecheck"
   },
   "repository": {

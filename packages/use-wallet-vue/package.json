@@ -10,7 +10,6 @@
     "test": "vitest",
     "test:watch": "vitest --watch",
     "lint": "eslint -c '../../.eslintrc.json' '**/*.{js,ts}'",
-    "prettier": "prettier --check '**/*.{js,ts}'",
     "typecheck": "tsc --noEmit"
   },
   "repository": {
