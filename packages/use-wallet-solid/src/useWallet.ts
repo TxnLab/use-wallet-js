@@ -1,16 +1,16 @@
 import { useStore } from '@tanstack/solid-store'
 import { createMemo } from 'solid-js'
 import { useWalletManager } from './WalletProvider'
-import type { WalletAccount, WalletId, WalletMetadata } from '@txnlab/use-wallet-js'
+import type { NetworkId, WalletAccount, WalletId, WalletMetadata } from '@txnlab/use-wallet-js'
 import type algosdk from 'algosdk'
 
 export interface Wallet {
-  id: string
-  metadata: WalletMetadata
-  accounts: WalletAccount[]
-  activeAccount: WalletAccount | null
-  isConnected: boolean
-  isActive: boolean
+  id: () => string
+  metadata: () => WalletMetadata
+  accounts: () => WalletAccount[]
+  activeAccount: () => WalletAccount | null
+  isConnected: () => boolean
+  isActive: () => boolean
   connect: () => Promise<WalletAccount[]>
   disconnect: () => Promise<void>
   setActive: () => void
@@ -18,58 +18,52 @@ export interface Wallet {
 }
 
 export function useWallet() {
-  const manager = useWalletManager()
+  // Good
+  const manager = createMemo(() => useWalletManager())
 
-  const algodClient: algosdk.Algodv2 = manager.algodClient
-
-  const walletStateMap = useStore(manager.store, (state) => {
+  // Good
+  const walletStateMap = useStore(manager().store, (state) => {
     console.log('Running walletStateMap callback...', state.wallets)
     return state.wallets
   })
-  const activeWalletId = useStore(manager.store, (state) => {
+
+  // Good
+  const activeWalletId = useStore(manager().store, (state) => {
     console.log('Running activeWalletId callback...', state.activeWallet)
     return state.activeWallet
   })
 
-  const wallets = createMemo(() => {
-    console.log('Recomputing wallets...')
-    const walletsMap = walletStateMap()
-    const activeId = activeWalletId()
+  // Good
+  const activeWallet = () =>
+    activeWalletId() !== null ? manager().getWallet(activeWalletId() as WalletId) || null : null
 
-    return [...manager.wallets.values()].map((wallet): Wallet => {
-      const walletState = walletsMap[wallet.id]
-
-      const walletObject: Wallet = {
-        id: wallet.id,
-        metadata: wallet.metadata,
-        accounts: walletState?.accounts ?? [],
-        activeAccount: walletState?.activeAccount ?? null,
-        isConnected: !!walletState,
-        isActive: wallet.id === activeId,
-        connect: () => wallet.connect(),
-        disconnect: () => wallet.disconnect(),
-        setActive: () => wallet.setActive(),
-        setActiveAccount: (addr) => wallet.setActiveAccount(addr)
-      }
-
-      return walletObject
-    })
-  })
-
-  const activeWallet =
-    activeWalletId() !== null ? manager.getWallet(activeWalletId() as WalletId) || null : null
-
-  const activeWalletState =
+  // Good
+  const activeWalletState = () =>
     activeWalletId() !== null ? walletStateMap()[activeWalletId() as WalletId] || null : null
 
-  const activeWalletAccounts = activeWalletState?.accounts ?? null
-  const activeWalletAddresses = activeWalletAccounts?.map((account) => account.address) ?? null
-  const activeAccount = activeWalletState?.activeAccount ?? null
-  const activeAddress = activeAccount?.address ?? null
+  // Good
+  const activeWalletAccounts = () => activeWalletState()?.accounts ?? null
 
-  const activeNetwork = useStore(manager.store, (state) => state.activeNetwork)
-  const setActiveNetwork = manager.setActiveNetwork
+  // Good
+  const activeWalletAddresses = () =>
+    activeWalletAccounts()?.map((account) => account.address) ?? null
 
+  // Good
+  const activeAccount = () => activeWalletState()?.activeAccount ?? null
+
+  // Good
+  const activeAddress = () => activeAccount()?.address ?? null
+
+  // Good
+  const activeNetwork = () => useStore(manager().store, (state) => state.activeNetwork) // Check if this needs to be wrapped in a function so it doesn't have to called twice ()()
+
+  // Good
+  const setActiveNetwork = (network: NetworkId) => manager().setActiveNetwork(network)
+
+  // TODO: Not reactive when intDecoding is changed
+  const algodClient = createMemo(() => manager().algodClient)
+
+  // TODO: Needs to be set up and tested
   const signTransactions = (
     txnGroup: algosdk.Transaction[] | algosdk.Transaction[][] | Uint8Array[] | Uint8Array[][],
     indexesToSign?: number[],
@@ -78,27 +72,56 @@ export function useWallet() {
     if (!activeWallet) {
       throw new Error('No active wallet')
     }
-    return activeWallet.signTransactions(txnGroup, indexesToSign, returnGroup)
+    return activeWallet()?.signTransactions(txnGroup, indexesToSign, returnGroup)
   }
 
+  // TODO: Need to be set up and tested
   const transactionSigner = (txnGroup: algosdk.Transaction[], indexesToSign: number[]) => {
     if (!activeWallet) {
       throw new Error('No active wallet')
     }
-    return activeWallet.transactionSigner(txnGroup, indexesToSign)
+    return activeWallet()?.transactionSigner(txnGroup, indexesToSign)
   }
 
+  // TODO: Array doesn't react; consider removing
+  // const wallets = createMemo(() => {
+  //   console.log('Recomputing wallets...')
+
+  //   return [...manager().wallets.values()].map((wallet) => {
+  //     const walletState = walletStateMap()[wallet.id]
+
+  //     const walletObject: Wallet = {
+  //       id: () => wallet.id,
+  //       metadata: () => wallet.metadata,
+  //       accounts: () => walletState?.accounts ?? [],
+  //       activeAccount: () => walletState?.activeAccount ?? null,
+  //       isConnected: () => !!walletState?.accounts.length,
+  //       isActive: () => wallet.id === activeWalletId(),
+  //       connect: () => wallet.connect(),
+  //       disconnect: () => wallet.disconnect(),
+  //       setActive: () => wallet.setActive(),
+  //       setActiveAccount: (addr) => wallet.setActiveAccount(addr)
+  //     }
+
+  //     return walletObject
+  //   })
+  // })
+
   return {
-    wallets,
+    activeWalletId,
+    walletStateMap,
+    // wallets,
     algodClient,
     activeNetwork,
     activeWallet,
     activeWalletAccounts,
     activeWalletAddresses,
+    activeWalletState,
     activeAccount,
     activeAddress,
     setActiveNetwork,
     signTransactions,
-    transactionSigner
+    transactionSigner,
+    manager
   }
 }
