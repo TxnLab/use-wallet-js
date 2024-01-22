@@ -5,11 +5,11 @@ import type { NetworkId, WalletAccount, WalletId, WalletMetadata } from '@txnlab
 import type algosdk from 'algosdk'
 
 export interface Wallet {
-  id: string
-  metadata: WalletMetadata
-  accounts: WalletAccount[]
-  activeAccount: WalletAccount | null
-  isConnected: boolean
+  id: () => string
+  metadata: () => WalletMetadata
+  accounts: () => WalletAccount[]
+  activeAccount: () => WalletAccount | null
+  isConnected: () => boolean
   isActive: () => boolean
   connect: () => Promise<WalletAccount[]>
   disconnect: () => Promise<void>
@@ -20,9 +20,6 @@ export interface Wallet {
 export function useWallet() {
   // Good
   const manager = createMemo(() => useWalletManager())
-
-  // TODO: Not reactive when intDecoding is changed
-  const algodClient = createMemo(() => manager().algodClient)
 
   // Good
   const walletStateMap = useStore(manager().store, (state) => {
@@ -36,34 +33,11 @@ export function useWallet() {
     return state.activeWallet
   })
 
-  // Showing promise but needs more testing
-  const wallets = createMemo(() => {
-    console.log('Recomputing wallets...')
-
-    return [...manager().wallets.values()].map((wallet) => {
-      const walletState = walletStateMap()[wallet.id]
-
-      const walletObject: Wallet = {
-        id: wallet.id,
-        metadata: wallet.metadata,
-        accounts: walletState?.accounts ?? [],
-        activeAccount: walletState?.activeAccount ?? null,
-        isConnected: !!walletState,
-        isActive: () => wallet.id === activeWalletId(),
-        connect: () => wallet.connect(),
-        disconnect: () => wallet.disconnect(),
-        setActive: () => wallet.setActive(),
-        setActiveAccount: (addr) => wallet.setActiveAccount(addr)
-      }
-
-      return walletObject
-    })
-  })
-
   // Good
   const activeWallet = () =>
     activeWalletId() !== null ? manager().getWallet(activeWalletId() as WalletId) || null : null
 
+  // Good
   const activeWalletState = () =>
     activeWalletId() !== null ? walletStateMap()[activeWalletId() as WalletId] || null : null
 
@@ -86,7 +60,10 @@ export function useWallet() {
   // Good
   const setActiveNetwork = (network: NetworkId) => manager().setActiveNetwork(network)
 
-  // TODO
+  // TODO: Not reactive when intDecoding is changed
+  const algodClient = createMemo(() => manager().algodClient)
+
+  // TODO: Needs to be set up and tested
   const signTransactions = (
     txnGroup: algosdk.Transaction[] | algosdk.Transaction[][] | Uint8Array[] | Uint8Array[][],
     indexesToSign?: number[],
@@ -98,7 +75,7 @@ export function useWallet() {
     return activeWallet()?.signTransactions(txnGroup, indexesToSign, returnGroup)
   }
 
-  // TODO
+  // TODO: Need to be set up and tested
   const transactionSigner = (txnGroup: algosdk.Transaction[], indexesToSign: number[]) => {
     if (!activeWallet) {
       throw new Error('No active wallet')
@@ -106,15 +83,40 @@ export function useWallet() {
     return activeWallet()?.transactionSigner(txnGroup, indexesToSign)
   }
 
+  // TODO: Array doesn't react; consider removing
+  // const wallets = createMemo(() => {
+  //   console.log('Recomputing wallets...')
+
+  //   return [...manager().wallets.values()].map((wallet) => {
+  //     const walletState = walletStateMap()[wallet.id]
+
+  //     const walletObject: Wallet = {
+  //       id: () => wallet.id,
+  //       metadata: () => wallet.metadata,
+  //       accounts: () => walletState?.accounts ?? [],
+  //       activeAccount: () => walletState?.activeAccount ?? null,
+  //       isConnected: () => !!walletState?.accounts.length,
+  //       isActive: () => wallet.id === activeWalletId(),
+  //       connect: () => wallet.connect(),
+  //       disconnect: () => wallet.disconnect(),
+  //       setActive: () => wallet.setActive(),
+  //       setActiveAccount: (addr) => wallet.setActiveAccount(addr)
+  //     }
+
+  //     return walletObject
+  //   })
+  // })
+
   return {
     activeWalletId,
     walletStateMap,
-    wallets,
+    // wallets,
     algodClient,
     activeNetwork,
     activeWallet,
     activeWalletAccounts,
     activeWalletAddresses,
+    activeWalletState,
     activeAccount,
     activeAddress,
     setActiveNetwork,
