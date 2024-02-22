@@ -1,9 +1,18 @@
 import { NetworkId } from 'src/network'
 import { LOCAL_STORAGE_KEY, State, defaultState } from 'src/store'
 import { WalletManager } from 'src/manager'
+import { StorageAdapter } from 'src/storage'
 // import { DeflyWallet } from 'src/wallets/defly'
 // import { PeraWallet } from 'src/wallets/pera'
 import { WalletId } from 'src/wallets/types'
+
+// Mock storage adapter
+vi.mock('src/storage', () => ({
+  StorageAdapter: {
+    getItem: vi.fn(),
+    setItem: vi.fn()
+  }
+}))
 
 // Suppress console output
 vi.spyOn(console, 'info').mockImplementation(() => {})
@@ -14,19 +23,6 @@ const mockConsoleWarn = vi.spyOn(console, 'warn').mockImplementation(() => {})
 // Mock console.error
 const mockConsoleError = vi.spyOn(console, 'error').mockImplementation(() => {})
 
-// Mock localStorage
-const localStorageMock = (() => {
-  let store: Record<string, any> = {}
-  return {
-    getItem: (key: string) => store[key] || null,
-    setItem: (key: string, value: any) => (store[key] = value.toString()),
-    clear: () => (store = {})
-  }
-})()
-Object.defineProperty(global, 'localStorage', {
-  value: localStorageMock
-})
-
 // const deflyResumeSession = vi
 //   .spyOn(DeflyWallet.prototype, 'resumeSession')
 //   .mockImplementation(() => Promise.resolve())
@@ -35,9 +31,20 @@ Object.defineProperty(global, 'localStorage', {
 //   .mockImplementation(() => Promise.resolve())
 
 describe('WalletManager', () => {
+  let mockInitialState: State | null = null
+
   beforeEach(() => {
-    localStorage.clear()
     vi.clearAllMocks()
+
+    vi.mocked(StorageAdapter.getItem).mockImplementation((key: string) => {
+      if (key === LOCAL_STORAGE_KEY && mockInitialState !== null) {
+        return JSON.stringify(mockInitialState)
+      }
+      return null
+    })
+
+    // Reset to null before each test
+    mockInitialState = null
   })
 
   describe('constructor', () => {
@@ -177,44 +184,42 @@ describe('WalletManager', () => {
   })
 
   describe('loadPersistedState', () => {
-    const initialState: State = {
-      wallets: {
-        [WalletId.PERA]: {
-          accounts: [
-            {
+    beforeEach(() => {
+      mockInitialState = {
+        wallets: {
+          [WalletId.PERA]: {
+            accounts: [
+              {
+                name: 'Pera Wallet 1',
+                address: '7ZUECA7HFLZTXENRV24SHLU4AVPUTMTTDUFUBNBD64C73F3UHRTHAIOF6Q'
+              },
+              {
+                name: 'Pera Wallet 2',
+                address: 'N2C374IRX7HEX2YEQWJBTRSVRHRUV4ZSF76S54WV4COTHRUNYRCI47R3WU'
+              }
+            ],
+            activeAccount: {
               name: 'Pera Wallet 1',
               address: '7ZUECA7HFLZTXENRV24SHLU4AVPUTMTTDUFUBNBD64C73F3UHRTHAIOF6Q'
-            },
-            {
-              name: 'Pera Wallet 2',
-              address: 'N2C374IRX7HEX2YEQWJBTRSVRHRUV4ZSF76S54WV4COTHRUNYRCI47R3WU'
             }
-          ],
-          activeAccount: {
-            name: 'Pera Wallet 1',
-            address: '7ZUECA7HFLZTXENRV24SHLU4AVPUTMTTDUFUBNBD64C73F3UHRTHAIOF6Q'
           }
-        }
-      },
-      activeWallet: WalletId.PERA,
-      activeNetwork: NetworkId.BETANET
-    }
-
-    beforeEach(() => {
-      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(initialState))
+        },
+        activeWallet: WalletId.PERA,
+        activeNetwork: NetworkId.BETANET
+      }
     })
 
     it('loads persisted state correctly', () => {
       const manager = new WalletManager({
         wallets: [WalletId.DEFLY, WalletId.PERA]
       })
-      expect(manager.store.state).toEqual(initialState)
+      expect(manager.store.state).toEqual(mockInitialState)
       expect(manager.activeWallet?.id).toBe(WalletId.PERA)
       expect(manager.activeNetwork).toBe(NetworkId.BETANET)
     })
 
     it('returns null if no persisted state', () => {
-      localStorage.clear()
+      mockInitialState = null
 
       const manager = new WalletManager({
         wallets: [WalletId.DEFLY, WalletId.PERA]
@@ -228,7 +233,8 @@ describe('WalletManager', () => {
 
     it('returns null and logs warning and error if persisted state is invalid', () => {
       const invalidState = { foo: 'bar' }
-      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(invalidState))
+      // @ts-expect-error - Set invalid state
+      mockInitialState = invalidState
 
       const manager = new WalletManager({
         wallets: [WalletId.DEFLY, WalletId.PERA]
@@ -244,59 +250,59 @@ describe('WalletManager', () => {
 
   describe('savePersistedState', () => {
     it('saves state to local storage', () => {
+      const stateToSave: State = {
+        wallets: {},
+        activeWallet: null,
+        activeNetwork: NetworkId.MAINNET
+      }
+
       const manager = new WalletManager({
         wallets: [WalletId.DEFLY, WalletId.PERA]
       })
       manager.setActiveNetwork(NetworkId.MAINNET)
 
-      const serializedState = localStorage.getItem(LOCAL_STORAGE_KEY)
-      expect(serializedState).toBeDefined()
-      expect(JSON.parse(serializedState!)).toEqual({
-        wallets: {},
-        activeWallet: null,
-        activeNetwork: NetworkId.MAINNET
-      })
+      expect(vi.mocked(StorageAdapter.setItem)).toHaveBeenCalledWith(
+        LOCAL_STORAGE_KEY,
+        JSON.stringify(stateToSave)
+      )
     })
   })
 
   describe('activeWallet', () => {
-    const initialState: State = {
-      wallets: {
-        [WalletId.PERA]: {
-          accounts: [
-            {
+    beforeEach(() => {
+      mockInitialState = {
+        wallets: {
+          [WalletId.PERA]: {
+            accounts: [
+              {
+                name: 'Pera Wallet 1',
+                address: '7ZUECA7HFLZTXENRV24SHLU4AVPUTMTTDUFUBNBD64C73F3UHRTHAIOF6Q'
+              },
+              {
+                name: 'Pera Wallet 2',
+                address: 'N2C374IRX7HEX2YEQWJBTRSVRHRUV4ZSF76S54WV4COTHRUNYRCI47R3WU'
+              }
+            ],
+            activeAccount: {
               name: 'Pera Wallet 1',
               address: '7ZUECA7HFLZTXENRV24SHLU4AVPUTMTTDUFUBNBD64C73F3UHRTHAIOF6Q'
-            },
-            {
-              name: 'Pera Wallet 2',
-              address: 'N2C374IRX7HEX2YEQWJBTRSVRHRUV4ZSF76S54WV4COTHRUNYRCI47R3WU'
             }
-          ],
-          activeAccount: {
-            name: 'Pera Wallet 1',
-            address: '7ZUECA7HFLZTXENRV24SHLU4AVPUTMTTDUFUBNBD64C73F3UHRTHAIOF6Q'
           }
-        }
-      },
-      activeWallet: WalletId.PERA,
-      activeNetwork: NetworkId.BETANET
-    }
-
-    beforeEach(() => {
-      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(initialState))
+        },
+        activeWallet: WalletId.PERA,
+        activeNetwork: NetworkId.BETANET
+      }
     })
 
     it('returns the active wallet', () => {
       const manager = new WalletManager({
         wallets: [WalletId.DEFLY, WalletId.PERA]
       })
-      console.log('state', manager.store.state)
       expect(manager.activeWallet?.id).toBe(WalletId.PERA)
     })
 
     it('returns null if no active wallet', () => {
-      localStorage.clear()
+      mockInitialState = null
 
       const manager = new WalletManager({
         wallets: [WalletId.DEFLY, WalletId.PERA]

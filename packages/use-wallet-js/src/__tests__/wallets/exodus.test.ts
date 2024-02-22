@@ -1,25 +1,24 @@
 import { Store } from '@tanstack/store'
 import * as msgpack from 'algo-msgpack-with-bigint'
 import algosdk from 'algosdk'
-import { State, defaultState } from 'src/store'
+import { StorageAdapter } from 'src/storage'
+import { LOCAL_STORAGE_KEY, State, defaultState } from 'src/store'
 import { Exodus, ExodusWallet } from 'src/wallets/exodus'
 import { WalletId } from 'src/wallets/types'
+
+// Mock storage adapter
+vi.mock('src/storage', () => ({
+  StorageAdapter: {
+    getItem: vi.fn(),
+    setItem: vi.fn()
+  }
+}))
 
 // Spy/suppress console output
 vi.spyOn(console, 'info').mockImplementation(() => {})
 vi.spyOn(console, 'warn').mockImplementation(() => {})
 vi.spyOn(console, 'error').mockImplementation(() => {})
 vi.spyOn(console, 'groupCollapsed').mockImplementation(() => {})
-
-// Mock localStorage
-const localStorageMock = (() => {
-  let store: Record<string, any> = {}
-  return {
-    getItem: (key: string) => store[key] || null,
-    setItem: (key: string, value: any) => (store[key] = value.toString()),
-    clear: () => (store = {})
-  }
-})()
 
 const mockEnableFn = vi.fn().mockImplementation(() => {
   return Promise.resolve({
@@ -43,9 +42,6 @@ const mockExodus: Exodus = {
 }
 
 Object.defineProperties(global, {
-  localStorage: {
-    value: localStorageMock
-  },
   window: {
     value: {
       algorand: mockExodus
@@ -56,6 +52,7 @@ Object.defineProperties(global, {
 describe('ExodusWallet', () => {
   let wallet: ExodusWallet
   let store: Store<State>
+  let mockInitialState: State | null = null
 
   const mockSubscribe: (callback: (state: State) => void) => () => void = vi.fn(
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -65,6 +62,21 @@ describe('ExodusWallet', () => {
   )
 
   beforeEach(() => {
+    vi.clearAllMocks()
+
+    vi.mocked(StorageAdapter.getItem).mockImplementation((key: string) => {
+      if (key === LOCAL_STORAGE_KEY && mockInitialState !== null) {
+        return JSON.stringify(mockInitialState)
+      }
+      return null
+    })
+
+    vi.mocked(StorageAdapter.setItem).mockImplementation((key: string, value: string) => {
+      if (key === LOCAL_STORAGE_KEY) {
+        mockInitialState = JSON.parse(value)
+      }
+    })
+
     store = new Store<State>(defaultState)
     wallet = new ExodusWallet({
       id: WalletId.EXODUS,
@@ -76,8 +88,7 @@ describe('ExodusWallet', () => {
 
   afterEach(async () => {
     await wallet.disconnect()
-    localStorage.clear()
-    vi.clearAllMocks()
+    mockInitialState = null
   })
 
   describe('connect', () => {

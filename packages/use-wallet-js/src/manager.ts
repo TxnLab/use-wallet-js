@@ -8,6 +8,7 @@ import {
   type NetworkConfig,
   type NetworkConfigMap
 } from 'src/network'
+import { StorageAdapter } from 'src/storage'
 import {
   defaultState,
   isValidState,
@@ -75,7 +76,7 @@ export class WalletManager {
 
   private loadPersistedState(): State | null {
     try {
-      const serializedState = localStorage.getItem(LOCAL_STORAGE_KEY)
+      const serializedState = StorageAdapter.getItem(LOCAL_STORAGE_KEY)
       if (serializedState === null) {
         return null
       }
@@ -95,7 +96,7 @@ export class WalletManager {
     try {
       const state = this.store.state
       const serializedState = JSON.stringify(state)
-      localStorage.setItem(LOCAL_STORAGE_KEY, serializedState)
+      StorageAdapter.setItem(LOCAL_STORAGE_KEY, serializedState)
     } catch (error) {
       console.error('[Store] Could not save state to local storage:', error)
     }
