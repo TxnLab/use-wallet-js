@@ -1,9 +1,18 @@
 import { Store } from '@tanstack/store'
 import { PeraWalletConnect } from '@perawallet/connect'
 import algosdk from 'algosdk'
-import { State, defaultState } from 'src/store'
+import { StorageAdapter } from 'src/storage'
+import { LOCAL_STORAGE_KEY, State, defaultState } from 'src/store'
 import { PeraWallet } from 'src/wallets/pera'
 import { WalletId } from 'src/wallets/types'
+
+// Mock storage adapter
+vi.mock('src/storage', () => ({
+  StorageAdapter: {
+    getItem: vi.fn(),
+    setItem: vi.fn()
+  }
+}))
 
 // Spy/suppress console output
 vi.spyOn(console, 'info').mockImplementation(() => {})
@@ -11,22 +20,10 @@ vi.spyOn(console, 'warn').mockImplementation(() => {})
 vi.spyOn(console, 'error').mockImplementation(() => {})
 vi.spyOn(console, 'groupCollapsed').mockImplementation(() => {})
 
-// Mock localStorage
-const localStorageMock = (() => {
-  let store: Record<string, any> = {}
-  return {
-    getItem: (key: string) => store[key] || null,
-    setItem: (key: string, value: any) => (store[key] = value.toString()),
-    clear: () => (store = {})
-  }
-})()
-Object.defineProperty(global, 'localStorage', {
-  value: localStorageMock
-})
-
 describe('PeraWallet', () => {
   let wallet: PeraWallet
   let store: Store<State>
+  let mockInitialState: State | null = null
 
   const mockSubscribe: (callback: (state: State) => void) => () => void = vi.fn(
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -36,6 +33,21 @@ describe('PeraWallet', () => {
   )
 
   beforeEach(() => {
+    vi.clearAllMocks()
+
+    vi.mocked(StorageAdapter.getItem).mockImplementation((key: string) => {
+      if (key === LOCAL_STORAGE_KEY && mockInitialState !== null) {
+        return JSON.stringify(mockInitialState)
+      }
+      return null
+    })
+
+    vi.mocked(StorageAdapter.setItem).mockImplementation((key: string, value: string) => {
+      if (key === LOCAL_STORAGE_KEY) {
+        mockInitialState = JSON.parse(value)
+      }
+    })
+
     store = new Store<State>(defaultState)
     wallet = new PeraWallet({
       id: WalletId.PERA,
@@ -47,8 +59,7 @@ describe('PeraWallet', () => {
 
   afterEach(async () => {
     await wallet.disconnect()
-    localStorage.clear()
-    vi.clearAllMocks()
+    mockInitialState = null
   })
 
   describe('connect', () => {
