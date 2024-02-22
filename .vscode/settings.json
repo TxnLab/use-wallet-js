@@ -1,0 +1,17 @@
+{
+  "editor.tabSize": 2,
+  "editor.insertSpaces": true,
+  "editor.detectIndentation": false,
+  "editor.formatOnSave": true,
+  "git.closeDiffOnOperation": true,
+  "javascript.validate.enable": true,
+  "eslint.workingDirectories": [
+    "./examples/nextjs",
+    "./examples/react-ts",
+    "./examples/vanilla-ts",
+    "./examples/vue-ts",
+    "./packages/use-wallet-js",
+    "./packages/use-wallet-react",
+    "./packages/use-wallet-vue"
+  ]
+}
