@@ -1,15 +1,26 @@
 import { useWallet } from '@txnlab/use-wallet-react'
+import * as React from 'react'
 import styles from './Connect.module.css'
 
 export function Connect() {
+  const [isReady, setIsReady] = React.useState(false)
+
+  React.useEffect(() => {
+    setIsReady(true)
+  }, [])
+
   const { wallets } = useWallet()
+
+  if (!isReady) {
+    return <p className={styles.fallbackMsg}>Loading wallets&hellip;</p>
+  }
 
   return (
     <div>
       {wallets.map((wallet) => (
         <div key={wallet.id}>
-          <h4 className={styles.walletName}>
-            {wallet.metadata.name} {wallet.isActive ? '[active]' : ''}
+          <h4 className={styles.walletName} data-active={wallet.isActive}>
+            {wallet.metadata.name}
           </h4>
           <div className={styles.walletButtons}>
             <button type="button" onClick={() => wallet.connect()} disabled={wallet.isConnected}>
@@ -33,6 +44,7 @@ export function Connect() {
           {wallet.isActive && wallet.accounts.length > 0 && (
             <div>
               <select
+                className={styles.walletMenu}
                 onChange={(event: React.ChangeEvent<HTMLSelectElement>) => {
                   const target = event.target
                   wallet.setActiveAccount(target.value)

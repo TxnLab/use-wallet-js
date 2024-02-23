@@ -1,5 +1,11 @@
 .walletName {
-  margin-bottom: 0.25em;
+  line-height: 1.5;
+  margin: 1.33em 0;
+  text-align: center;
+}
+
+.walletName[data-active='true']:after {
+  content: ' [active]';
 }
 
 .walletButtons {
@@ -8,7 +14,7 @@
   justify-content: center;
   flex-wrap: wrap;
   gap: 0.5em;
-  margin-bottom: 2em;
+  margin-bottom: 0.9em;
 }
 
 .walletButtons button {
@@ -34,8 +40,20 @@
   cursor: default;
 }
 
+.walletMenu {
+  margin-top: 1.5em;
+}
+
+.fallbackMsg {
+  font-size: 1.125rem;
+  line-height: 1.5rem;
+  text-align: center;
+  opacity: 0.5;
+  margin: 2em 0;
+}
+
 @media (prefers-color-scheme: light) {
   .walletButtons button {
-    background-color: #f9f9f9;
+    background-color: #ffffff;
   }
 }
