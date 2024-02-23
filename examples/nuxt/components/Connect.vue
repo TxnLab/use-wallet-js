@@ -8,7 +8,9 @@ const wallets = walletsRef.value
 <template>
   <section>
     <div v-for="wallet in wallets" :key="wallet.id">
-      <h4>{{ wallet.metadata.name }} <span v-if="wallet.isActive">[active]</span></h4>
+      <h4 class="wallet-name" :data-active="wallet.isActive">
+        {{ wallet.metadata.name }}
+      </h4>
       <div class="wallet-buttons">
         <button @click="wallet.connect()" :disabled="wallet.isConnected">Connect</button>
         <button @click="wallet.disconnect()" :disabled="!wallet.isConnected">Disconnect</button>
@@ -18,6 +20,7 @@ const wallets = walletsRef.value
       </div>
       <div v-if="wallet.isActive && wallet.accounts.length > 0">
         <select
+          class="wallet-menu"
           @change="(event) => wallet.setActiveAccount((event.target as HTMLSelectElement).value)"
         >
           <option
@@ -42,18 +45,24 @@ section {
   line-height: 1.5;
 }
 
+.wallet-name {
+  line-height: 1.5;
+  margin-bottom: 1.33em;
+  text-align: center;
+  font-weight: bold;
+}
+
+.wallet-name[data-active='true']:after {
+  content: ' [active]';
+}
+
 .wallet-buttons {
   display: flex;
   align-items: center;
   justify-content: center;
   flex-wrap: wrap;
   gap: 0.5em;
-  margin-bottom: 2em;
-}
-
-h4 {
-  margin-bottom: 0.5em;
-  font-weight: 600;
+  margin-bottom: 0.9em;
 }
 
 button {
@@ -81,9 +90,26 @@ button:disabled {
   color: #999;
 }
 
+.wallet-menu {
+  margin-top: 1.5em;
+}
+
 @media (prefers-color-scheme: light) {
   button {
     background-color: #f9f9f9;
+    color: #1a1a1a;
+  }
+
+  .wallet-menu {
+    border: 1px solid rgb(118, 118, 118);
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  .wallet-menu {
+    border: 1px solid rgb(133, 133, 133);
+    background-color: rgb(59, 59, 59);
+    color: white;
   }
 }
 </style>

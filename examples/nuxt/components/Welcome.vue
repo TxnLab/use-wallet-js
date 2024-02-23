@@ -3,7 +3,7 @@ import { useHead } from '#imports'
 const props = defineProps({
   title: {
     type: String,
-    default: 'Welcome to Nuxt!'
+    default: 'use-wallet | Nuxt'
   }
 })
 useHead({
@@ -21,12 +21,12 @@ useHead({
   <div
     class="antialiased bg-white dark:bg-black text-black dark:text-white min-h-screen place-content-center flex flex-col items-center justify-center text-sm sm:text-base"
   >
-    <div class="flex-1 flex flex-col gap-y-16 py-14">
-      <div class="flex flex-col gap-y-4 items-center justify-center">
-        <a href="https://nuxt.com" target="_blank">
+    <div class="flex-1 flex flex-col justify-center py-14">
+      <div class="flex flex-col items-center justify-center">
+        <a href="https://nuxt.com" class="logo" target="_blank">
           <svg
-            width="61"
-            height="42"
+            width="139"
+            height="96"
             viewBox="0 0 61 42"
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
@@ -37,15 +37,13 @@ useHead({
             ></path>
           </svg>
         </a>
-        <h1 class="text-black dark:text-white text-4xl sm:text-5xl font-semibold text-center">
-          Welcome to Nuxt!
-        </h1>
+        <h1 class="heading text-black dark:text-white">@txnlab/use-wallet-vue</h1>
       </div>
 
       <ClientOnly>
         <Connect />
         <template #fallback>
-          <p class="fallback-msg">Loading wallets...</p>
+          <p class="fallback-msg">Loading wallets&hellip;</p>
         </template>
       </ClientOnly>
     </div>
@@ -94,6 +92,9 @@ useHead({
 .font-semibold {
   font-weight: 600;
 }
+.font-bold {
+  font-weight: 700;
+}
 .text-4xl {
   font-size: 2.25rem;
   line-height: 2.5rem;
@@ -120,24 +121,27 @@ useHead({
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
-.gap-y-16 {
-  -webkit-row-gap: 4rem;
-  -moz-row-gap: 4rem;
-  grid-row-gap: 4rem;
-  row-gap: 4rem;
+
+.logo {
+  margin: 1.5em;
 }
-.gap-y-4 {
-  -webkit-row-gap: 1rem;
-  -moz-row-gap: 1rem;
-  grid-row-gap: 1rem;
-  row-gap: 1rem;
+
+.heading {
+  text-align: center;
+  font-size: 3.2em;
+  font-weight: 700;
+  line-height: 1.1;
+  margin: 0.67em 0 0.25em;
 }
+
 .fallback-msg {
-  font-size: 1rem;
+  font-size: 1.125rem;
   line-height: 1.5rem;
   text-align: center;
   opacity: 0.5;
+  margin: 2em 0;
 }
+
 @media (min-width: 640px) {
   .sm\:text-base {
     font-size: 1rem;
@@ -148,6 +152,7 @@ useHead({
     line-height: 1;
   }
 }
+
 @media (prefers-color-scheme: dark) {
   .dark\:bg-black {
     --tw-bg-opacity: 1;
