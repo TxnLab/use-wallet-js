@@ -4,7 +4,6 @@ import {
   BaseWallet,
   DeflyWallet,
   NetworkId,
-  StorageAdapter,
   WalletManager,
   WalletId,
   defaultState,
@@ -32,10 +31,6 @@ vi.mock('@txnlab/use-wallet-js', async (importOriginal) => {
   const mod = await importOriginal<typeof import('@txnlab/use-wallet-js')>()
   return {
     ...mod,
-    StorageAdapter: {
-      getItem: vi.fn(),
-      setItem: vi.fn()
-    },
     DeflyWallet: class extends mod.BaseWallet {
       connect = mocks.connect
       disconnect = mocks.disconnect
@@ -56,8 +51,6 @@ vi.mock('@txnlab/use-wallet-js', async (importOriginal) => {
     }
   }
 })
-
-const LOCAL_STORAGE_KEY = '@txnlab/use-wallet-js'
 
 const mockSubscribe: (callback: (state: State) => void) => () => void = vi.fn(
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -86,23 +79,9 @@ describe('useWallet', () => {
   let mockWalletManager: WalletManager
   let mockWallets: Wallet[]
   let wrapper: React.FC<{ children: React.ReactNode }>
-  let mockInitialState: State | null = null
 
   beforeEach(() => {
     vi.clearAllMocks()
-
-    vi.mocked(StorageAdapter.getItem).mockImplementation((key: string) => {
-      if (key === LOCAL_STORAGE_KEY && mockInitialState !== null) {
-        return JSON.stringify(mockInitialState)
-      }
-      return null
-    })
-
-    vi.mocked(StorageAdapter.setItem).mockImplementation((key: string, value: string) => {
-      if (key === LOCAL_STORAGE_KEY) {
-        mockInitialState = JSON.parse(value)
-      }
-    })
 
     mockStore.setState(() => defaultState)
 
@@ -142,10 +121,6 @@ describe('useWallet', () => {
     wrapper = ({ children }: { children: React.ReactNode }) => (
       <WalletProvider manager={mockWalletManager}>{children}</WalletProvider>
     )
-  })
-
-  afterEach(() => {
-    mockInitialState = null
   })
 
   it('initializes wallets and active wallet correctly', () => {
