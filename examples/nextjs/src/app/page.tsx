@@ -16,6 +16,7 @@ export default function Home() {
           height={37}
           priority
         />
+        <h1 className={styles.heading}>@txnlab/use-wallet-react</h1>
         <Connect />
       </div>
     </main>

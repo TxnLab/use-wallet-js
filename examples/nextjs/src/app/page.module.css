@@ -82,7 +82,6 @@
   align-items: center;
   position: relative;
   padding: 4rem 0;
-  row-gap: 3rem;
 }
 
 .center::before {
@@ -92,13 +91,14 @@
   height: 360px;
   margin-left: -400px;
   pointer-events: none;
+  z-index: -1;
 }
 
 .center::after {
   background: var(--primary-glow);
   width: 240px;
   height: 180px;
-  z-index: -1;
+  z-index: -2;
   pointer-events: none;
 }
 
@@ -113,7 +113,16 @@
 
 .logo {
   position: relative;
+  margin: 1.5em;
 }
+
+.heading {
+  text-align: center;
+  font-size: 3.2em;
+  line-height: 1.1;
+  margin: 0.67em 0 0.25em;
+}
+
 /* Enable hover only on non-touch devices */
 @media (hover: hover) and (pointer: fine) {
   .card:hover {
