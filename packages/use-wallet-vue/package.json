@@ -60,7 +60,7 @@
     }
   },
   "dependencies": {
-    "@tanstack/vue-store": "^0.2.0",
+    "@tanstack/vue-store": "^0.3.1",
     "@txnlab/use-wallet-js": "workspace:*"
   },
   "devDependencies": {
