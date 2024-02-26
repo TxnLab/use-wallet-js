@@ -1,6 +1,7 @@
 import { DeflyWallet, type DeflyWalletConnectOptions } from './defly'
 import { ExodusWallet, type ExodusOptions } from './exodus'
 import { KmdWallet, type KmdOptions } from './kmd'
+import { LuteConnectOptions, LuteWallet } from './lute'
 import { MnemonicWallet, type MnemonicOptions } from './mnemonic'
 import { PeraWallet, type PeraWalletConnectOptions } from './pera'
 import { WalletConnect, type WalletConnectOptions } from './walletconnect'
@@ -12,6 +13,7 @@ export enum WalletId {
   DEFLY = 'defly',
   EXODUS = 'exodus',
   KMD = 'kmd',
+  LUTE = 'lute',
   MNEMONIC = 'mnemonic',
   PERA = 'pera',
   WALLETCONNECT = 'walletconnect'
@@ -21,6 +23,7 @@ export type WalletMap = {
   [WalletId.DEFLY]: typeof DeflyWallet
   [WalletId.EXODUS]: typeof ExodusWallet
   [WalletId.KMD]: typeof KmdWallet
+  [WalletId.LUTE]: typeof LuteWallet
   [WalletId.MNEMONIC]: typeof MnemonicWallet
   [WalletId.PERA]: typeof PeraWallet
   [WalletId.WALLETCONNECT]: typeof WalletConnect
@@ -30,6 +33,7 @@ export type WalletOptionsMap = {
   [WalletId.DEFLY]: DeflyWalletConnectOptions
   [WalletId.EXODUS]: ExodusOptions
   [WalletId.KMD]: KmdOptions
+  [WalletId.LUTE]: LuteConnectOptions
   [WalletId.MNEMONIC]: MnemonicOptions
   [WalletId.PERA]: PeraWalletConnectOptions
   [WalletId.WALLETCONNECT]: WalletConnectOptions
@@ -39,6 +43,7 @@ export type SupportedWallet =
   | WalletIdConfig<WalletId.DEFLY>
   | WalletIdConfig<WalletId.EXODUS>
   | WalletIdConfig<WalletId.KMD>
+  | WalletIdConfig<WalletId.LUTE>
   | WalletIdConfig<WalletId.MNEMONIC>
   | WalletIdConfig<WalletId.PERA>
   | WalletIdConfig<WalletId.WALLETCONNECT>

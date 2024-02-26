@@ -3,6 +3,7 @@ import { WalletId, type JsonRpcRequest, type WalletAccount, type WalletMap } fro
 import { DeflyWallet } from './wallets/defly'
 import { ExodusWallet } from './wallets/exodus'
 import { KmdWallet } from './wallets/kmd'
+import { LuteWallet } from './wallets/lute'
 import { MnemonicWallet } from './wallets/mnemonic'
 import { PeraWallet } from './wallets/pera'
 import { WalletConnect } from './wallets/walletconnect'
@@ -12,6 +13,7 @@ export function createWalletMap(): WalletMap {
     [WalletId.DEFLY]: DeflyWallet,
     [WalletId.EXODUS]: ExodusWallet,
     [WalletId.KMD]: KmdWallet,
+    [WalletId.LUTE]: LuteWallet,
     [WalletId.MNEMONIC]: MnemonicWallet,
     [WalletId.PERA]: PeraWallet,
     [WalletId.WALLETCONNECT]: WalletConnect
