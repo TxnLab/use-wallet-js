@@ -81,6 +81,7 @@ describe('ExodusWallet', () => {
     wallet = new ExodusWallet({
       id: WalletId.EXODUS,
       metadata: {},
+      algodClient: {} as any,
       store,
       subscribe: mockSubscribe
     })
@@ -169,6 +170,7 @@ describe('ExodusWallet', () => {
         wallet = new ExodusWallet({
           id: WalletId.EXODUS,
           metadata: {},
+          algodClient: {} as any,
           store,
           subscribe: mockSubscribe
         })

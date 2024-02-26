@@ -31,10 +31,11 @@ export class DeflyWallet extends BaseWallet {
     id,
     store,
     subscribe,
+    algodClient,
     options = {},
     metadata = {}
   }: WalletConstructor<WalletId.DEFLY>) {
-    super({ id, metadata, store, subscribe })
+    super({ id, metadata, algodClient, store, subscribe })
     this.options = options
     this.store = store
   }

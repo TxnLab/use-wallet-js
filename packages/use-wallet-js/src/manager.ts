@@ -136,8 +136,9 @@ export class WalletManager {
       const walletInstance = new WalletClass({
         id: walletId,
         metadata: walletMetadata,
-        store: this.store,
         options: walletOptions as any,
+        algodClient: this.algodClient,
+        store: this.store,
         subscribe: this.subscribe
       })
 

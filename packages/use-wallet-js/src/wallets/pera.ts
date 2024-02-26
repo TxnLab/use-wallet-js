@@ -32,10 +32,11 @@ export class PeraWallet extends BaseWallet {
     id,
     store,
     subscribe,
+    algodClient,
     options = {},
     metadata = {}
   }: WalletConstructor<WalletId.PERA>) {
-    super({ id, metadata, store, subscribe })
+    super({ id, metadata, algodClient, store, subscribe })
     this.options = options
     this.store = store
   }

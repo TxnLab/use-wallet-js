@@ -61,8 +61,15 @@ export class KmdWallet extends BaseWallet {
 
   protected store: Store<State>
 
-  constructor({ id, store, subscribe, options, metadata = {} }: WalletConstructor<WalletId.KMD>) {
-    super({ id, metadata, store, subscribe })
+  constructor({
+    id,
+    store,
+    subscribe,
+    algodClient,
+    options,
+    metadata = {}
+  }: WalletConstructor<WalletId.KMD>) {
+    super({ id, metadata, algodClient, store, subscribe })
 
     const {
       token = 'a'.repeat(64),

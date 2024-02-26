@@ -52,6 +52,7 @@ describe('PeraWallet', () => {
     wallet = new PeraWallet({
       id: WalletId.PERA,
       metadata: {},
+      algodClient: {} as any,
       store,
       subscribe: mockSubscribe
     })
@@ -148,6 +149,7 @@ describe('PeraWallet', () => {
       wallet = new PeraWallet({
         id: WalletId.PERA,
         metadata: {},
+        algodClient: {} as any,
         store,
         subscribe: mockSubscribe
       })
@@ -173,6 +175,7 @@ describe('PeraWallet', () => {
       wallet = new PeraWallet({
         id: WalletId.PERA,
         metadata: {},
+        algodClient: {} as any,
         store,
         subscribe: mockSubscribe
       })
@@ -217,6 +220,7 @@ describe('PeraWallet', () => {
       wallet = new PeraWallet({
         id: WalletId.PERA,
         metadata: {},
+        algodClient: {} as any,
         store,
         subscribe: mockSubscribe
       })
