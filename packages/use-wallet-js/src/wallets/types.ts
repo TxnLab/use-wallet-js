@@ -82,7 +82,7 @@ export type WalletMetadata = {
 export interface BaseWalletConstructor {
   id: WalletId
   metadata: Partial<WalletMetadata> | undefined
-  algodClient: algosdk.Algodv2
+  getAlgodClient: () => algosdk.Algodv2
   store: Store<State>
   subscribe: (callback: (state: State) => void) => () => void
 }

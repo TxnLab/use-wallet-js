@@ -65,11 +65,11 @@ export class KmdWallet extends BaseWallet {
     id,
     store,
     subscribe,
-    algodClient,
+    getAlgodClient,
     options,
     metadata = {}
   }: WalletConstructor<WalletId.KMD>) {
-    super({ id, metadata, algodClient, store, subscribe })
+    super({ id, metadata, getAlgodClient, store, subscribe })
 
     const {
       token = 'a'.repeat(64),

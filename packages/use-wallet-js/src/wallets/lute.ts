@@ -42,15 +42,15 @@ export class LuteWallet extends BaseWallet {
     id,
     store,
     subscribe,
-    algodClient,
+    getAlgodClient,
     options,
     metadata = {}
   }: WalletConstructor<WalletId.LUTE>) {
-    super({ id, metadata, algodClient, store, subscribe })
+    super({ id, metadata, getAlgodClient, store, subscribe })
     if (!options?.siteName) {
       throw new Error('[LuteWallet] Missing required option: siteName')
     }
-    this.algodClient = algodClient
+    this.algodClient = getAlgodClient()
     this.options = options
     this.store = store
   }

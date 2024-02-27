@@ -21,11 +21,11 @@ export class MnemonicWallet extends BaseWallet {
     id,
     store,
     subscribe,
-    algodClient,
+    getAlgodClient,
     options,
     metadata = {}
   }: WalletConstructor<WalletId.MNEMONIC>) {
-    super({ id, metadata, algodClient, store, subscribe })
+    super({ id, metadata, getAlgodClient, store, subscribe })
 
     const { persistToStorage = false } = options || {}
     this.options = { persistToStorage }

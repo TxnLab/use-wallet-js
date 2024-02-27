@@ -52,7 +52,7 @@ describe('DeflyWallet', () => {
     wallet = new DeflyWallet({
       id: WalletId.DEFLY,
       metadata: {},
-      algodClient: {} as any,
+      getAlgodClient: {} as any,
       store,
       subscribe: mockSubscribe
     })
@@ -149,7 +149,7 @@ describe('DeflyWallet', () => {
       wallet = new DeflyWallet({
         id: WalletId.DEFLY,
         metadata: {},
-        algodClient: {} as any,
+        getAlgodClient: {} as any,
         store,
         subscribe: mockSubscribe
       })
@@ -175,7 +175,7 @@ describe('DeflyWallet', () => {
       wallet = new DeflyWallet({
         id: WalletId.DEFLY,
         metadata: {},
-        algodClient: {} as any,
+        getAlgodClient: {} as any,
         store,
         subscribe: mockSubscribe
       })
@@ -220,7 +220,7 @@ describe('DeflyWallet', () => {
       wallet = new DeflyWallet({
         id: WalletId.DEFLY,
         metadata: {},
-        algodClient: {} as any,
+        getAlgodClient: () => ({}) as any,
         store,
         subscribe: mockSubscribe
       })

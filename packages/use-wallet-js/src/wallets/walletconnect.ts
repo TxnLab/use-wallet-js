@@ -52,11 +52,11 @@ export class WalletConnect extends BaseWallet {
     id,
     store,
     subscribe,
-    algodClient,
+    getAlgodClient,
     options,
     metadata = {}
   }: WalletConstructor<WalletId.WALLETCONNECT>) {
-    super({ id, metadata, algodClient, store, subscribe })
+    super({ id, metadata, getAlgodClient, store, subscribe })
     if (!options?.projectId) {
       throw new Error('[WalletConnect] Missing required option: projectId')
     }

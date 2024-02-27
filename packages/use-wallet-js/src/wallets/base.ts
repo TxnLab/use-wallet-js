@@ -14,13 +14,21 @@ export abstract class BaseWallet {
   readonly metadata: WalletMetadata
 
   protected store: Store<State>
+  protected getAlgodClient: () => algosdk.Algodv2
 
   public subscribe: (callback: (state: State) => void) => () => void
 
-  protected constructor({ id, metadata, store, subscribe }: WalletConstructor<WalletId>) {
+  protected constructor({
+    id,
+    metadata,
+    store,
+    subscribe,
+    getAlgodClient
+  }: WalletConstructor<WalletId>) {
     this.id = id
     this.store = store
     this.subscribe = subscribe
+    this.getAlgodClient = getAlgodClient
 
     const ctor = this.constructor as WalletConstructorType
     this.metadata = { ...ctor.defaultMetadata, ...metadata }

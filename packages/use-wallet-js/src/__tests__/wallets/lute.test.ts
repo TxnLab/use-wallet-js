@@ -55,11 +55,12 @@ describe('LuteWallet', () => {
         siteName: 'Mock Site Name'
       },
       metadata: {},
-      algodClient: {
-        genesis: () => ({
-          do: () => Promise.resolve({ id: 'mockGenesisID', network: 'mockGenesisNetwork' })
-        })
-      } as any,
+      getAlgodClient: () =>
+        ({
+          genesis: () => ({
+            do: () => Promise.resolve({ id: 'mockGenesisID', network: 'mockGenesisNetwork' })
+          })
+        }) as any,
       store,
       subscribe: mockSubscribe
     })

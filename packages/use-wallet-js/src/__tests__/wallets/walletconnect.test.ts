@@ -135,7 +135,7 @@ describe('WalletConnect', () => {
         projectId: 'mockProjectId'
       },
       metadata: {},
-      algodClient: {} as any,
+      getAlgodClient: () => ({}) as any,
       store,
       subscribe: mockSubscribe
     })
@@ -260,7 +260,7 @@ describe('WalletConnect', () => {
           projectId: 'mockProjectId'
         },
         metadata: {},
-        algodClient: {} as any,
+        getAlgodClient: () => ({}) as any,
         store,
         subscribe: mockSubscribe
       })
@@ -327,7 +327,7 @@ describe('WalletConnect', () => {
           projectId: 'mockProjectId'
         },
         metadata: {},
-        algodClient: {} as any,
+        getAlgodClient: () => ({}) as any,
         store,
         subscribe: mockSubscribe
       })

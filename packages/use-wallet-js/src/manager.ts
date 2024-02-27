@@ -137,7 +137,7 @@ export class WalletManager {
         id: walletId,
         metadata: walletMetadata,
         options: walletOptions as any,
-        algodClient: this.algodClient,
+        getAlgodClient: this.getAlgodClient,
         store: this.store,
         subscribe: this.subscribe
       })
@@ -201,6 +201,10 @@ export class WalletManager {
     console.info(`[Manager] Creating Algodv2 client for ${this.activeNetwork}...`)
     const { token = '', baseServer, port = '', headers = {} } = config
     return new algosdk.Algodv2(token, baseServer, port, headers)
+  }
+
+  public getAlgodClient = (): algosdk.Algodv2 => {
+    return this.algodClient
   }
 
   public setActiveNetwork(networkId: NetworkId): void {
