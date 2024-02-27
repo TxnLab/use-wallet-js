@@ -16,11 +16,6 @@ export interface LuteConnectOptions {
   siteName?: string
 }
 
-interface AlgodGenesis {
-  id: string
-  network: string
-}
-
 function isSignTxnsError(error: any): error is SignTxnsError {
   return error instanceof Error && 'code' in error
 }
@@ -34,7 +29,6 @@ const svgIcon = `
 export class LuteWallet extends BaseWallet {
   private client: LuteConnect | null = null
   private options: LuteConnectOptions
-  private algodClient: algosdk.Algodv2
 
   protected store: Store<State>
 
@@ -50,7 +44,6 @@ export class LuteWallet extends BaseWallet {
     if (!options?.siteName) {
       throw new Error('[LuteWallet] Missing required option: siteName')
     }
-    this.algodClient = getAlgodClient()
     this.options = options
     this.store = store
   }
@@ -70,13 +63,20 @@ export class LuteWallet extends BaseWallet {
     return client
   }
 
+  private async getGenesisId(): Promise<string> {
+    const algodClient = this.getAlgodClient()
+    const genesis = await algodClient.genesis().do()
+    const genesisId = `${genesis.network}-${genesis.id}`
+
+    return genesisId
+  }
+
   public async connect(): Promise<WalletAccount[]> {
     console.info('[LuteWallet] Connecting...')
     try {
       const client = this.client || (await this.initializeClient())
-      const genesis = (await this.algodClient.genesis().do()) as AlgodGenesis
-      const genesisID = `${genesis.network}-${genesis.id}`
-      const accounts = await client.connect(genesisID)
+      const genesisId = await this.getGenesisId()
+      const accounts = await client.connect(genesisId)
 
       if (accounts.length === 0) {
         throw new Error('No accounts found!')
