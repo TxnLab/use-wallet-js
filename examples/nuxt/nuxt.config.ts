@@ -5,13 +5,8 @@ export default defineNuxtConfig({
     strict: true
   },
   vite: {
-    optimizeDeps: {
-      esbuildOptions: {
-        // Node.js global to browser globalThis
-        define: {
-          global: 'globalThis'
-        }
-      }
+    define: {
+      global: 'globalThis'
     },
     build: {
       target: 'es2020',
