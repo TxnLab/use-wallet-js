@@ -39,19 +39,7 @@ export type WalletOptionsMap = {
   [WalletId.WALLETCONNECT]: WalletConnectOptions
 }
 
-export type SupportedWallet =
-  | WalletIdConfig<WalletId.DEFLY>
-  | WalletIdConfig<WalletId.EXODUS>
-  | WalletIdConfig<WalletId.KMD>
-  | WalletIdConfig<WalletId.LUTE>
-  | WalletIdConfig<WalletId.MNEMONIC>
-  | WalletIdConfig<WalletId.PERA>
-  | WalletIdConfig<WalletId.WALLETCONNECT>
-  | WalletId.DEFLY
-  | WalletId.EXODUS
-  | WalletId.KMD
-  | WalletId.MNEMONIC
-  | WalletId.PERA
+export type SupportedWallet = WalletIdConfig<WalletId> | WalletId
 
 export type WalletConfigMap = {
   [K in keyof WalletOptionsMap]: {
