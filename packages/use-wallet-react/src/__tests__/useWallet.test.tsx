@@ -64,6 +64,7 @@ const mockStore = new Store<State>(defaultState)
 const mockDeflyWallet = new DeflyWallet({
   id: WalletId.DEFLY,
   metadata: { name: 'Defly', icon: 'icon' },
+  getAlgodClient: () => ({}) as any,
   store: mockStore,
   subscribe: mockSubscribe
 })
@@ -71,6 +72,7 @@ const mockDeflyWallet = new DeflyWallet({
 const mockPeraWallet = new PeraWallet({
   id: WalletId.PERA,
   metadata: { name: 'Pera', icon: 'icon' },
+  getAlgodClient: () => ({}) as any,
   store: mockStore,
   subscribe: mockSubscribe
 })
