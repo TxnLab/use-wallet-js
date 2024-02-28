@@ -13,7 +13,12 @@ const walletManager = new WalletManager({
       id: WalletId.WALLETCONNECT,
       options: { projectId: 'fcfde0713d43baa0d23be0773c80a72b' }
     },
-    WalletId.KMD
+    WalletId.KMD,
+    WalletId.KIBISIS,
+    {
+      id: WalletId.LUTE,
+      options: { siteName: 'Example Site' }
+    }
   ],
   network: NetworkId.TESTNET
 })
