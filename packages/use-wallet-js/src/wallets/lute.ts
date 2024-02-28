@@ -167,12 +167,12 @@ export class LuteWallet extends BaseWallet {
       )
 
       return txnGroupSigned
-    } catch (error) {
-      if (isSignTxnsError(error)) {
-        throw new Error(`Error signing transactions: ${error.message} (code: ${error.code})`)
-      } else {
-        throw error
-      }
+    } catch (error: any) {
+      console.error(
+        `[LuteWallet] Error signing transactions: ` +
+          (isSignTxnsError(error) ? `${error.message} (code: ${error.code})` : error.message)
+      )
+      throw error
     }
   }
 
@@ -199,12 +199,12 @@ export class LuteWallet extends BaseWallet {
       const signTxnsResult = (await this.client.signTxns(txnsToSign)) as (Uint8Array | null)[]
       const signedTxns = signTxnsResult.filter(Boolean) as Uint8Array[]
       return signedTxns
-    } catch (error) {
-      if (isSignTxnsError(error)) {
-        throw new Error(`Error signing transactions: ${error.message} (code: ${error.code})`)
-      } else {
-        throw error
-      }
+    } catch (error: any) {
+      console.error(
+        `[LuteWallet] Error signing transactions: ` +
+          (isSignTxnsError(error) ? `${error.message} (code: ${error.code})` : error.message)
+      )
+      throw error
     }
   }
 }

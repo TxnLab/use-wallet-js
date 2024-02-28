@@ -191,6 +191,27 @@ describe('LuteWallet', () => {
         await wallet.connect()
       })
 
+      it('should log errors and re-throw to the consuming application', async () => {
+        const signTxnsError = {
+          code: 4001,
+          message: 'User Rejected Request'
+        }
+
+        vi.spyOn(LuteConnect.prototype, 'signTxns').mockRejectedValue(signTxnsError)
+
+        try {
+          // Signing transaction should fail
+          await expect(wallet.signTransactions([txn1])).rejects.toThrowError()
+        } catch (error: any) {
+          expect(error).toEqual(signTxnsError)
+
+          // Error message logged
+          expect(console.error).toHaveBeenCalledWith(
+            `[LuteWallet] Error signing transactions: ${signTxnsError.message} (code: ${signTxnsError.code})`
+          )
+        }
+      })
+
       it('should correctly process and sign a single algosdk.Transaction', async () => {
         const mockSignTxns = vi.fn().mockImplementation(() => Promise.resolve([mockSignedTxn]))
 
