@@ -68,6 +68,10 @@ export abstract class BaseWallet {
 
   // ---------- Derived Properties ------------------------------------ //
 
+  public get name(): string {
+    return this.id.toUpperCase()
+  }
+
   public get accounts(): WalletAccount[] {
     const state = this.store.state
     const walletState = state.wallets[this.id]

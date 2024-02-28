@@ -1,5 +1,6 @@
 import { DeflyWallet, type DeflyWalletConnectOptions } from './defly'
 import { ExodusWallet, type ExodusOptions } from './exodus'
+import { KibisisWallet } from './kibisis'
 import { KmdWallet, type KmdOptions } from './kmd'
 import { LuteConnectOptions, LuteWallet } from './lute'
 import { MnemonicWallet, type MnemonicOptions } from './mnemonic'
@@ -12,6 +13,7 @@ import type { State } from 'src/store'
 export enum WalletId {
   DEFLY = 'defly',
   EXODUS = 'exodus',
+  KIBISIS = 'kibisis',
   KMD = 'kmd',
   LUTE = 'lute',
   MNEMONIC = 'mnemonic',
@@ -22,6 +24,7 @@ export enum WalletId {
 export type WalletMap = {
   [WalletId.DEFLY]: typeof DeflyWallet
   [WalletId.EXODUS]: typeof ExodusWallet
+  [WalletId.KIBISIS]: typeof KibisisWallet
   [WalletId.KMD]: typeof KmdWallet
   [WalletId.LUTE]: typeof LuteWallet
   [WalletId.MNEMONIC]: typeof MnemonicWallet
@@ -32,6 +35,7 @@ export type WalletMap = {
 export type WalletOptionsMap = {
   [WalletId.DEFLY]: DeflyWalletConnectOptions
   [WalletId.EXODUS]: ExodusOptions
+  [WalletId.KIBISIS]: Record<string, never>
   [WalletId.KMD]: KmdOptions
   [WalletId.LUTE]: LuteConnectOptions
   [WalletId.MNEMONIC]: MnemonicOptions
