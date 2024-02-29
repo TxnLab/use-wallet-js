@@ -19,7 +19,7 @@ interface KmdConstructor {
 
 export type KmdOptions = Partial<Pick<KmdConstructor, 'token'>> &
   Omit<KmdConstructor, 'token'> & {
-    wallet: string
+    wallet?: string
   }
 
 interface KmdWalletRecord {
