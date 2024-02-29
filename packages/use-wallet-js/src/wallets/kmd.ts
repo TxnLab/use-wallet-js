@@ -74,7 +74,7 @@ export class KmdWallet extends BaseWallet {
     const {
       token = 'a'.repeat(64),
       baseServer = 'http://127.0.0.1',
-      port = 7833,
+      port = 4002,
       wallet = 'unencrypted-default-wallet'
     } = options || {}
 
