@@ -45,11 +45,11 @@ vi.mock('algosdk', async (importOriginal) => {
     })
     signTransaction = vi.fn((token: string, password: string, txn: algosdk.Transaction) => {
       const dummySignature = new Uint8Array(64).fill(0) // 64-byte signature filled with zeros
-      const dummyTxID = txn.txID()
+      const txnID = txn.txID()
       const encodedTxn = algosdk.encodeUnsignedTransaction(txn)
 
       const signedTxn = {
-        txID: dummyTxID,
+        txID: txnID,
         blob: encodedTxn,
         sig: dummySignature
       }
