@@ -83,6 +83,8 @@ describe('KmdWallet', () => {
 
   beforeEach(() => {
     vi.clearAllMocks()
+
+    // Password prompt
     global.prompt = vi.fn().mockReturnValue('')
 
     vi.mocked(StorageAdapter.getItem).mockImplementation((key: string) => {
