@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { Store } from '@tanstack/store'
+import * as msgpack from 'algo-msgpack-with-bigint'
 import algosdk from 'algosdk'
 import { StorageAdapter } from 'src/storage'
 import { LOCAL_STORAGE_KEY, State, defaultState } from 'src/store'
@@ -45,8 +46,15 @@ vi.mock('algosdk', async (importOriginal) => {
     })
     signTransaction = vi.fn((token: string, password: string, txn: algosdk.Transaction) => {
       const dummySignature = new Uint8Array(64).fill(0) // 64-byte signature filled with zeros
-      const txnID = txn.txID()
-      const encodedTxn = algosdk.encodeUnsignedTransaction(txn)
+      let txnID: string = ''
+      let encodedTxn: Uint8Array = new Uint8Array(0)
+
+      if (txn instanceof Uint8Array) {
+        txnID = algosdk.decodeUnsignedTransaction(txn).txID()
+      } else {
+        encodedTxn = algosdk.encodeUnsignedTransaction(txn)
+        txnID = txn.txID()
+      }
 
       const signedTxn = {
         txID: txnID,
@@ -147,7 +155,7 @@ describe('KmdWallet', () => {
     })
   })
 
-  describe('signTransactions', () => {
+  describe('resumeSession', () => {
     describe('when the client is not initialized', () => {
       it('should throw an error', async () => {
         await expect(wallet.signTransactions([])).rejects.toThrowError(
@@ -157,33 +165,7 @@ describe('KmdWallet', () => {
     })
   })
 
-  it('should correctly process and sign a single algosdk.Transaction', async () => {
-    const txn = new algosdk.Transaction({
-      fee: 10,
-      firstRound: 51,
-      lastRound: 61,
-      genesisHash: 'SGO1GKSzyE7IEPItTxCByw9x8FmnrCDexi9/cOUJOiI=',
-      genesisID: 'testnet-v1.0',
-      from: TEST_ADDRESS,
-      to: 'GD64YIY3TWGDMCNPP553DZPPR6LDUSFQOIJVFDPPXWEG3FVOJCCDBBHU5A',
-      amount: 1000,
-      flatFee: true
-    })
-
-    await wallet.connect()
-
-    const signedTxnResult = await wallet.signTransactions([txn])
-
-    const expectedSignedTxn = {
-      txID: txn.txID(),
-      blob: algosdk.encodeUnsignedTransaction(txn),
-      sig: new Uint8Array(64).fill(0)
-    }
-
-    expect(signedTxnResult).toEqual([expectedSignedTxn])
-  })
-
-  it('should correctly process and sign a single algosdk.Transaction group', async () => {
+  describe('transactionSigner', () => {
     const txn1 = new algosdk.Transaction({
       fee: 10,
       firstRound: 51,
@@ -208,24 +190,90 @@ describe('KmdWallet', () => {
       flatFee: true
     })
 
-    algosdk.assignGroupID([txn1, txn2])
+    const txn3 = new algosdk.Transaction({
+      fee: 10,
+      firstRound: 51,
+      lastRound: 61,
+      genesisHash: 'SGO1GKSzyE7IEPItTxCByw9x8FmnrCDexi9/cOUJOiI=',
+      genesisID: 'testnet-v1.0',
+      from: TEST_ADDRESS,
+      to: 'EW64GC6F24M7NDSC5R3ES4YUVE3ZXXNMARJHDCCCLIHZU6TBEOC7XRSBG4',
+      amount: 3000,
+      flatFee: true
+    })
 
-    await wallet.connect()
+    const txn4 = new algosdk.Transaction({
+      fee: 10,
+      firstRound: 51,
+      lastRound: 61,
+      genesisHash: 'SGO1GKSzyE7IEPItTxCByw9x8FmnrCDexi9/cOUJOiI=',
+      genesisID: 'testnet-v1.0',
+      from: TEST_ADDRESS,
+      to: 'EW64GC6F24M7NDSC5R3ES4YUVE3ZXXNMARJHDCCCLIHZU6TBEOC7XRSBG4',
+      amount: 4000,
+      flatFee: true
+    })
 
-    const signedTxnResult = await wallet.signTransactions([txn1, txn2])
+    const encodedTxn1 = algosdk.encodeUnsignedTransaction(txn1)
+    const encodedTxn2 = algosdk.encodeUnsignedTransaction(txn2)
+    const encodedTxn3 = algosdk.encodeUnsignedTransaction(txn3)
+    const encodedTxn4 = algosdk.encodeUnsignedTransaction(txn4)
 
-    const expectedSignedTxn1 = {
-      txID: txn1.txID(),
-      blob: algosdk.encodeUnsignedTransaction(txn1),
-      sig: new Uint8Array(64).fill(0)
-    }
+    it('should correctly process and sign a single algosdk.Transaction', async () => {
+      await wallet.connect()
 
-    const expectedSignedTxn2 = {
-      txID: txn2.txID(),
-      blob: algosdk.encodeUnsignedTransaction(txn2),
-      sig: new Uint8Array(64).fill(0)
-    }
+      const signedTxnResult = await wallet.transactionSigner([txn1], [0])
 
-    expect(signedTxnResult).toEqual([expectedSignedTxn1, expectedSignedTxn2])
+      const expectedSignedTxn = {
+        txID: txn1.txID(),
+        blob: algosdk.encodeUnsignedTransaction(txn1),
+        sig: new Uint8Array(64).fill(0)
+      }
+
+      expect(signedTxnResult).toEqual([expectedSignedTxn])
+    })
+
+    it('should correctly process and sign a single algosdk.Transaction group', async () => {
+      algosdk.assignGroupID([txn1, txn2])
+
+      await wallet.connect()
+
+      const signedTxnResult = await wallet.signTransactions([txn1, txn2], [0, 1])
+
+      const expectedTxnGroup = [txn1, txn2].map((txn) => ({
+        txID: txn.txID(),
+        blob: algosdk.encodeUnsignedTransaction(txn),
+        sig: new Uint8Array(64).fill(0)
+      }))
+
+      expect(signedTxnResult).toEqual(expectedTxnGroup)
+    })
+
+    it('should determine which transactions to sign based on indexesToSign', async () => {
+      await wallet.connect()
+
+      const signedTxnResult = await wallet.signTransactions([txn1, txn2, txn3, txn4], [0, 2])
+
+      const expectedSignedTxn1 = {
+        txID: txn1.txID(),
+        blob: algosdk.encodeUnsignedTransaction(txn1),
+        sig: new Uint8Array(64).fill(0)
+      }
+
+      const expectedSignedTxn3 = {
+        txID: txn3.txID(),
+        blob: algosdk.encodeUnsignedTransaction(txn3),
+        sig: new Uint8Array(64).fill(0)
+      }
+
+      const expectedTxnGroup = [
+        expectedSignedTxn1,
+        algosdk.encodeUnsignedTransaction(txn2),
+        expectedSignedTxn3,
+        algosdk.encodeUnsignedTransaction(txn4)
+      ]
+
+      expect(signedTxnResult).toEqual(expectedTxnGroup)
+    })
   })
 })
