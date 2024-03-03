@@ -165,6 +165,200 @@ describe('KmdWallet', () => {
     })
   })
 
+  describe('signTransactions', () => {
+    const txn1 = new algosdk.Transaction({
+      fee: 10,
+      firstRound: 51,
+      lastRound: 61,
+      genesisHash: 'SGO1GKSzyE7IEPItTxCByw9x8FmnrCDexi9/cOUJOiI=',
+      genesisID: 'testnet-v1.0',
+      from: TEST_ADDRESS,
+      to: 'GD64YIY3TWGDMCNPP553DZPPR6LDUSFQOIJVFDPPXWEG3FVOJCCDBBHU5A',
+      amount: 1000,
+      flatFee: true
+    })
+
+    const txn2 = new algosdk.Transaction({
+      fee: 10,
+      firstRound: 51,
+      lastRound: 61,
+      genesisHash: 'SGO1GKSzyE7IEPItTxCByw9x8FmnrCDexi9/cOUJOiI=',
+      genesisID: 'testnet-v1.0',
+      from: TEST_ADDRESS,
+      to: 'EW64GC6F24M7NDSC5R3ES4YUVE3ZXXNMARJHDCCCLIHZU6TBEOC7XRSBG4',
+      amount: 2000,
+      flatFee: true
+    })
+
+    const txn3 = new algosdk.Transaction({
+      fee: 10,
+      firstRound: 51,
+      lastRound: 61,
+      genesisHash: 'SGO1GKSzyE7IEPItTxCByw9x8FmnrCDexi9/cOUJOiI=',
+      genesisID: 'testnet-v1.0',
+      from: TEST_ADDRESS,
+      to: 'EW64GC6F24M7NDSC5R3ES4YUVE3ZXXNMARJHDCCCLIHZU6TBEOC7XRSBG4',
+      amount: 3000,
+      flatFee: true
+    })
+
+    const txn4 = new algosdk.Transaction({
+      fee: 10,
+      firstRound: 51,
+      lastRound: 61,
+      genesisHash: 'SGO1GKSzyE7IEPItTxCByw9x8FmnrCDexi9/cOUJOiI=',
+      genesisID: 'testnet-v1.0',
+      from: TEST_ADDRESS,
+      to: 'EW64GC6F24M7NDSC5R3ES4YUVE3ZXXNMARJHDCCCLIHZU6TBEOC7XRSBG4',
+      amount: 4000,
+      flatFee: true
+    })
+
+    it('should correctly process and sign a single algosdk.Transaction', async () => {
+      await wallet.connect()
+
+      const signedTxnResult = await wallet.signTransactions([txn1])
+
+      const expectedSignedTxn = {
+        txID: txn1.txID(),
+        blob: algosdk.encodeUnsignedTransaction(txn1),
+        sig: new Uint8Array(64).fill(0)
+      }
+
+      expect(signedTxnResult).toEqual([expectedSignedTxn])
+    })
+
+    it('should correctly process and sign a single algosdk.Transaction group', async () => {
+      algosdk.assignGroupID([txn1, txn2])
+
+      await wallet.connect()
+
+      const signedTxnResult = await wallet.signTransactions([txn1, txn2])
+
+      const expectedTxnGroup = [txn1, txn2].map((txn) => ({
+        txID: txn.txID(),
+        blob: algosdk.encodeUnsignedTransaction(txn),
+        sig: new Uint8Array(64).fill(0)
+      }))
+
+      expect(signedTxnResult).toEqual(expectedTxnGroup)
+    })
+
+    it('should determine which transactions to sign based on indexesToSign', async () => {
+      await wallet.connect()
+
+      const signedTxnResult = await wallet.signTransactions([txn1, txn2, txn3, txn4], [0, 2])
+
+      const expectedSignedTxn1 = {
+        txID: txn1.txID(),
+        blob: algosdk.encodeUnsignedTransaction(txn1),
+        sig: new Uint8Array(64).fill(0)
+      }
+
+      const expectedSignedTxn3 = {
+        txID: txn3.txID(),
+        blob: algosdk.encodeUnsignedTransaction(txn3),
+        sig: new Uint8Array(64).fill(0)
+      }
+
+      const expectedTxnGroup = [
+        expectedSignedTxn1,
+        algosdk.encodeUnsignedTransaction(txn2),
+        expectedSignedTxn3,
+        algosdk.encodeUnsignedTransaction(txn4)
+      ]
+
+      expect(signedTxnResult).toEqual(expectedTxnGroup)
+    })
+
+    it('should determine which transactions to sign based on indexesToSign and return only signed transactions', async () => {
+      await wallet.connect()
+
+      const signedTxnResult = await wallet.signTransactions([txn1, txn2, txn3, txn4], [0, 2], false)
+
+      const expectedSignedTxn1 = {
+        txID: txn1.txID(),
+        blob: algosdk.encodeUnsignedTransaction(txn1),
+        sig: new Uint8Array(64).fill(0)
+      }
+
+      const expectedSignedTxn3 = {
+        txID: txn3.txID(),
+        blob: algosdk.encodeUnsignedTransaction(txn3),
+        sig: new Uint8Array(64).fill(0)
+      }
+
+      const expectedTxnGroup = [expectedSignedTxn1, expectedSignedTxn3]
+
+      expect(signedTxnResult).toEqual(expectedTxnGroup)
+    })
+
+    it('should correctly process and sign a single encoded algosdk.Transaction', async () => {
+      await wallet.connect()
+
+      const encodedTxn1 = algosdk.encodeUnsignedTransaction(txn1)
+
+      const signedTxnResult = await wallet.signTransactions([encodedTxn1])
+
+      const expectedSignedTxn = {
+        txID: txn1.txID(),
+        blob: algosdk.encodeUnsignedTransaction(txn1),
+        sig: new Uint8Array(64).fill(0)
+      }
+
+      expect(signedTxnResult).toEqual([expectedSignedTxn])
+    })
+
+    it('should correctly process and sign a single encoded algosdk.Transaction', async () => {
+      await wallet.connect()
+
+      const txn1 = new algosdk.Transaction({
+        fee: 10,
+        firstRound: 51,
+        lastRound: 61,
+        genesisHash: 'SGO1GKSzyE7IEPItTxCByw9x8FmnrCDexi9/cOUJOiI=',
+        genesisID: 'testnet-v1.0',
+        from: TEST_ADDRESS,
+        to: 'GD64YIY3TWGDMCNPP553DZPPR6LDUSFQOIJVFDPPXWEG3FVOJCCDBBHU5A',
+        amount: 1000,
+        flatFee: true
+      })
+
+      const txn2 = new algosdk.Transaction({
+        fee: 10,
+        firstRound: 51,
+        lastRound: 61,
+        genesisHash: 'SGO1GKSzyE7IEPItTxCByw9x8FmnrCDexi9/cOUJOiI=',
+        genesisID: 'testnet-v1.0',
+        from: TEST_ADDRESS,
+        to: 'EW64GC6F24M7NDSC5R3ES4YUVE3ZXXNMARJHDCCCLIHZU6TBEOC7XRSBG4',
+        amount: 2000,
+        flatFee: true
+      })
+
+      algosdk.assignGroupID([txn1, txn2])
+
+      const encodedTxn1 = algosdk.encodeUnsignedTransaction(txn1)
+      const encodedTxn2 = algosdk.encodeUnsignedTransaction(txn2)
+
+      const signedTxnResult = await wallet.signTransactions([encodedTxn1, encodedTxn2])
+
+      const expectedSignedTxn1 = {
+        txID: txn1.txID(),
+        blob: algosdk.encodeUnsignedTransaction(txn1),
+        sig: new Uint8Array(64).fill(0)
+      }
+
+      const expectedSignedTxn2 = {
+        txID: txn2.txID(),
+        blob: algosdk.encodeUnsignedTransaction(txn2),
+        sig: new Uint8Array(64).fill(0)
+      }
+
+      expect(signedTxnResult).toEqual([expectedSignedTxn1, expectedSignedTxn2])
+    })
+  })
+
   describe('transactionSigner', () => {
     const txn1 = new algosdk.Transaction({
       fee: 10,
