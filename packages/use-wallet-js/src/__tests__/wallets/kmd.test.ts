@@ -312,30 +312,6 @@ describe('KmdWallet', () => {
     it('should correctly process and sign a single encoded algosdk.Transaction', async () => {
       await wallet.connect()
 
-      const txn1 = new algosdk.Transaction({
-        fee: 10,
-        firstRound: 51,
-        lastRound: 61,
-        genesisHash: 'SGO1GKSzyE7IEPItTxCByw9x8FmnrCDexi9/cOUJOiI=',
-        genesisID: 'testnet-v1.0',
-        from: TEST_ADDRESS,
-        to: 'GD64YIY3TWGDMCNPP553DZPPR6LDUSFQOIJVFDPPXWEG3FVOJCCDBBHU5A',
-        amount: 1000,
-        flatFee: true
-      })
-
-      const txn2 = new algosdk.Transaction({
-        fee: 10,
-        firstRound: 51,
-        lastRound: 61,
-        genesisHash: 'SGO1GKSzyE7IEPItTxCByw9x8FmnrCDexi9/cOUJOiI=',
-        genesisID: 'testnet-v1.0',
-        from: TEST_ADDRESS,
-        to: 'EW64GC6F24M7NDSC5R3ES4YUVE3ZXXNMARJHDCCCLIHZU6TBEOC7XRSBG4',
-        amount: 2000,
-        flatFee: true
-      })
-
       algosdk.assignGroupID([txn1, txn2])
 
       const encodedTxn1 = algosdk.encodeUnsignedTransaction(txn1)
@@ -407,11 +383,6 @@ describe('KmdWallet', () => {
       amount: 4000,
       flatFee: true
     })
-
-    const encodedTxn1 = algosdk.encodeUnsignedTransaction(txn1)
-    const encodedTxn2 = algosdk.encodeUnsignedTransaction(txn2)
-    const encodedTxn3 = algosdk.encodeUnsignedTransaction(txn3)
-    const encodedTxn4 = algosdk.encodeUnsignedTransaction(txn4)
 
     it('should correctly process and sign a single algosdk.Transaction', async () => {
       await wallet.connect()
