@@ -309,7 +309,7 @@ describe('KmdWallet', () => {
       expect(signedTxnResult).toEqual([expectedSignedTxn])
     })
 
-    it('should correctly process and sign a single encoded algosdk.Transaction', async () => {
+    it('should correctly process and sign a single encoded algosdk.Transaction group', async () => {
       await wallet.connect()
 
       algosdk.assignGroupID([txn1, txn2])
