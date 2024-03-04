@@ -25,60 +25,6 @@ vi.spyOn(console, 'warn').mockImplementation(() => {})
 vi.spyOn(console, 'error').mockImplementation(() => {})
 vi.spyOn(console, 'groupCollapsed').mockImplementation(() => {})
 
-vi.mock('algosdk', async (importOriginal) => {
-  const algosdk = await importOriginal<typeof import('algosdk')>()
-
-  class KmdMock {
-    constructor() {}
-    listWallets = vi.fn(() => {
-      return Promise.resolve({
-        wallets: [{ id: 'mockId', name: 'unencrypted-default-wallet' }]
-      })
-    })
-    initWalletHandle = vi.fn(() => {
-      return Promise.resolve({ wallet_handle_token: 'token' })
-    })
-    listKeys = vi.fn(() => {
-      return Promise.resolve({
-        addresses: [TEST_ADDRESS]
-      })
-    })
-    releaseWalletHandle = vi.fn(() => {
-      return Promise.resolve({})
-    })
-    signTransaction = vi.fn((token: string, password: string, txn: algosdk.Transaction) => {
-      const dummySignature = new Uint8Array(64).fill(0) // 64-byte signature filled with zeros
-      let txnID: string = ''
-      let encodedTxn: Uint8Array = new Uint8Array(0)
-
-      if (txn instanceof Uint8Array) {
-        txnID = algosdk.decodeUnsignedTransaction(txn).txID()
-      } else {
-        encodedTxn = algosdk.encodeUnsignedTransaction(txn)
-        txnID = txn.txID()
-      }
-
-      const signedTxn = {
-        txID: txnID,
-        blob: encodedTxn,
-        sig: dummySignature
-      }
-
-      return Promise.resolve(signedTxn)
-    })
-  }
-
-  const algosdkDefault = {
-    ...algosdk,
-    Kmd: KmdMock
-  }
-
-  return {
-    default: algosdkDefault,
-    Kmd: KmdMock
-  }
-})
-
 describe('MnemonicWallet', () => {
   let wallet: MnemonicWallet
   let store: Store<State>
