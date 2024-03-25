@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { ref } from 'vue'
-import algosdk from 'algosdk'
 import { useWallet, type Wallet } from '@txnlab/use-wallet-vue'
+import algosdk from 'algosdk'
+import { ref } from 'vue'
 
 const { algodClient, transactionSigner, wallets } = useWallet()
 const isSending = ref(false)
