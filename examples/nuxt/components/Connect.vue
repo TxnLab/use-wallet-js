@@ -2,7 +2,7 @@
 import { useWallet } from '@txnlab/use-wallet-vue'
 
 const { wallets: walletsRef } = useWallet()
-const wallets = walletsRef.value
+const wallets = computed(() => walletsRef.value)
 </script>
 
 <template>
