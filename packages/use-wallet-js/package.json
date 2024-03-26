@@ -40,7 +40,8 @@
     "@blockshake/defly-connect": "^1.1.6",
     "@perawallet/connect": "^1.3.3",
     "@walletconnect/modal": "^2.6.2",
-    "@walletconnect/sign-client": "^2.10.2"
+    "@walletconnect/sign-client": "^2.10.2",
+    "lute-connect": "^1.1.3"
   },
   "peerDependenciesMeta": {
     "@blockshake/defly-connect": {
@@ -53,6 +54,9 @@
       "optional": true
     },
     "@walletconnect/sign-client": {
+      "optional": true
+    },
+    "lute-connect": {
       "optional": true
     }
   },
@@ -71,7 +75,7 @@
     "@walletconnect/sign-client": "^2.10.2",
     "@walletconnect/types": "^2.10.2",
     "algo-msgpack-with-bigint": "^2.1.1",
-    "lute-connect": "^1.1.0",
+    "lute-connect": "^1.1.3",
     "tsup": "^8.0.0",
     "typescript": "^5.2.2"
   }
