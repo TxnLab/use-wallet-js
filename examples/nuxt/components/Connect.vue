@@ -1,8 +1,52 @@
 <script setup lang="ts">
-import { useWallet } from '@txnlab/use-wallet-vue'
+import { useWallet, type Wallet } from '@txnlab/use-wallet-vue'
+import algosdk from 'algosdk'
+import { ref } from 'vue'
 
-const { wallets: walletsRef } = useWallet()
-const wallets = walletsRef.value
+const { algodClient, transactionSigner, wallets: walletsRef } = useWallet()
+const wallets = computed(() => walletsRef.value)
+const isSending = ref(false)
+
+const setActiveAccount = (event: Event, wallet: Wallet) => {
+  const target = event.target as HTMLSelectElement
+  wallet.setActiveAccount(target.value)
+}
+
+const sendTransaction = async (wallet: Wallet) => {
+  if (!wallet.activeAccount?.address) {
+    alert('No active account')
+    return
+  }
+
+  isSending.value = true
+
+  try {
+    const atc = new algosdk.AtomicTransactionComposer()
+    const suggestedParams = await algodClient.getTransactionParams().do()
+
+    const transaction = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
+      from: wallet.activeAccount.address,
+      to: wallet.activeAccount.address,
+      amount: 0,
+      suggestedParams
+    })
+
+    atc.addTransaction({ txn: transaction, signer: transactionSigner })
+
+    console.info(`[App] Sending transaction...`, transaction)
+
+    const result = await atc.execute(algodClient, 4)
+
+    console.info(`[App] ✅ Successfully sent transaction!`, {
+      confirmedRound: result.confirmedRound,
+      txIDs: result.txIDs
+    })
+  } catch (error) {
+    console.error('[App] Error signing transaction:', error)
+  } finally {
+    isSending.value = false
+  }
+}
 </script>
 
 <template>
@@ -14,15 +58,19 @@ const wallets = walletsRef.value
       <div class="wallet-buttons">
         <button @click="wallet.connect()" :disabled="wallet.isConnected">Connect</button>
         <button @click="wallet.disconnect()" :disabled="!wallet.isConnected">Disconnect</button>
-        <button @click="wallet.setActive()" :disabled="!wallet.isConnected || wallet.isActive">
+        <button
+          v-if="!wallet.isActive"
+          @click="wallet.setActive()"
+          :disabled="!wallet.isConnected || wallet.isActive"
+        >
           Set Active
+        </button>
+        <button v-else @click="sendTransaction(wallet)" :disabled="isSending">
+          {{ isSending ? 'Sending Transaction...' : 'Send Transaction' }}
         </button>
       </div>
       <div v-if="wallet.isActive && wallet.accounts.length > 0">
-        <select
-          class="wallet-menu"
-          @change="(event) => wallet.setActiveAccount((event.target as HTMLSelectElement).value)"
-        >
+        <select class="wallet-menu" @change="(event) => setActiveAccount(event, wallet)">
           <option
             v-for="account in wallet.accounts"
             :key="account.address"

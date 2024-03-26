@@ -1,2 +1,2 @@
 export { WalletManagerPlugin } from './walletManagerPlugin'
-export { useWallet } from './useWallet'
+export { useWallet, type Wallet } from './useWallet'

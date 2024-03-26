@@ -37,7 +37,9 @@ appDiv!.innerHTML = `
   </div>
 `
 
-const walletComponents = walletManager.wallets.map((wallet) => new WalletComponent(wallet))
+const walletComponents = walletManager.wallets.map(
+  (wallet) => new WalletComponent(wallet, walletManager)
+)
 
 walletComponents.forEach((walletComponent) => {
   appDiv?.appendChild(walletComponent.element)
