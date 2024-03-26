@@ -1,6 +1,6 @@
 {
   "name": "@txnlab/use-wallet-react",
-  "version": "3.0.0-alpha.15",
+  "version": "3.0.0-alpha.16",
   "description": "React library for integrating Algorand wallets into decentralized applications",
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
