@@ -4,10 +4,12 @@ import * as msgpack from 'algo-msgpack-with-bigint'
 import algosdk from 'algosdk'
 import { StorageAdapter } from 'src/storage'
 import { LOCAL_STORAGE_KEY, State, defaultState } from 'src/store'
-import { KmdWallet } from 'src/wallets/kmd'
+import { MnemonicWallet } from 'src/wallets/mnemonic'
 import { WalletId } from 'src/wallets/types'
 
-const TEST_ADDRESS = '7ZUECA7HFLZTXENRV24SHLU4AVPUTMTTDUFUBNBD64C73F3UHRTHAIOF6Q'
+const ACCOUNT_MNEMONIC =
+  'sugar bronze century excuse animal jacket what rail biology symbol want craft annual soul increase question army win execute slim girl chief exhaust abstract wink'
+const TEST_ADDRESS = '3F3FPW6ZQQYD6JDC7FKKQHNGVVUIBIZOUI5WPSJEHBRABZDRN6LOTBMFEY'
 
 // Mock storage adapter
 vi.mock('src/storage', () => ({
@@ -23,62 +25,8 @@ vi.spyOn(console, 'warn').mockImplementation(() => {})
 vi.spyOn(console, 'error').mockImplementation(() => {})
 vi.spyOn(console, 'groupCollapsed').mockImplementation(() => {})
 
-vi.mock('algosdk', async (importOriginal) => {
-  const algosdk = await importOriginal<typeof import('algosdk')>()
-
-  class KmdMock {
-    constructor() {}
-    listWallets = vi.fn(() => {
-      return Promise.resolve({
-        wallets: [{ id: 'mockId', name: 'unencrypted-default-wallet' }]
-      })
-    })
-    initWalletHandle = vi.fn(() => {
-      return Promise.resolve({ wallet_handle_token: 'token' })
-    })
-    listKeys = vi.fn(() => {
-      return Promise.resolve({
-        addresses: [TEST_ADDRESS]
-      })
-    })
-    releaseWalletHandle = vi.fn(() => {
-      return Promise.resolve({})
-    })
-    signTransaction = vi.fn((token: string, password: string, txn: algosdk.Transaction) => {
-      const dummySignature = new Uint8Array(64).fill(0) // 64-byte signature filled with zeros
-      let txnID: string = ''
-      let encodedTxn: Uint8Array = new Uint8Array(0)
-
-      if (txn instanceof Uint8Array) {
-        txnID = algosdk.decodeUnsignedTransaction(txn).txID()
-      } else {
-        encodedTxn = algosdk.encodeUnsignedTransaction(txn)
-        txnID = txn.txID()
-      }
-
-      const signedTxn = {
-        txID: txnID,
-        blob: encodedTxn,
-        sig: dummySignature
-      }
-
-      return Promise.resolve(signedTxn)
-    })
-  }
-
-  const algosdkDefault = {
-    ...algosdk,
-    Kmd: KmdMock
-  }
-
-  return {
-    default: algosdkDefault,
-    Kmd: KmdMock
-  }
-})
-
-describe('KmdWallet', () => {
-  let wallet: KmdWallet
+describe('MnemonicWallet', () => {
+  let wallet: MnemonicWallet
   let store: Store<State>
   let mockInitialState: State | null = null
 
@@ -92,8 +40,8 @@ describe('KmdWallet', () => {
   beforeEach(() => {
     vi.clearAllMocks()
 
-    // Password prompt
-    global.prompt = vi.fn().mockReturnValue('')
+    // Mnemonic prompt
+    global.prompt = vi.fn().mockReturnValue(ACCOUNT_MNEMONIC)
 
     vi.mocked(StorageAdapter.getItem).mockImplementation((key: string) => {
       if (key === LOCAL_STORAGE_KEY && mockInitialState !== null) {
@@ -109,8 +57,8 @@ describe('KmdWallet', () => {
     })
 
     store = new Store<State>(defaultState)
-    wallet = new KmdWallet({
-      id: WalletId.KMD,
+    wallet = new MnemonicWallet({
+      id: WalletId.MNEMONIC,
       metadata: {},
       getAlgodClient: {} as any,
       store,
@@ -127,7 +75,7 @@ describe('KmdWallet', () => {
   describe('connect', () => {
     it('should initialize client, return account objects, and update store', async () => {
       const account1 = {
-        name: 'KMD Wallet 1',
+        name: 'Mnemonic Account',
         address: TEST_ADDRESS
       }
 
@@ -135,7 +83,7 @@ describe('KmdWallet', () => {
 
       expect(wallet.isConnected).toBe(true)
       expect(accounts).toEqual([account1])
-      expect(store.state.wallets[WalletId.KMD]).toEqual({
+      expect(store.state.wallets[WalletId.MNEMONIC]).toEqual({
         accounts: [account1],
         activeAccount: account1
       })
@@ -147,11 +95,11 @@ describe('KmdWallet', () => {
       await wallet.connect()
 
       expect(wallet.isConnected).toBe(true)
-      expect(store.state.wallets[WalletId.KMD]).toBeDefined()
+      expect(store.state.wallets[WalletId.MNEMONIC]).toBeDefined()
 
       await wallet.disconnect()
       expect(wallet.isConnected).toBe(false)
-      expect(store.state.wallets[WalletId.KMD]).toBeUndefined()
+      expect(store.state.wallets[WalletId.MNEMONIC]).toBeUndefined()
     })
   })
 
@@ -159,7 +107,7 @@ describe('KmdWallet', () => {
     describe('when the client is not initialized', () => {
       it('should throw an error', async () => {
         await expect(wallet.signTransactions([])).rejects.toThrowError(
-          '[KmdWallet] Client not initialized!'
+          '[MnemonicWallet] Client not initialized!'
         )
       })
     })
@@ -214,16 +162,14 @@ describe('KmdWallet', () => {
       flatFee: true
     })
 
+    const { sk } = algosdk.mnemonicToSecretKey(ACCOUNT_MNEMONIC)
+
     it('should correctly process and sign a single algosdk.Transaction', async () => {
       await wallet.connect()
 
       const signedTxnResult = await wallet.signTransactions([txn1])
 
-      const expectedSignedTxn = {
-        txID: txn1.txID(),
-        blob: algosdk.encodeUnsignedTransaction(txn1),
-        sig: new Uint8Array(64).fill(0)
-      }
+      const expectedSignedTxn = txn1.signTxn(sk)
 
       expect(signedTxnResult).toEqual([expectedSignedTxn])
     })
@@ -235,11 +181,7 @@ describe('KmdWallet', () => {
 
       const signedTxnResult = await wallet.signTransactions([txn1, txn2])
 
-      const expectedTxnGroup = [txn1, txn2].map((txn) => ({
-        txID: txn.txID(),
-        blob: algosdk.encodeUnsignedTransaction(txn),
-        sig: new Uint8Array(64).fill(0)
-      }))
+      const expectedTxnGroup = [txn1, txn2].map((txn) => txn.signTxn(sk))
 
       expect(signedTxnResult).toEqual(expectedTxnGroup)
     })
@@ -249,17 +191,9 @@ describe('KmdWallet', () => {
 
       const signedTxnResult = await wallet.signTransactions([txn1, txn2, txn3, txn4], [0, 2])
 
-      const expectedSignedTxn1 = {
-        txID: txn1.txID(),
-        blob: algosdk.encodeUnsignedTransaction(txn1),
-        sig: new Uint8Array(64).fill(0)
-      }
+      const expectedSignedTxn1 = txn1.signTxn(sk)
 
-      const expectedSignedTxn3 = {
-        txID: txn3.txID(),
-        blob: algosdk.encodeUnsignedTransaction(txn3),
-        sig: new Uint8Array(64).fill(0)
-      }
+      const expectedSignedTxn3 = txn3.signTxn(sk)
 
       const expectedTxnGroup = [
         expectedSignedTxn1,
@@ -276,17 +210,9 @@ describe('KmdWallet', () => {
 
       const signedTxnResult = await wallet.signTransactions([txn1, txn2, txn3, txn4], [0, 2], false)
 
-      const expectedSignedTxn1 = {
-        txID: txn1.txID(),
-        blob: algosdk.encodeUnsignedTransaction(txn1),
-        sig: new Uint8Array(64).fill(0)
-      }
+      const expectedSignedTxn1 = txn1.signTxn(sk)
 
-      const expectedSignedTxn3 = {
-        txID: txn3.txID(),
-        blob: algosdk.encodeUnsignedTransaction(txn3),
-        sig: new Uint8Array(64).fill(0)
-      }
+      const expectedSignedTxn3 = txn3.signTxn(sk)
 
       const expectedTxnGroup = [expectedSignedTxn1, expectedSignedTxn3]
 
@@ -300,11 +226,7 @@ describe('KmdWallet', () => {
 
       const signedTxnResult = await wallet.signTransactions([encodedTxn1])
 
-      const expectedSignedTxn = {
-        txID: txn1.txID(),
-        blob: algosdk.encodeUnsignedTransaction(txn1),
-        sig: new Uint8Array(64).fill(0)
-      }
+      const expectedSignedTxn = txn1.signTxn(sk)
 
       expect(signedTxnResult).toEqual([expectedSignedTxn])
     })
@@ -312,26 +234,14 @@ describe('KmdWallet', () => {
     it('should correctly process and sign a single encoded algosdk.Transaction group', async () => {
       await wallet.connect()
 
-      algosdk.assignGroupID([txn1, txn2])
-
       const encodedTxn1 = algosdk.encodeUnsignedTransaction(txn1)
       const encodedTxn2 = algosdk.encodeUnsignedTransaction(txn2)
 
       const signedTxnResult = await wallet.signTransactions([encodedTxn1, encodedTxn2])
 
-      const expectedSignedTxn1 = {
-        txID: txn1.txID(),
-        blob: algosdk.encodeUnsignedTransaction(txn1),
-        sig: new Uint8Array(64).fill(0)
-      }
+      const exceptedSignedTxnGroup = [txn1.signTxn(sk), txn2.signTxn(sk)]
 
-      const expectedSignedTxn2 = {
-        txID: txn2.txID(),
-        blob: algosdk.encodeUnsignedTransaction(txn2),
-        sig: new Uint8Array(64).fill(0)
-      }
-
-      expect(signedTxnResult).toEqual([expectedSignedTxn1, expectedSignedTxn2])
+      expect(signedTxnResult).toEqual(exceptedSignedTxnGroup)
     })
   })
 
@@ -384,16 +294,14 @@ describe('KmdWallet', () => {
       flatFee: true
     })
 
+    const { sk } = algosdk.mnemonicToSecretKey(ACCOUNT_MNEMONIC)
+
     it('should correctly process and sign a single algosdk.Transaction', async () => {
       await wallet.connect()
 
       const signedTxnResult = await wallet.transactionSigner([txn1], [0])
 
-      const expectedSignedTxn = {
-        txID: txn1.txID(),
-        blob: algosdk.encodeUnsignedTransaction(txn1),
-        sig: new Uint8Array(64).fill(0)
-      }
+      const expectedSignedTxn = txn1.signTxn(sk)
 
       expect(signedTxnResult).toEqual([expectedSignedTxn])
     })
@@ -405,11 +313,7 @@ describe('KmdWallet', () => {
 
       const signedTxnResult = await wallet.signTransactions([txn1, txn2], [0, 1])
 
-      const expectedTxnGroup = [txn1, txn2].map((txn) => ({
-        txID: txn.txID(),
-        blob: algosdk.encodeUnsignedTransaction(txn),
-        sig: new Uint8Array(64).fill(0)
-      }))
+      const expectedTxnGroup = [txn1, txn2].map((txn) => txn.signTxn(sk))
 
       expect(signedTxnResult).toEqual(expectedTxnGroup)
     })
@@ -419,17 +323,9 @@ describe('KmdWallet', () => {
 
       const signedTxnResult = await wallet.signTransactions([txn1, txn2, txn3, txn4], [0, 2])
 
-      const expectedSignedTxn1 = {
-        txID: txn1.txID(),
-        blob: algosdk.encodeUnsignedTransaction(txn1),
-        sig: new Uint8Array(64).fill(0)
-      }
+      const expectedSignedTxn1 = txn1.signTxn(sk)
 
-      const expectedSignedTxn3 = {
-        txID: txn3.txID(),
-        blob: algosdk.encodeUnsignedTransaction(txn3),
-        sig: new Uint8Array(64).fill(0)
-      }
+      const expectedSignedTxn3 = txn3.signTxn(sk)
 
       const expectedTxnGroup = [
         expectedSignedTxn1,
