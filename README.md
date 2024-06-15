@@ -1,3 +1,9 @@
+# :warning: Notice
+
+**This repository's contents have been migrated to the [`v3`](https://github.com/TxnLab/use-wallet/tree/v3) branch on the https://github.com/TxnLab/use-wallet repository. All further development will continue there.**
+
+---
+
 # UseWallet v3 Alpha - `use-wallet-js`
 
 [![npm version](https://badge.fury.io/js/%40txnlab%2Fuse-wallet-js.svg)](https://badge.fury.io/js/%40txnlab%2Fuse-wallet-js) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
