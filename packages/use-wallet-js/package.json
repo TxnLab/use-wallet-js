@@ -61,7 +61,7 @@
     }
   },
   "dependencies": {
-    "@tanstack/store": "^0.3.1",
+    "@tanstack/store": "^0.4.0",
     "@walletconnect/utils": "^2.10.2",
     "algosdk": "^2.7.0",
     "buffer": "^6.0.3"
